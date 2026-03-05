@@ -3,7 +3,7 @@ import { supabase } from "../supabaseClient";
 import { useBusiness } from "../context/BusinessContext";
 import { calculateFinancialHealth } from "../utils/financialHealthEngine";
 import { calculateCashFlow } from "../utils/cashFlowEngine";
-import Card from "../components/ui/Card";
+import Card from "../Components/ui/Card";
 
 import {
   LineChart,

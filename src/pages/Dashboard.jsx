@@ -27,9 +27,16 @@ export default function Dashboard() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showBreakdown, setShowBreakdown] = useState(false);
   const [showAll, setShowAll] = useState(false);
+  const [filter, setFilter] = useState("all");
   const visibleTransactions = showAll
   ? transactions
   : transactions.slice(0, 10);
+  const filteredTransactions =
+  filter === "all"
+    ? visibleTransactions
+    : visibleTransactions.filter(
+        (t) => t.categories?.type === filter
+      );
 
   useEffect(() => {
     document.body.style.overflow = modalOpen ? "hidden" : "auto";
@@ -353,7 +360,26 @@ const volatilityColor =
       <Card>
         <h2>Transactions</h2>
 
-        {visibleTransactions.map((t) => (
+        <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
+  {["all", "income", "expense"].map((type) => (
+    <button
+      key={type}
+      onClick={() => setFilter(type)}
+      style={{
+        padding: "6px 12px",
+        borderRadius: "6px",
+        border: "1px solid #1e293b",
+        background: filter === type ? "#1e293b" : "transparent",
+        color: "#e2e8f0",
+        cursor: "pointer",
+      }}
+    >
+      {type.charAt(0).toUpperCase() + type.slice(1)}
+    </button>
+  ))}
+</div>
+
+        {filteredTransactions.map((t) => (
           <div key={t.id} style={styles.transactionRow}>
             <div>
   <div>{t.categories?.name}</div>

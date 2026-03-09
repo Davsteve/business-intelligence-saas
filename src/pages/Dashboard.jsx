@@ -20,6 +20,9 @@ export default function Dashboard() {
 
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [newCategoryType, setNewCategoryType] = useState("");
+  const [newCategoryName, setNewCategoryName] = useState("");
   const [amount, setAmount] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedCategoryName, setSelectedCategoryName] = useState("");
@@ -72,16 +75,18 @@ export default function Dashboard() {
   const health = calculateFinancialHealth(transactions);
   const cashFlow = calculateCashFlow(transactions);
 
-  async function createCategory(type) {
-    const name = prompt(`Enter new ${type} category name`);
-    if (!name) return;
+  async function createCategory() {
+  if (!newCategoryName) return;
 
-    await supabase.from("categories").insert([
-      { name, type, business_id: businessId },
-    ]);
+  await supabase.from("categories").insert([
+    { name: newCategoryName, type: newCategoryType, business_id: businessId },
+  ]);
 
-    fetchCategories();
-  }
+  setNewCategoryName("");
+  setCategoryModalOpen(false);
+
+  fetchCategories();
+}
 
   async function deleteCategory(id, e) {
     e.stopPropagation();
@@ -479,7 +484,10 @@ const volatilityColor =
 
                   <div
                     style={styles.addNew}
-                    onClick={() => createCategory("income")}
+                    onClick={() => {
+  setNewCategoryType("income");
+  setCategoryModalOpen(true);
+}}
                   >
                     + Add new income category
                   </div>
@@ -512,7 +520,10 @@ const volatilityColor =
 
                   <div
                     style={styles.addNew}
-                    onClick={() => createCategory("expense")}
+                    onClick={() => {
+  setNewCategoryType("expense");
+  setCategoryModalOpen(true);
+}}
                   >
                     + Add new expense category
                   </div>
@@ -535,6 +546,34 @@ const volatilityColor =
           </div>
         </div>
       )}
+      {categoryModalOpen && (
+  <div style={styles.modalOverlay}>
+    <div style={styles.modal}>
+      <h3>Add New {newCategoryType} Category</h3>
+
+      <input
+        type="text"
+        placeholder="Category name"
+        value={newCategoryName}
+        onChange={(e) => setNewCategoryName(e.target.value)}
+        style={styles.modalInput}
+      />
+
+      <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
+        <button style={styles.modalButton} onClick={createCategory}>
+          Add Category
+        </button>
+
+        <button
+          style={styles.modalCancel}
+          onClick={() => setCategoryModalOpen(false)}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }
@@ -735,4 +774,54 @@ card: {
     cursor: "pointer",
     fontSize: "13px",
   },
+
+  modalOverlay: {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  background: "rgba(0,0,0,0.7)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 1000,
+},
+
+modal: {
+  background: "#0b1120",
+  padding: "25px",
+  borderRadius: "10px",
+  width: "320px",
+  border: "1px solid #1e293b",
+},
+
+modalInput: {
+  width: "100%",
+  padding: "10px",
+  borderRadius: "6px",
+  border: "1px solid #1e293b",
+  background: "#020617",
+  color: "#e2e8f0",
+  marginTop: "10px",
+},
+
+modalButton: {
+  padding: "8px 14px",
+  background: "#0284c7",
+  border: "none",
+  borderRadius: "6px",
+  color: "white",
+  cursor: "pointer",
+},
+
+modalCancel: {
+  padding: "8px 14px",
+  background: "#1e293b",
+  border: "none",
+  borderRadius: "6px",
+  color: "#e2e8f0",
+  cursor: "pointer",
+},
+
 };

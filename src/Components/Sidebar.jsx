@@ -43,16 +43,17 @@ export default function Sidebar({ collapsed, toggleSidebar }) {
 
       {/* LOGO */}
       {!collapsed && (
-        <h2
-          style={{
-            color: "#f8fafc",
-            fontWeight: "700",
-            marginBottom: "50px",
-          }}
-        >
-          <h1 style={{letterSpacing:"-1px"}}>Clariflow</h1>
-        </h2>
-      )}
+  <h1
+    style={{
+      color: "#f8fafc",
+      fontWeight: "700",
+      marginBottom: "50px",
+      letterSpacing: "-1px",
+    }}
+  >
+    Clariflow
+  </h1>
+)}
 
       {/* MENU */}
       <div

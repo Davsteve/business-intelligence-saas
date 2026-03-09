@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import logo from "../assets/clariflowpic.jpeg";
 
 export default function Sidebar({ collapsed, toggleSidebar }) {
   const location = useLocation();
@@ -41,18 +42,36 @@ style={{
       </div>
 
       {/* LOGO */}
-      {!collapsed && (
-  <h1
-    style={{
-      color: "#f8fafc",
-      fontWeight: "700",
-      marginBottom: "50px",
-      letterSpacing: "-1px",
-    }}
-  >
-    Clariflow
-  </h1>
+      <div
+style={{
+marginBottom: "40px",
+display: "flex",
+alignItems: "center",
+gap: "10px"
+}}
+>
+<img
+src={logo}
+alt="Clariflow"
+style={{
+width: collapsed ? "30px" : "36px",
+height: collapsed ? "30px" : "36px"
+}}
+/>
+
+{!collapsed && (
+<span
+style={{
+fontWeight: "700",
+fontSize: "20px",
+color: "#f8fafc",
+letterSpacing: "-1px"
+}}
+>
+Clariflow
+</span>
 )}
+</div>
 
       {/* MENU */}
       <div

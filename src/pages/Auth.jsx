@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "../supabaseClient";
+import logo from "../assets/clariflowpic.jpeg";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
@@ -31,7 +32,16 @@ export default function Auth() {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h2 style={{ marginBottom: "10px" }}>ClariFlow</h2>
+        <img
+  src={logo}
+  alt="Clariflow"
+  style={{
+    width: "60px",
+    marginBottom: "15px"
+  }}
+/>
+
+<h2 style={{ marginBottom: "10px" }}>Clariflow</h2>
 <p style={{ opacity: 0.7, marginBottom: "25px" }}>
   Simplifying Cash Flow
 </p>

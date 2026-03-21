@@ -182,7 +182,7 @@ const volatilityColor =
                 height: "100%",
                 background:
                   health.score >= 70
-                    ? "#3b82f6"
+                    ? "#16c625"
                     : health.score >= 40
                     ? "#f59e0b"
                     : "#ef4444",

@@ -30,16 +30,45 @@ export default function Dashboard() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showBreakdown, setShowBreakdown] = useState(false);
   const [showAll, setShowAll] = useState(false);
+  const [search, setSearch] = useState("");
+const [dateRange, setDateRange] = useState("all");
+const [sortOrder, setSortOrder] = useState("latest");
   const [filter, setFilter] = useState("all");
   const visibleTransactions = showAll
   ? transactions
   : transactions.slice(0, 10);
-  const filteredTransactions =
-  filter === "all"
-    ? visibleTransactions
-    : visibleTransactions.filter(
-        (t) => t.categories?.type === filter
-      );
+  const now = new Date();
+
+const filteredTransactions = transactions
+  .filter((t) => {
+    // 🔍 Search filter
+    const matchesSearch = t.categories?.name
+      ?.toLowerCase()
+      .includes(search.toLowerCase());
+
+    // 📊 Type filter
+    const matchesType =
+      filter === "all" || t.categories?.type === filter;
+
+    // 📅 Date filter
+    let matchesDate = true;
+    if (dateRange !== "all") {
+      const days = parseInt(dateRange);
+      const txnDate = new Date(t.created_at);
+      const diffTime = now - txnDate;
+      const diffDays = diffTime / (1000 * 60 * 60 * 24);
+      matchesDate = diffDays <= days;
+    }
+
+    return matchesSearch && matchesType && matchesDate;
+  })
+  .sort((a, b) => {
+    if (sortOrder === "latest") {
+      return new Date(b.created_at) - new Date(a.created_at);
+    } else {
+      return new Date(a.created_at) - new Date(b.created_at);
+    }
+  });
 
   useEffect(() => {
     document.body.style.overflow = modalOpen ? "hidden" : "auto";
@@ -364,6 +393,47 @@ const volatilityColor =
       {/* TRANSACTIONS */}
       <Card>
         <h2>Transactions</h2>
+
+<div style={{ marginBottom: "15px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
+
+  {/* Search */}
+  <input
+    type="text"
+    placeholder="Search category..."
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    style={{
+      padding: "8px 12px",
+      borderRadius: "6px",
+      border: "1px solid #1e293b",
+      background: "#020617",
+      color: "#e2e8f0"
+    }}
+  />
+
+  {/* Date Filter */}
+  <select
+    value={dateRange}
+    onChange={(e) => setDateRange(e.target.value)}
+  >
+    <option value="all">All Time</option>
+    <option value="1">1 Day</option>
+    <option value="3">3 Days</option>
+    <option value="7">1 Week</option>
+    <option value="30">1 Month</option>
+    <option value="365">1 Year</option>
+  </select>
+
+  {/* Sort */}
+  <select
+    value={sortOrder}
+    onChange={(e) => setSortOrder(e.target.value)}
+  >
+    <option value="latest">Latest</option>
+    <option value="oldest">Oldest</option>
+  </select>
+
+</div>
 
         <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
   {["all", "income", "expense"].map((type) => (

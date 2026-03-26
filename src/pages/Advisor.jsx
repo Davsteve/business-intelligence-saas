@@ -5,6 +5,9 @@ import { useBusiness } from "../context/BusinessContext";
 export default function Advisor() {
   const { businessId, loading } = useBusiness();
   const [transactions, setTransactions] = useState([]);
+  const [aiAdvice, setAiAdvice] = useState("");
+  const [aiData, setAiData] = useState(null);
+  const [loadingAI, setLoadingAI] = useState(false);
 
   useEffect(() => {
     if (!businessId) return;
@@ -218,6 +221,88 @@ if (last3Months.length === 3) {
 }
 
 
+const getAIAdvice = async (data) => {
+  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer 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", // 🔥 replace this
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "openai/gpt-3.5-turbo",
+      messages: [
+        {
+          role: "user",
+          content: `You are a strict financial API.
+
+You MUST return ONLY valid JSON.
+DO NOT write anything else.
+NO explanations.
+NO headings.
+NO text outside JSON.
+
+FORMAT:
+{
+  "risks": ["risk1", "risk2"],
+  "recommendations": ["rec1", "rec2"]
+}
+
+DATA:
+Net: ₹${data.netBalance}
+Burn: ₹${data.burn}
+Runway: ${data.runway}
+Trend: ${data.trend}
+Volatility: ${data.volatility}
+Top Expense: ${data.topExpense}
+
+
+Give:
+1. 2-3 key risks
+2. 2-3 actionable recommendations
+Keep it short and clear.`
+        }
+      ]
+    })
+  });
+
+  const json = await res.json();
+  console.log("API RESPONSE:", json); // 🔥 debug
+
+  if (!json.choices) {
+    throw new Error("Invalid API response");
+  }
+
+  const text = json.choices[0].message.content;
+
+try {
+  return JSON.parse(text);
+} catch (e) {
+  console.error("Parsing failed:", text);
+  throw new Error("Invalid AI format");
+}
+};
+
+const handleGenerateAdvice = async () => {
+  setLoadingAI(true);
+
+  try {
+    const result = await getAIAdvice({
+      netBalance: net,
+      burn: avgMonthlyBurn,
+      runway,
+      trend,
+      volatility,
+      topExpense: topCategory,
+    });
+
+    setAiData(result);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoadingAI(false);
+  }
+};
+
 
   // ------------------------
   // UI
@@ -229,6 +314,28 @@ if (last3Months.length === 3) {
     <h1 style={{ fontSize: "32px", marginBottom: "30px" }}>
       AI Strategic Advisor
     </h1>
+
+    <button
+  onClick={handleGenerateAdvice}
+  disabled={loadingAI}
+  style={{
+    padding: "10px 16px",
+    borderRadius: "8px",
+    background: loadingAI ? "#555" : "#38bdf8",
+    border: "none",
+    color: "#000",
+    cursor: loadingAI ? "not-allowed" : "pointer",
+    marginBottom: "20px"
+  }}
+>
+  {loadingAI ? "Generating..." : "Generate AI Advice"}
+</button>
+
+{loadingAI && (
+  <p style={{ color: "#aaa", marginTop: "10px" }}>
+    Analyzing your financial data...
+  </p>
+)}
 
     {/* HEALTH CARD */}
     <div style={{
@@ -252,9 +359,32 @@ if (last3Months.length === 3) {
         </span>
       </h2>
 
-      <p>Risk Level: {risk}</p>
-      <p>Trend: {trend}</p>
-      <p>Volatility Index: {volatility.toFixed(0)}</p>
+      <p>
+  <strong>Financial Risk:</strong>{" "}
+  {risk === "Low"
+    ? "You're in a safe position ✅"
+    : risk === "Moderate"
+    ? "You're okay, but needs attention ⚠️"
+    : "You're at risk, act immediately 🚨"}
+</p>
+
+<p>
+  <strong>Income Trend:</strong>{" "}
+  {trend === "Upward"
+    ? "Your income is growing 📈"
+    : trend === "Downward"
+    ? "Your income is declining 📉"
+    : "Your income is stable ➖"}
+</p>
+
+<p>
+  <strong>Stability:</strong>{" "}
+  {volatility < 500
+    ? "Very stable income 🟢"
+    : volatility < 1500
+    ? "Some fluctuations 🟡"
+    : "Highly unstable income 🔴"}
+</p>
     </div>
 
     {/* METRICS GRID */}
@@ -271,39 +401,48 @@ if (last3Months.length === 3) {
     </div>
 
     {/* SUMMARY */}
-    <PremiumSection title="Executive Summary">
-      Net position is ₹{net}. Estimated runway is {runway} months.
-      Revenue trend is {trend}. Income volatility index is {volatility.toFixed(0)}.
-    </PremiumSection>
+    <PremiumSection title="AI Insights">
 
-    <PremiumSection title="Key Risks">
-      <ul>
-        {runway < 3 && <li>Runway critically low.</li>}
-        {growth < 0 && <li>Revenue declining month-over-month.</li>}
-        {topCategoryPercent > 60 && (
-          <li>Heavy dependency on {topCategory} expenses.</li>
-        )}
-        {volatility > 1500 && (
-          <li>Income highly volatile.</li>
-        )}
-      </ul>
-    </PremiumSection>
+  <button
+    onClick={handleGenerateAdvice}
+    style={{
+      padding: "10px 16px",
+      borderRadius: "8px",
+      background: "#38bdf8",
+      border: "none",
+      color: "#000",
+      cursor: "pointer",
+      marginBottom: "16px"
+    }}
+  >
+    {loadingAI ? "Generating..." : "Generate AI Advice"}
+  </button>
 
-    <PremiumSection title="Recommendations">
-      <ul>
-        {runway < 3 && <li>Reduce burn immediately.</li>}
-        {growth <= 0 && <li>Focus on revenue growth initiatives.</li>}
-        {topCategoryPercent > 50 && (
-          <li>Optimize {topCategory} spending.</li>
-        )}
-        {volatility > 1500 && (
-          <li>Stabilize revenue sources.</li>
-        )}
-        {score >= 75 && (
-          <li>Reinvest surplus into growth channels.</li>
-        )}
-      </ul>
-    </PremiumSection>
+  {aiData ? (
+  <div style={{
+    padding: "16px",
+    borderRadius: "10px",
+    background: "#020617",
+    border: "1px solid rgba(255,255,255,0.05)",
+    lineHeight: "1.6"
+  }}>
+    <p><strong>Key Risks:</strong></p>
+    <ul>
+      {aiData.risks.map((r, i) => <li key={i}>{r}</li>)}
+    </ul>
+
+    <p style={{ marginTop: "12px" }}><strong>Recommendations:</strong></p>
+    <ul>
+      {aiData.recommendations.map((r, i) => <li key={i}>{r}</li>)}
+    </ul>
+  </div>
+) : (
+  <div style={{ opacity: 0.6 }}>
+    Click the button above to generate personalized financial advice.
+  </div>
+)}
+
+</PremiumSection>
 
   </div>
 );

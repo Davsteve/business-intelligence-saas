@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { supabase } from "../supabaseClient";
-import logo from "../assets/clariflowpic.jpeg";
+<img src="/favicon.png" alt="logo" />
 
 export default function Auth() {
   const [email, setEmail] = useState("");

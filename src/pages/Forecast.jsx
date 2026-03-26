@@ -17,6 +17,14 @@ import {
 export default function Forecast() {
   const { session, businessId } = useBusiness();
   const [transactions, setTransactions] = useState([]);
+  const forecast = calculateForecast(transactions);
+  const averageLineData = forecast
+  ? [
+      ...forecast.monthlyData.map(() => forecast.averageNet),
+      ...forecast.projectionData.map(() => forecast.averageNet),
+    ]
+  : [];
+
   const [cashReserve, setCashReserve] = useState("");
 
   const [revenueGrowth, setRevenueGrowth] = useState("");
@@ -40,6 +48,7 @@ export default function Forecast() {
   }
 
   const forecastData = calculateForecast(transactions);
+  const latestMonthNet = forecast?.latestMonthNet || 0;
 
   if (!forecastData) {
     return <h2 style={{ color: "#fff" }}>No data available</h2>;
@@ -58,7 +67,17 @@ const parsedTarget =
     ? parseFloat(targetNet)
     : null;
 
-  const combinedData = [...monthlyData, ...projectionData];
+  const combinedData = forecast
+  ? [
+      ...forecast.monthlyData,
+      ...forecast.projectionData,
+    ]
+      .filter((item) => item.actualNet !== 0 || item.projectedNet !== null)
+      .map((item) => ({
+        ...item,
+        average: forecast.averageNet,
+      }))
+  : [];
 
   // ---------------- RUNWAY ----------------
 
@@ -124,7 +143,7 @@ const parsedTarget =
 
       {/* ---------- PROJECTION CHART ---------- */}
       <div style={styles.fullWidthCard}>
-        <h2>Revenue Projection (Next 3 Months)</h2>
+        <h2>Net Cash Flow Projection</h2>
 
         <ResponsiveContainer width="100%" height={350}>
           <LineChart data={combinedData}>
@@ -151,6 +170,16 @@ const parsedTarget =
               dot={false}
               connectNulls={false}
             />
+
+            <Line
+            type="monotone"
+            dataKey="average"
+            stroke="#8b5cf6"
+            strokeWidth={2}
+            strokeDasharray="6 6"
+            dot={false}
+            opacity={0.6}
+          />
 
             {parsedTarget && (
   <ReferenceLine
@@ -201,13 +230,20 @@ const parsedTarget =
         </div>
 
         {/* MONTHLY NET TARGET PANEL */}
+
+
         <div style={styles.card}>
           <h2>Monthly Net Profit Target</h2>
 
           <div style={styles.metricRow}>
-            <p>Current Avg Net</p>
+            <p>Average Monthly Net</p>
             <h3>₹ {averageNet.toFixed(0)}</h3>
           </div>
+
+          <p className="text-sm text-gray-400">Latest Month Net</p>
+          <h2 className="text-xl font-bold">
+          ₹ {(forecast?.latestMonthNet || 0).toFixed(0)}
+          </h2>
 
           <input
             type="number"

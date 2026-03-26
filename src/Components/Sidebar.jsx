@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import logo from "../assets/clariflowpic.jpeg";
+<img src="/favicon.png" alt="Clariflow Logo" />
 
 export default function Sidebar({ collapsed, toggleSidebar }) {
   const location = useLocation();
@@ -51,7 +51,7 @@ style={{
   }}
 >
   <img
-    src={logo}
+    src="/favicon.png"
     alt="Clariflow"
     style={{
       width: collapsed ? "34px" : "42px",

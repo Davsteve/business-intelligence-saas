@@ -30,9 +30,55 @@ export default function Dashboard() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showBreakdown, setShowBreakdown] = useState(false);
   const [showAll, setShowAll] = useState(false);
+  const [aiAdvice, setAiAdvice] = useState("");
+  const [loadingAI, setLoadingAI] = useState(false);
   const [search, setSearch] = useState("");
 const [dateRange, setDateRange] = useState("all");
 const [sortOrder, setSortOrder] = useState("latest");
+const getAIAdvice = async ({
+  netBalance,
+  burn,
+  runway,
+  trend,
+  volatility,
+  topExpense
+}) => {
+  const prompt = `
+You are a financial advisor for a normal person (not an expert).
+
+Explain clearly and simply.
+
+User Data:
+- Net Balance: ₹${netBalance}
+- Monthly Burn: ₹${burn}
+- Runway: ${runway} months
+- Income Trend: ${trend}
+- Income Stability: ${volatility}
+- Highest Expense: ${topExpense}
+
+Give:
+1. Simple explanation of current situation
+2. Key risks (if any)
+3. Clear actions to improve
+
+Keep it short, practical, and easy to understand.
+`;
+
+  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer YOUR_API_KEY_HERE",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "mistralai/mixtral-8x7b",
+      messages: [{ role: "user", content: prompt }]
+    })
+  });
+
+  const data = await res.json();
+  return data.choices[0].message.content;
+};
   const [filter, setFilter] = useState("all");
   const visibleTransactions = showAll
   ? transactions
@@ -121,6 +167,7 @@ const filteredTransactions = transactions
     e.stopPropagation();
     if (!window.confirm("Delete this category?")) return;
 
+
     const { error } = await supabase
       .from("categories")
       .delete()
@@ -134,6 +181,22 @@ const filteredTransactions = transactions
 
     fetchCategories();
   }
+
+  const handleGenerateAdvice = async () => {
+  setLoadingAI(true);
+
+  const advice = await getAIAdvice({
+    netBalance,
+    burn: totalExpense,
+    runway,
+    trend: cashFlow.trend,
+    volatility: cashFlow.volatilityLevel,
+    topExpense
+  });
+
+  setAiAdvice(advice);
+  setLoadingAI(false);
+};
 
   async function addTransaction() {
     if (!amount || !selectedCategory) return;
@@ -392,77 +455,95 @@ const volatilityColor =
 
       {/* TRANSACTIONS */}
       <Card>
-        <h2>Transactions</h2>
+  <h2>Transactions</h2>
 
-<div style={{ marginBottom: "15px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
+  <div style={{ marginBottom: "15px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
 
-  {/* Search */}
-  <input
-    type="text"
-    placeholder="Search category..."
-    value={search}
-    onChange={(e) => setSearch(e.target.value)}
-    style={{
-      padding: "8px 12px",
-      borderRadius: "6px",
-      border: "1px solid #1e293b",
-      background: "#020617",
-      color: "#e2e8f0"
-    }}
-  />
-
-  {/* Date Filter */}
-  <select
-    value={dateRange}
-    onChange={(e) => setDateRange(e.target.value)}
-  >
-    <option value="all">All Time</option>
-    <option value="1">1 Day</option>
-    <option value="3">3 Days</option>
-    <option value="7">1 Week</option>
-    <option value="30">1 Month</option>
-    <option value="365">1 Year</option>
-  </select>
-
-  {/* Sort */}
-  <select
-    value={sortOrder}
-    onChange={(e) => setSortOrder(e.target.value)}
-  >
-    <option value="latest">Latest</option>
-    <option value="oldest">Oldest</option>
-  </select>
-
-</div>
-
-        <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
-  {["all", "income", "expense"].map((type) => (
-    <button
-      key={type}
-      onClick={() => setFilter(type)}
+    {/* Search */}
+    <input
+      type="text"
+      placeholder="Search category..."
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
       style={{
-        padding: "6px 12px",
+        padding: "8px 12px",
         borderRadius: "6px",
         border: "1px solid #1e293b",
-        background: filter === type ? "#1e293b" : "transparent",
-        color: "#e2e8f0",
-        cursor: "pointer",
+        background: "#020617",
+        color: "#e2e8f0"
       }}
-    >
-      {type.charAt(0).toUpperCase() + type.slice(1)}
-    </button>
-  ))}
-</div>
+    />
 
-        {filteredTransactions.map((t) => (
+    {/* Date Filter */}
+    <select
+      value={dateRange}
+      onChange={(e) => setDateRange(e.target.value)}
+    >
+      <option value="all">All Time</option>
+      <option value="1">1 Day</option>
+      <option value="3">3 Days</option>
+      <option value="7">1 Week</option>
+      <option value="30">1 Month</option>
+      <option value="365">1 Year</option>
+    </select>
+
+    {/* Sort */}
+    <select
+      value={sortOrder}
+      onChange={(e) => setSortOrder(e.target.value)}
+    >
+      <option value="latest">Latest</option>
+      <option value="oldest">Oldest</option>
+    </select>
+
+  </div>
+
+  <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
+    {["all", "income", "expense"].map((type) => (
+      <button
+        key={type}
+        onClick={() => setFilter(type)}
+        style={{
+          padding: "6px 12px",
+          borderRadius: "6px",
+          border: "1px solid #1e293b",
+          background: filter === type ? "#1e293b" : "transparent",
+          color: "#e2e8f0",
+          cursor: "pointer",
+        }}
+      >
+        {type.charAt(0).toUpperCase() + type.slice(1)}
+      </button>
+    ))}
+  </div>
+
+  {/* ✅ SORT + SLICE LOGIC */}
+  {(() => {
+    const sortedTransactions = [...filteredTransactions].sort((a, b) => {
+      if (sortOrder === "latest") {
+        return new Date(b.created_at) - new Date(a.created_at);
+      } else {
+        return new Date(a.created_at) - new Date(b.created_at);
+      }
+    });
+
+    const DEFAULT_VISIBLE = 15;
+
+    const visibleTransactions = showAll
+      ? sortedTransactions
+      : sortedTransactions.slice(0, DEFAULT_VISIBLE);
+
+    return (
+      <>
+        {/* ✅ RENDER FIXED */}
+        {visibleTransactions.map((t) => (
           <div key={t.id} style={styles.transactionRow}>
             <div>
-  <div>{t.categories?.name}</div>
-  <div style={{ fontSize: "12px", opacity: 0.6 }}>
-    {new Date(t.created_at).toLocaleDateString()}
-  </div>
-</div>
-
+              <div>{t.categories?.name}</div>
+              <div style={{ fontSize: "12px", opacity: 0.6 }}>
+                {new Date(t.created_at).toLocaleDateString()}
+              </div>
+            </div>
 
             <div style={{ display: "flex", gap: "15px" }}>
               <span
@@ -485,24 +566,31 @@ const volatilityColor =
             </div>
           </div>
         ))}
-      </Card>
-      {transactions.length > 10 && (
-  <div style={{ textAlign: "center", marginTop: "10px" }}>
-    <button
-      onClick={() => setShowAll(!showAll)}
-      style={{
-        padding: "6px 12px",
-        background: "#0b1120",
-        border: "1px solid #1e293b",
-        borderRadius: "6px",
-        color: "#e2e8f0",
-        cursor: "pointer"
-      }}
-    >
-      {showAll ? "Show Less" : "Show More"}
-    </button>
-  </div>
-)}
+
+        {/* ✅ BUTTON FIXED */}
+        {sortedTransactions.length > DEFAULT_VISIBLE && (
+          <div style={{ textAlign: "center", marginTop: "10px" }}>
+            <button
+              onClick={() => setShowAll(!showAll)}
+              style={{
+                padding: "6px 12px",
+                background: "#0b1120",
+                border: "1px solid #1e293b",
+                borderRadius: "6px",
+                color: "#e2e8f0",
+                cursor: "pointer"
+              }}
+            >
+              {showAll
+                ? "Show Less"
+                : `Show ${sortedTransactions.length - DEFAULT_VISIBLE} More`}
+            </button>
+          </div>
+        )}
+      </>
+    );
+  })()}
+</Card>
 
       {/* MODAL */}
       {modalOpen && (

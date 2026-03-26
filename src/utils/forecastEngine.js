@@ -19,10 +19,10 @@ export function calculateForecast(transactions) {
     }
 
     if (t.categories?.type === "income") {
-      monthlyMap[key].income += t.amount;
-    } else {
-      monthlyMap[key].expense += t.amount;
-    }
+  monthlyMap[key].income += t.amount;
+} else if (t.categories?.type === "expense") {
+  monthlyMap[key].expense += t.amount;
+}
   });
 
   // ----------------------------
@@ -54,17 +54,33 @@ export function calculateForecast(transactions) {
   // ----------------------------
   const latestMonthNet = last12Months[last12Months.length - 1].net;
 
-  const averageNet =
-    last12Months.reduce((acc, curr) => acc + curr.net, 0) /
-    last12Months.length;
+const validMonths = last12Months.filter(
+  (m) => m.income > 0 || m.expense > 0
+);
 
-  const averageExpense =
-    last12Months.reduce((acc, curr) => acc + curr.expense, 0) /
-    last12Months.length;
+const averageNet =
+  validMonths.reduce((acc, curr) => acc + curr.net, 0) /
+  (validMonths.length || 1);
+
+const averageExpense =
+  validMonths.reduce((acc, curr) => acc + curr.expense, 0) /
+  (validMonths.length || 1);
+
+
+ const variance =
+  validMonths.reduce((acc, m) => acc + Math.abs(m.net - averageNet), 0) /
+  (validMonths.length || 1);
+
+const stabilityFactor = Math.max(
+  0.2,
+  1 - variance / (Math.abs(averageNet) || 1)
+);
+
 
   // ----------------------------
   // 4️⃣ PROJECTION (NEXT 3 MONTHS)
   // ----------------------------
+
   const projectionData = [];
 
   let lastDate = last12Months[last12Months.length - 1].date;
@@ -79,7 +95,15 @@ export function calculateForecast(transactions) {
 
     // Conservative projection:
     // move 20% toward average trend each month
-    lastNet = lastNet + averageNet * 0.2;
+    const growthRate =
+  latestMonthNet !== 0
+    ? (latestMonthNet - averageNet) / Math.abs(averageNet || 1)
+    : 0;
+
+// clamp growth so it doesn't go crazy
+const cappedGrowth = Math.max(Math.min(growthRate, 0.2), -0.2);
+
+lastNet = lastNet + averageNet * 0.3 * stabilityFactor;
 
     projectionData.push({
       label: futureDate.toLocaleString("default", {

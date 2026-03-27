@@ -33,7 +33,7 @@ export default function Auth() {
     <div style={styles.container}>
       <div style={styles.card}>
         <img
-  src={logo}
+  src="/favicon.png"
   alt="Clariflow"
   style={{
     width: "60px",

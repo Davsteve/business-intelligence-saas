@@ -4,6 +4,7 @@ import { useBusiness } from "../context/BusinessContext";
 import { calculateFinancialHealth } from "../utils/financialHealthEngine";
 import { calculateCashFlow } from "../utils/cashFlowEngine";
 import Card from "../Components/ui/Card";
+import { getCurrentUser } from "../utils/Auth";
 
 import {
   LineChart,
@@ -20,6 +21,9 @@ export default function Dashboard() {
 
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
+
+  const health = calculateFinancialHealth(transactions);
+  const cashFlow = calculateCashFlow(transactions);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [newCategoryType, setNewCategoryType] = useState("");
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -116,9 +120,44 @@ const filteredTransactions = transactions
     }
   });
 
+
   useEffect(() => {
     document.body.style.overflow = modalOpen ? "hidden" : "auto";
   }, [modalOpen]);
+
+  async function fetchCategories() {
+  const user = await getCurrentUser();
+
+  const { data, error } = await supabase
+    .from("categories")
+    .select("*")
+    .eq("business_id", businessId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  if (data) setCategories(data);
+} 
+
+async function fetchTransactions() {
+  const user = await getCurrentUser();
+
+  const { data, error } = await supabase
+    .from("transactions")
+    .select("*, categories(name, type)")
+    .eq("business_id", businessId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  if (data) setTransactions(data);
+}
 
   useEffect(() => {
     if (session && businessId) {
@@ -127,40 +166,29 @@ const filteredTransactions = transactions
     }
   }, [session, businessId]);
 
-  async function fetchCategories() {
-    const { data } = await supabase
-      .from("categories")
-      .select("*")
-      .eq("business_id", businessId)
-      .order("created_at", { ascending: true });
-
-    if (data) setCategories(data);
-  }
-
-  async function fetchTransactions() {
-    const { data } = await supabase
-      .from("transactions")
-      .select("*, categories(name, type)")
-      .eq("business_id", businessId)
-      .order("created_at", { ascending: false });
-
-    if (data) setTransactions(data);
-  }
-
-  const health = calculateFinancialHealth(transactions);
-  const cashFlow = calculateCashFlow(transactions);
-
   async function createCategory() {
   if (!newCategoryName) return;
 
-  await supabase.from("categories").insert([
-    { name: newCategoryName, type: newCategoryType, business_id: businessId },
+  const user = await getCurrentUser();
+
+  const { error } = await supabase.from("categories").insert([
+    {
+      name: newCategoryName,
+      type: newCategoryType,
+      business_id: businessId,
+      user_id: user.id
+    }
   ]);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
 
   setNewCategoryName("");
   setCategoryModalOpen(false);
 
-  fetchCategories();
+  await fetchCategories();  // 🔥 IMPORTANT
 }
 
   async function deleteCategory(id, e) {
@@ -199,32 +227,37 @@ const filteredTransactions = transactions
 };
 
   async function addTransaction() {
-    if (!amount || !selectedCategory) return;
+  if (!amount || !selectedCategory) return;
 
-    await supabase.from("transactions").insert([
-      {
-        amount: parseFloat(amount),
-        category_id: selectedCategory,
-        business_id: businessId,
-      },
-    ]);
+  const user = await getCurrentUser();
 
-    setAmount("");
-    setSelectedCategory("");
-    setSelectedCategoryName("");
-    setDropdownOpen(false);
-    setModalOpen(false);
-    fetchTransactions();
-  }
+  await supabase.from("transactions").insert([
+    {
+      amount: parseFloat(amount),
+      category_id: selectedCategory,
+      business_id: businessId,
+      user_id: user.id   // 🔥 IMPORTANT
+    }
+  ]);
+
+  setAmount("");
+  setSelectedCategory("");
+  setSelectedCategoryName("");
+  setDropdownOpen(false);
+  setModalOpen(false);
+  fetchTransactions();
+}
 
   async function deleteTransaction(id) {
     if (!window.confirm("Delete this transaction?")) return;
 
-    await supabase
-      .from("transactions")
-      .delete()
-      .eq("id", id)
-      .eq("business_id", businessId);
+    const user = await getCurrentUser();
+
+await supabase
+  .from("transactions")
+  .delete()
+  .eq("id", id)
+  .eq("business_id", businessId);
 
     fetchTransactions();
   }

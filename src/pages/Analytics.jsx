@@ -21,12 +21,19 @@ import {
 export default function Analytics() {
   const { businessId, loading } = useBusiness();
   const [transactions, setTransactions] = useState([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [filter, setFilter] = useState("all");
 
   useEffect(() => {
     if (!businessId) return;
     fetchTransactions();
   }, [businessId]);
+
+  useEffect(() => {
+  const close = () => setDropdownOpen(false);
+  window.addEventListener("click", close);
+  return () => window.removeEventListener("click", close);
+}, []);
 
   async function fetchTransactions() {
     const { data, error } = await supabase
@@ -252,22 +259,85 @@ export default function Analytics() {
 
       {/* FILTER */}
       <div style={{ marginBottom: "30px" }}>
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          style={{ padding: "8px", borderRadius: "6px" }}
+        <div style={{ position: "relative", marginBottom: "30px" }}>
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      setDropdownOpen(!dropdownOpen);
+    }}
+    style={{
+      padding: "8px 14px",
+      background: "#0b1120",
+      border: "1px solid #1e293b",
+      borderRadius: "8px",
+      color: "#e2e8f0",
+      cursor: "pointer"
+    }}
+  >
+    {
+      {
+        all: "All Time",
+        thisMonth: "This Month",
+        lastMonth: "Last Month"
+      }[filter]
+    } ▼
+  </button>
+
+  {dropdownOpen && (
+    <div
+      style={{
+        position: "absolute",
+        top: "110%",
+        left: 0,
+        width: "160px",
+        background: "#020617",
+        border: "1px solid #1e293b",
+        borderRadius: "8px",
+        overflow: "hidden",
+        zIndex: 1000
+      }}
+    >
+      {[
+        { label: "All Time", value: "all" },
+        { label: "This Month", value: "thisMonth" },
+        { label: "Last Month", value: "lastMonth" }
+      ].map((item) => (
+        <div
+          key={item.value}
+          onClick={(e) => {
+            e.stopPropagation();
+            setFilter(item.value);
+            setDropdownOpen(false);
+          }}
+          style={{
+            padding: "10px",
+            cursor: "pointer",
+            background:
+              filter === item.value ? "#1e293b" : "transparent",
+            color:
+              filter === item.value ? "#38bdf8" : "#e2e8f0"
+          }}
         >
-          <option value="all">All Time</option>
-          <option value="thisMonth">This Month</option>
-          <option value="lastMonth">Last Month</option>
-        </select>
+          {item.label}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
       </div>
 
       {/* CHARTS */}
-      <div style={{ display: "flex", gap: "60px", flexWrap: "wrap" }}>
-        <div style={{ width: "100%", maxWidth: "600px", height: "350px" }}>
+      <div
+  style={{
+    display: "flex",
+    gap: "60px",
+    flexWrap: "wrap",
+    alignItems: "stretch"
+  }}
+>
+        <div style={{ width: "100%", maxWidth: "600px", height: "350px", minHeight: "350px" }}>
           <h3>Income vs Expense</h3>
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={300}>
             <BarChart data={barData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
@@ -278,9 +348,9 @@ export default function Analytics() {
           </ResponsiveContainer>
         </div>
 
-        <div style={{ width: "100%", maxWidth: "600px", height: "350px" }}>
+        <div style={{ width: "100%", maxWidth: "600px", height: "350px", minHeight: "350px" }}>
           <h3>Category Breakdown</h3>
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
                 data={pieData}
@@ -305,7 +375,7 @@ export default function Analytics() {
       {/* MONTHLY TREND */}
       <div style={{ marginTop: "60px", height: "400px" }}>
         <h3>Monthly Income vs Expense Trend (Last 6 Months)</h3>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height={300}>
           <LineChart data={lineData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" />

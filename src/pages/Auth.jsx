@@ -1,31 +1,32 @@
 import { useState } from "react";
-import { supabase } from "../supabaseClient";
+import { signUp, signIn } from "../utils/Auth";
 <img src="/favicon.png" alt="logo" />
 
 export default function Auth() {
   const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function signIn() {
-  if (!email) return;
-
+  async function handleSignup() {
   setLoading(true);
-  setMessage("");
-
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: {
-      emailRedirectTo: window.location.origin
-    }
-  });
-
-  if (error) {
-    setMessage("Error sending magic link.");
-  } else {
-    setMessage("Check your email. We've sent you a login link.");
+  try {
+    await signUp(email, password);
+    alert("Signup successful!");
+  } catch (err) {
+    alert(err.message);
   }
+  setLoading(false);
+}
 
+async function handleLogin() {
+  setLoading(true);
+  try {
+    await signIn(email, password);
+    alert("Login successful!");
+    window.location.reload();
+  } catch (err) {
+    alert(err.message);
+  }
   setLoading(false);
 }
 
@@ -58,28 +59,32 @@ export default function Auth() {
           style={styles.input}
         />
 
+        <input
+        type="password"
+        placeholder="Enter your password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        style={styles.input}
+      />
+
         <button
-  onClick={signIn}
+  onClick={handleSignup}
   disabled={loading}
   style={styles.button}
 >
-  {loading ? "Sending..." : "Continue"}
+  {loading ? "Loading..." : "Sign Up"}
 </button>
-          {message && (
-  <p style={{ marginTop: "12px", opacity: 0.8 }}>
-    {message}
-  </p>
-)}
 
-        <p
-  style={{
-    fontSize: "13px",
-    opacity: 0.6,
-    marginTop: "12px",
-  }}
+<br /><br />
+
+<button
+  onClick={handleLogin}
+  disabled={loading}
+  style={styles.button}
 >
-  We'll send a secure login link to your inbox. No password required.
-</p>
+  {loading ? "Loading..." : "Login"}
+</button>
+
       </div>
     </div>
   );

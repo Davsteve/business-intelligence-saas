@@ -1,7 +1,16 @@
 export function calculateFinancialHealth(transactions) {
   if (!transactions || transactions.length === 0) {
-    return null;
-  }
+  return {
+    score: 0,
+    breakdown: {
+      profit: 0,
+      runway: 0,
+      growth: 0,
+      concentration: 0,
+      stability: 0,
+    },
+  };
+}
 
   let totalIncome = 0;
   let totalExpense = 0;

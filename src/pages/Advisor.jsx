@@ -8,6 +8,11 @@ export default function Advisor() {
   const [aiAdvice, setAiAdvice] = useState("");
   const [aiData, setAiData] = useState(null);
   const [loadingAI, setLoadingAI] = useState(false);
+  const getImpactColor = (impact) => {
+  if (impact === "high") return "#ef4444";   // red
+  if (impact === "medium") return "#f59e0b"; // yellow
+  return "#22c55e"; // green
+};
 
   useEffect(() => {
     if (!businessId) return;
@@ -233,33 +238,52 @@ const getAIAdvice = async (data) => {
       messages: [
         {
           role: "user",
-          content: `You are a strict financial API.
+          content: `
+You are a STRICT financial advisor AI.
 
 You MUST return ONLY valid JSON.
-DO NOT write anything else.
-NO explanations.
-NO headings.
+
 NO text outside JSON.
+NO explanations.
+NO markdown.
 
 FORMAT:
 {
-  "risks": ["risk1", "risk2"],
-  "recommendations": ["rec1", "rec2"]
+  "summary": "...",
+  "riskLevel": "low | medium | high",
+  "insights": [
+    {
+      "title": "...",
+      "impact": "high | medium | low",
+      "message": "...",
+      "action": "...",
+      "numbers": "..."
+    }
+  ]
 }
 
 DATA:
-Net: ₹${data.netBalance}
-Burn: ₹${data.burn}
-Runway: ${data.runway}
+Net Balance: ₹${data.netBalance}
+Monthly Burn: ₹${data.burn}
+Runway: ${data.runway} months
 Trend: ${data.trend}
 Volatility: ${data.volatility}
 Top Expense: ${data.topExpense}
 
+RULES:
+- Be specific with numbers
+- Mention ₹ values wherever possible
+- Prioritize survival first (runway)
+- Give realistic actions
+- Give out 3 insights
 
-Give:
-1. 2-3 key risks
-2. 2-3 actionable recommendations
-Keep it short and clear.`
+CRITICAL RULES:
+- Calculate runway in days if < 1 month
+- Suggest EXACT ₹ reductions needed
+- Prioritize expense reduction over income increase
+- If one category >30%, mark it HIGH impact
+- Always quantify actions (₹ values)
+`
         }
       ]
     })
@@ -295,7 +319,11 @@ const handleGenerateAdvice = async () => {
       topExpense: topCategory,
     });
 
-    setAiData(result);
+    setAiData({
+  summary: result.summary || "No summary available",
+  riskLevel: result.riskLevel || "medium",
+  insights: result.insights || []
+});
   } catch (err) {
     console.error(err);
   } finally {
@@ -426,15 +454,49 @@ const handleGenerateAdvice = async () => {
     border: "1px solid rgba(255,255,255,0.05)",
     lineHeight: "1.6"
   }}>
-    <p><strong>Key Risks:</strong></p>
-    <ul>
-      {aiData.risks.map((r, i) => <li key={i}>{r}</li>)}
-    </ul>
+    {aiData && (
+  <div style={{
+    padding: "16px",
+    borderRadius: "10px",
+    background: "#020617",
+    border: "1px solid rgba(255,255,255,0.08)"
+  }}>
 
-    <p style={{ marginTop: "12px" }}><strong>Recommendations:</strong></p>
-    <ul>
-      {aiData.recommendations.map((r, i) => <li key={i}>{r}</li>)}
-    </ul>
+    {/* SUMMARY */}
+    <div style={{
+      padding: "12px",
+      background: "#020617",
+      borderRadius: "8px",
+      marginBottom: "12px"
+    }}>
+      ⚠️ {aiData.summary}
+    </div>
+
+    {/* RISK LEVEL */}
+    <h3>Risk Level: {aiData.riskLevel.toUpperCase()}</h3>
+
+    {/* INSIGHTS */}
+    <h3 style={{ marginTop: "16px" }}>Key Insights</h3>
+
+    {aiData.insights.map((item, i) => (
+      <div key={i} style={{
+        marginBottom: "12px",
+        padding: "12px",
+        borderRadius: "8px",
+        background: "#020617",
+        border: "1px solid rgba(255,255,255,0.08)",
+        borderLeft: `4px solid ${getImpactColor(item.impact)}`
+      }}>
+        <strong>{item.title}</strong>
+        <p>{item.message}</p>
+        <p><b>Action:</b> {item.action}</p>
+        <p><b>Impact:</b> {item.impact}</p>
+        <p><b>Numbers:</b> {item.numbers}</p>
+      </div>
+    ))}
+
+  </div>
+)}
   </div>
 ) : (
   <div style={{ opacity: 0.6 }}>

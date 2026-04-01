@@ -28,26 +28,32 @@ export function calculateCashFlow(transactions) {
   // ----------------------------
   // 2️⃣ BUILD LAST 12 MONTHS (PADDED)
   // ----------------------------
-  const now = new Date();
-  const last12Months = [];
+  // ----------------------------
+// 2️⃣ BUILD ACTIVE MONTHS ONLY
+// ----------------------------
+let activeMonths = Object.entries(monthlyMap).map(([key, data]) => {
+  const [year, month] = key.split("-");
 
-  for (let i = 11; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const key = `${d.getFullYear()}-${d.getMonth()}`;
+  const d = new Date(year, month);
 
-    const data = monthlyMap[key] || { income: 0, expense: 0 };
+  return {
+    date: d,
+    label: d.toLocaleString("default", {
+      month: "short",
+      year: "numeric",
+    }),
+    income: data.income,
+    expense: data.expense,
+    net: data.income - data.expense,
+    timestamp: d.getTime(),
+  };
+});
 
-    last12Months.push({
-      date: d,
-      label: d.toLocaleString("default", {
-        month: "short",
-        year: "numeric",
-      }),
-      income: data.income,
-      expense: data.expense,
-      net: data.income - data.expense,
-    });
-  }
+// sort by time
+activeMonths.sort((a, b) => a.timestamp - b.timestamp);
+
+// take last 12 ACTIVE months only
+const last12Months = activeMonths.slice(-12);
 
   // ----------------------------
   // 3️⃣ KPIs
@@ -66,13 +72,15 @@ export function calculateCashFlow(transactions) {
   // ----------------------------
   // 4️⃣ TREND DETECTION
   // ----------------------------
-  const firstHalf = last12Months
-    .slice(0, 6)
-    .reduce((acc, curr) => acc + curr.net, 0);
+  const mid = Math.floor(last12Months.length / 2);
 
-  const secondHalf = last12Months
-    .slice(6)
-    .reduce((acc, curr) => acc + curr.net, 0);
+const firstHalf = last12Months
+  .slice(0, mid)
+  .reduce((acc, curr) => acc + curr.net, 0);
+
+const secondHalf = last12Months
+  .slice(mid)
+  .reduce((acc, curr) => acc + curr.net, 0);
 
   let trend = "Stable";
   if (secondHalf > firstHalf) trend = "Upward";
@@ -92,11 +100,13 @@ export function calculateCashFlow(transactions) {
 
   let volatilityLevel = "Stable";
 
-  if (volatilityScore > Math.abs(mean) * 0.8) {
-    volatilityLevel = "High Volatility";
-  } else if (volatilityScore > Math.abs(mean) * 0.4) {
-    volatilityLevel = "Moderate Volatility";
-  }
+  const base = Math.abs(mean) || 1;
+
+if (volatilityScore > base * 0.8) {
+  volatilityLevel = "High Volatility";
+} else if (volatilityScore > base * 0.4) {
+  volatilityLevel = "Moderate Volatility";
+}
 
   // ----------------------------
   // RETURN (Dashboard Safe)

@@ -1,7 +1,53 @@
-import { useState, useMemo } from "react";
+import { supabase } from "../supabaseClient";
+import { useState, useMemo, useEffect } from "react";
+import { getUserBusiness } from "../utils/business";
+import { xAxisDefaultProps } from "recharts/types/cartesian/XAxis";
 
-function Transactions({ transactions = [] }) {
+function Transactions() {
   const [showAll, setShowAll] = useState(false);
+  const [transactions, setTransactions] = useState([]);
+
+  // ✅ ADD THIS
+  const [business, setBusiness] = useState(null);
+
+  // ✅ ADD THIS
+  useEffect(() => {
+    async function loadBusiness() {
+      const data = await getUserBusiness();
+
+      if (!data) {
+        console.log("No business found");
+        return;
+      }
+
+      setBusiness(data);
+    }
+
+    loadBusiness();
+  }, []);
+
+  useEffect(() => {
+  async function loadTransactions() {
+    if (!business) return;
+
+    const { data, error } = await supabase
+      .from("transactions")
+      .select("*")
+      .eq("business_id", business.id)
+      .order("date", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching transactions:", error);
+      return;
+    }
+
+    setTransactions(data);
+  }
+
+  loadTransactions();
+}, [business]);
+
+    if (!business) return null;
 
   // ✅ Sort transactions (latest first)
   const sortedTransactions = useMemo(() => {

@@ -22,7 +22,6 @@ export default function Dashboard() {
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
 
-  const health = calculateFinancialHealth(transactions);
   const cashFlow = calculateCashFlow(transactions);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [newCategoryType, setNewCategoryType] = useState("");
@@ -37,8 +36,27 @@ export default function Dashboard() {
   const [aiAdvice, setAiAdvice] = useState("");
   const [loadingAI, setLoadingAI] = useState(false);
   const [search, setSearch] = useState("");
-const [dateRange, setDateRange] = useState("all");
-const [sortOrder, setSortOrder] = useState("latest");
+  const [dateRange, setDateRange] = useState("all");
+  const [dateDropdownOpen, setDateDropdownOpen] = useState(false);
+  const [sortOrder, setSortOrder] = useState("latest");
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+  const result = calculateFinancialHealth(transactions) || {
+  score: 0,
+  breakdown: {},
+};
+
+const { score, breakdown } = result;
+  const mappedBreakdown = {
+  profitMargin: breakdown?.profit || 0,
+  runway: breakdown?.runway || 0,
+  incomeGrowth: breakdown?.growth || 0,
+  expenseConcentration: breakdown?.concentration || 0,
+  stability: breakdown?.stability || 0,
+};
+  const riskLevel =
+  score >= 75 ? "Low" :
+  score >= 50 ? "Moderate" :
+  "High";
 const getAIAdvice = async ({
   netBalance,
   burn,
@@ -125,14 +143,25 @@ const filteredTransactions = transactions
     document.body.style.overflow = modalOpen ? "hidden" : "auto";
   }, [modalOpen]);
 
+  useEffect(() => {
+  const handleClickOutside = () => {
+    setSortDropdownOpen(false);
+    setDateDropdownOpen(false); // 🔥 ADD THIS
+  };
+
+  window.addEventListener("click", handleClickOutside);
+
+  return () => window.removeEventListener("click", handleClickOutside);
+}, []);
+
   async function fetchCategories() {
-  const user = await getCurrentUser();
+  const user = await getCurrentUser(); 
 
   const { data, error } = await supabase
     .from("categories")
     .select("*")
     .eq("business_id", businessId)
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: false })
 
   if (error) {
     console.error(error);
@@ -171,19 +200,42 @@ async function fetchTransactions() {
 
   const user = await getCurrentUser();
 
+  const cleanedName = newCategoryName.trim();
+
+  if (cleanedName.length < 2) {
+    alert("Category name too short");
+    return;
+  }
+
+  if (cleanedName.length > 30) {
+    alert("Category name too long");
+    return;
+  }
+
+  // Allow only letters, numbers, spaces
+  const valid = /^[a-zA-Z0-9 ]+$/.test(cleanedName);
+
+  if (!valid) {
+    alert("Only letters and numbers allowed");
+    return;
+  }
+
   const { error } = await supabase.from("categories").insert([
     {
-      name: newCategoryName,
-      type: newCategoryType,
-      business_id: businessId,
-      user_id: user.id
-    }
+  name: newCategoryName.trim().toLowerCase(),
+  type: newCategoryType.trim().toLowerCase(),
+  business_id: businessId,
+}
   ]);
 
   if (error) {
+  if (error.message.includes("duplicate")) {
+    alert("Category already exists");
+  } else {
     console.error(error);
-    return;
   }
+  return;
+}
 
   setNewCategoryName("");
   setCategoryModalOpen(false);
@@ -230,6 +282,16 @@ async function fetchTransactions() {
   if (!amount || !selectedCategory) return;
 
   const user = await getCurrentUser();
+
+  if (amount <= 0) {
+  alert("Invalid amount");
+  return;
+}
+
+if (!selectedCategory) {
+  alert("Select a category");
+  return;
+}
 
   await supabase.from("transactions").insert([
     {
@@ -295,27 +357,27 @@ const volatilityColor =
       </button>
 
       {/* FINANCIAL HEALTH */}
-      {health && (
+      {score !== undefined && (
         <Card>
           <h3>Financial Health Index</h3>
-          <h1>{health.score} / 100</h1>
+          <h1>{score} / 100</h1>
 
           <div style={styles.progressBar}>
             <div
               style={{
-                width: `${health.score}%`,
-                height: "100%",
-                background:
-                  health.score >= 70
-                    ? "#16c625"
-                    : health.score >= 40
-                    ? "#f59e0b"
-                    : "#ef4444",
-              }}
+  width: `${score}%`,
+  height: "100%",
+  background:
+    score >= 70
+      ? "#16c625"
+      : score >= 40
+      ? "#f59e0b"
+      : "#ef4444",
+}}
             />
           </div>
 
-          <p>Risk Level: {health.riskLevel}</p>
+          <p>Risk Level: {riskLevel}</p>
 
           <button
             onClick={() => setShowBreakdown((prev) => !prev)}
@@ -324,34 +386,33 @@ const volatilityColor =
             {showBreakdown ? "Hide Breakdown ▲" : "View Breakdown ▼"}
           </button>
 
-          {showBreakdown && health.breakdown?.length > 0 && (
-            <div style={{ marginTop: "20px" }}>
-              {health.breakdown.map((item, index) => (
+          {showBreakdown && breakdown && Object.keys(breakdown).length > 0 && (
+  <div style={{ marginTop: "20px" }}>
+    {Object.entries(breakdown).map(([key, value], index) => (
                 <div key={index} style={styles.breakdownCard}>
                   <div style={styles.breakdownRow}>
-                    <span>{item.name}</span>
-                    <span>{item.score} / 100</span>
+                    <span>{value.name}</span>
+<span>{value.score} / 100</span>
                   </div>
 
                   <div style={styles.innerProgress}>
                     <div
                       style={{
-                        width: `${item.score}%`,
+                        width: `${value.score}%`,
                         height: "100%",
                         background:
-                          item.score >= 70
-                            ? "#00ff9d"
-                            : item.score >= 40
-                            ? "#ffaa00"
-                            : "#ff4d4d",
+  value.score >= 75
+    ? "#22c55e"   // green
+    : value.score >= 50
+    ? "#f59e0b"   // yellow
+    : "#ef4444",  // red
                       }}
                     />
                   </div>
 
                   <div style={styles.breakdownMeta}>
-                    <span>Status: {item.status}</span>
-                    <span>Weight: {item.weight}</span>
-                  </div>
+  <span>Status: {value.status}</span>
+</div>
                 </div>
               ))}
             </div>
@@ -508,26 +569,156 @@ const volatilityColor =
     />
 
     {/* Date Filter */}
-    <select
-      value={dateRange}
-      onChange={(e) => setDateRange(e.target.value)}
+    <div style={{ position: "relative" }}>
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      setDateDropdownOpen(!dateDropdownOpen);
+    }}
+    style={{
+      padding: "8px 14px",
+      background: "#0b1120",
+      border: "1px solid #1e293b",
+      borderRadius: "8px",
+      color: "#e2e8f0",
+      cursor: "pointer"
+    }}
+  >
+    {
+      {
+        all: "All Time",
+        1: "1 Day",
+        3: "3 Days",
+        7: "1 Week",
+        30: "1 Month",
+        365: "1 Year"
+      }[dateRange]
+    } ▼
+  </button>
+
+  {dateDropdownOpen && (
+    <div
+      style={{
+        position: "absolute",
+        top: "110%",
+        left: 0,
+        width: "140px",
+        background: "#020617",
+        border: "1px solid #1e293b",
+        borderRadius: "8px",
+        overflow: "hidden",
+        zIndex: 1000,
+        boxShadow: "0 10px 25px rgba(0,0,0,0.5)"
+      }}
     >
-      <option value="all">All Time</option>
-      <option value="1">1 Day</option>
-      <option value="3">3 Days</option>
-      <option value="7">1 Week</option>
-      <option value="30">1 Month</option>
-      <option value="365">1 Year</option>
-    </select>
+      {[
+        { label: "All Time", value: "all" },
+        { label: "1 Day", value: "1" },
+        { label: "3 Days", value: "3" },
+        { label: "1 Week", value: "7" },
+        { label: "1 Month", value: "30" },
+        { label: "1 Year", value: "365" }
+      ].map((item) => (
+        <div
+          key={item.value}
+          onClick={(e) => {
+            e.stopPropagation();
+            setDateRange(item.value);
+            setDateDropdownOpen(false);
+          }}
+          style={{
+            padding: "10px",
+            cursor: "pointer",
+            background:
+              dateRange === item.value ? "#1e293b" : "transparent",
+            color:
+              dateRange === item.value ? "#38bdf8" : "#e2e8f0"
+          }}
+          onMouseEnter={(e) =>
+            (e.target.style.background = "#1e293b")
+          }
+          onMouseLeave={(e) =>
+            (e.target.style.background =
+              dateRange === item.value ? "#1e293b" : "transparent")
+          }
+        >
+          {item.label}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
 
     {/* Sort */}
-    <select
-      value={sortOrder}
-      onChange={(e) => setSortOrder(e.target.value)}
+    <div style={{ position: "relative" }}>
+  <button
+  onClick={(e) => {
+    e.stopPropagation();
+    setSortDropdownOpen(!sortDropdownOpen);
+  }}
+  style={{
+    padding: "8px 14px",
+    background: "#0b1120",
+    border: "1px solid #1e293b",
+    borderRadius: "8px",
+    color: "#e2e8f0",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px"
+  }}
+>
+  {sortOrder === "latest" ? "Latest" : "Oldest"} ▼
+</button>
+
+  {sortDropdownOpen && (
+    <div
+      style={{
+        position: "absolute",
+        top: "110%",
+        left: 0,
+        width: "120px",
+        background: "#020617",
+        border: "1px solid #1e293b",
+        borderRadius: "8px",
+        overflow: "hidden",
+        zIndex: 1000,
+        boxShadow: "0 10px 25px rgba(0,0,0,0.5)"
+      }}
     >
-      <option value="latest">Latest</option>
-      <option value="oldest">Oldest</option>
-    </select>
+      {[
+        { label: "Latest", value: "latest" },
+        { label: "Oldest", value: "oldest" }
+      ].map((item) => (
+        <div
+          key={item.value}
+          onClick={(e) => {
+  e.stopPropagation();
+  setSortOrder(item.value);
+  setSortDropdownOpen(false);
+}}
+          style={{
+            padding: "10px",
+            cursor: "pointer",
+            background:
+              sortOrder === item.value ? "#1e293b" : "transparent",
+            color:
+              sortOrder === item.value ? "#38bdf8" : "#e2e8f0"
+          }}
+          onMouseEnter={(e) =>
+            (e.target.style.background = "#1e293b")
+          }
+          onMouseLeave={(e) =>
+            (e.target.style.background =
+              sortOrder === item.value ? "#1e293b" : "transparent")
+          }
+        >
+          {item.label}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
 
   </div>
 
@@ -652,7 +843,7 @@ const volatilityColor =
                   <p style={styles.groupLabel}>Income</p>
 
                   {categories
-                    .filter((c) => c.type === "income")
+                    .filter((c) => c.type?.trim().toLowerCase() === "income")
                     .map((c) => (
                       <div
                         key={c.id}
@@ -688,7 +879,7 @@ const volatilityColor =
                   </p>
 
                   {categories
-                    .filter((c) => c.type === "expense")
+                    .filter((c) => c.type?.trim().toLowerCase() === "expense")
                     .map((c) => (
                       <div
                         key={c.id}

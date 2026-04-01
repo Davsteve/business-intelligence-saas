@@ -6,6 +6,7 @@ export default function Advisor() {
   const { businessId, loading } = useBusiness();
   const [transactions, setTransactions] = useState([]);
   const [aiAdvice, setAiAdvice] = useState("");
+  const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;  
   const [aiData, setAiData] = useState(null);
   const [loadingAI, setLoadingAI] = useState(false);
   const getImpactColor = (impact) => {
@@ -230,7 +231,7 @@ const getAIAdvice = async (data) => {
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
-      "Authorization": "Bearer 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", // 🔥 replace this
+      Authorization: `Bearer ${API_KEY}`, // 🔥 replace this
       "Content-Type": "application/json"
     },
     body: JSON.stringify({

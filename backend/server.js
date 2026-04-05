@@ -1,0 +1,425 @@
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import rateLimit from "express-rate-limit";
+import { createClient } from "@supabase/supabase-js";
+import fetch from "node-fetch";
+
+dotenv.config();
+
+const app = express();
+
+// ✅ CORS
+app.use(cors({
+  origin: "http://localhost:5173"
+}));
+
+// ✅ JSON parser
+app.use(express.json());
+
+// ✅ Rate limiter
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50,
+});
+
+app.use("/api/ai", limiter);
+
+// 🔐 Supabase Setup
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+// 🔐 Auth Middleware
+const verifyUser = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({ error: "No token" });
+    }
+
+    const { data, error } = await supabase.auth.getUser(token);
+
+    if (error || !data.user) {
+      return res.status(403).json({ error: "Invalid token" });
+    }
+
+    req.user = data.user;
+    next();
+  } catch (err) {
+    console.error("Auth error:", err);
+    return res.status(500).json({ error: "Auth failed" });
+  }
+};
+
+// 🚀 MAIN ENDPOINT
+app.post("/api/ai", verifyUser, async (req, res) => {
+  try {
+    const {
+  net,
+  income,
+  burn,
+  growth,
+  trend,
+  topCategory,
+  topCategoryPercent
+} = req.body;
+
+    // ✅ VALIDATION FIRST
+    if (
+      !Number.isFinite(net) ||
+      !Number.isFinite(burn) ||
+      !Number.isFinite(income)
+    ) {
+      return res.status(400).json({ error: "Invalid input data" });
+    }
+
+    // ✅ DERIVED METRICS (ADD HERE)
+const runwayMonths = burn > 0 ? net / burn : 0;
+
+const runwayDays = Math.max(0, Math.floor(runwayMonths * 30));
+
+const burnRatio = income > 0 ? burn / income : 0;
+
+    // ✅ RISK LEVEL (DEFINE EARLY)
+    const riskLevel =
+  runwayDays <= 15 ? "HIGH" :
+  burnRatio > 0.7 ? "HIGH" :
+  runwayDays < 90 ? "MODERATE" :
+  "LOW";
+
+    // ✅ INSIGHTS (ALWAYS 3)
+    const insights = [];
+
+    // 1️⃣ CASH BUFFER
+    if (runwayDays < 30) {
+      insights.push({
+  title: "Low Cash Buffer",
+  message: `You only have ${runwayDays} days of runway, which is critically low.`,
+  action: `Increase runway to at least 90 days by reducing burn or increasing income.`,
+  impact: "high",
+  numbers: {
+    runwayDays,
+    burn,
+    income
+  }
+});
+    } else if (runwayDays < 90) {
+  insights.push({
+    title: "Moderate Cash Buffer",
+    message: `You currently have ${runwayDays} days of runway. While this provides some stability, it may not be sufficient to handle unexpected financial shocks.`,
+    action: `Increase your runway to at least 120 days by reducing expenses by approximately ₹${Math.round(burn * 0.15)} or improving income streams.`,
+    impact: "medium",
+    numbers: {
+      runwayDays,
+      burn,
+      income,
+      suggestedCut: Math.round(burn * 0.15)
+    }
+  });
+
+} else {
+  insights.push({
+    title: "Strong Cash Position",
+    message: `Your runway stands at ${runwayDays} days, indicating a strong financial buffer and low short-term liquidity risk.`,
+    action: `Consider allocating ₹${Math.round(net * 0.2)} towards investments or growth initiatives while maintaining a safety reserve.`,
+    impact: "low",
+    numbers: {
+      runwayDays,
+      burn,
+      income,
+      investableAmount: Math.round(net * 0.2)
+    }
+      });
+    }
+
+    // 2️⃣ BURN
+    if (burnRatio > 0.7) {
+      insights.push({
+  title: "High Burn Rate",
+  message: `You are spending ₹${burn} against an income of ₹${income}, resulting in a ${Math.round(burnRatio * 100)}% burn ratio.`,
+  action: `Reduce expenses by ₹${Math.round(burn * 0.2)} to bring burn ratio below 60%.`,
+  impact: "high",
+  numbers: {
+    burn,
+    income,
+    burnRatio
+  }
+});
+    } else if (burnRatio > 0.5) {
+  insights.push({
+    title: "Moderate Burn",
+    message: `Your burn ratio is ${Math.round(burnRatio * 100)}%, with expenses of ₹${burn} against income of ₹${income}. This is manageable but leaves limited margin for error.`,
+    action: `Optimize expenses by cutting approximately ₹${Math.round(burn * 0.1)} to improve financial flexibility.`,
+    impact: "medium",
+    numbers: {
+      burn,
+      income,
+      burnRatio,
+      suggestedCut: Math.round(burn * 0.1)
+    }
+  });
+
+} else {
+  insights.push({
+    title: "Efficient Spending",
+    message: `Your burn ratio is a healthy ${Math.round(burnRatio * 100)}%, with expenses well aligned to your income of ₹${income}.`,
+    action: `Maintain current discipline. You may consider reallocating ₹${Math.round((income - burn) * 0.2)} towards savings or growth.`,
+    impact: "low",
+    numbers: {
+      burn,
+      income,
+      burnRatio,
+      surplus: income - burn,
+      investableAmount: Math.round((income - burn) * 0.2)
+    }
+      });
+    }
+
+    // 3️⃣ GROWTH
+if (growth < 0) {
+  insights.push({
+    title: "Declining Income",
+    message: `Your income growth is ${growth.toFixed(1)}%, indicating a downward trend.`,
+    action: `Increase revenue streams or pricing to reverse the decline within the next month.`,
+    impact: "high",
+    numbers: {
+      growth,
+      income
+    }
+  });
+
+} else if (growth < 10) {
+  insights.push({
+    title: "Slow Growth",
+    message: `Your income is growing at ${growth.toFixed(1)}%, which is positive but relatively slow for sustainable expansion.`,
+    action: `Aim to increase growth to at least 10–15% by adding new income streams or improving conversion efficiency.`,
+    impact: "medium",
+    numbers: {
+      growth,
+      income,
+      targetGrowth: 12,
+      gapToTarget: +(12 - growth).toFixed(1)
+    }
+  });
+
+} else {
+  insights.push({
+    title: "Strong Growth",
+    message: `Your income is growing at a healthy ${growth.toFixed(1)}%, indicating strong upward momentum.`,
+    action: `Capitalize on this by reinvesting approximately ₹${Math.round(income * 0.2)} into scaling operations or marketing.`,
+    impact: "low",
+    numbers: {
+      growth,
+      income,
+      reinvestment: Math.round(income * 0.2)
+    }
+  });
+}
+
+    // ✅ PRIORITY
+    let priority = "";
+
+if (runwayDays < 15) {
+  priority = `URGENT: You have less than ${runwayDays} days of runway. Reduce burn immediately and secure additional income or capital within the next 7–10 days.`;
+} else if (burnRatio > 0.7) {
+  priority = `HIGH: Your burn ratio is ${Math.round(burnRatio * 100)}%. Cut at least 20–30% of non-essential expenses to stabilize cash flow.`;
+} else if (runwayDays < 90) {
+  priority = `MODERATE: Strengthen your runway to at least 90 days by improving savings and optimizing expenses.`;
+} else {
+  priority = `STABLE: Maintain current discipline and explore growth opportunities.`;
+}
+
+    // ✅ SUMMARY
+    const generateSummary = ({
+  net,
+  income,
+  burn,
+  runwayDays,
+  burnRatio,
+  trend,
+  riskLevel
+}) => {
+  let opening = "";
+  let condition = "";
+  let riskStatement = "";
+  let forward = "";
+
+  // 🟢 OPENING (state-based)
+  if (riskLevel === "HIGH") {
+    opening = "Your financial position is currently under pressure.";
+  } else if (riskLevel === "MODERATE") {
+    opening = "Your financial position is stable but requires attention.";
+  } else {
+    opening = "Your financial position appears stable and well-managed.";
+  }
+
+  // 💸 CONDITION (numbers-driven)
+  if (burnRatio > 0.8) {
+    condition = "Expenses are consuming a significant portion of your income";
+  } else if (burnRatio > 0.5) {
+    condition = "Spending levels are moderately high relative to income";
+  } else {
+    condition = "Spending is well-controlled relative to income";
+  }
+
+  // ⏳ RUNWAY CONTEXT
+  let runwayContext = "";
+  if (runwayDays < 30) {
+    runwayContext = "with limited cash runway remaining";
+  } else if (runwayDays < 90) {
+    runwayContext = "with a moderate financial buffer";
+  } else {
+    runwayContext = "supported by a strong cash runway";
+  }
+
+  // 📉 TREND
+  let trendContext = "";
+  if (trend === "declining") {
+    trendContext = "Income trends indicate a downward trajectory";
+  } else if (trend === "growing") {
+    trendContext = "Income is showing positive growth momentum";
+  } else {
+    trendContext = "Income levels are relatively stable";
+  }
+
+  // ⚠️ RISK STATEMENT
+  if (riskLevel === "HIGH") {
+    riskStatement =
+      "This combination increases the risk of liquidity stress if not addressed.";
+  } else if (riskLevel === "MODERATE") {
+    riskStatement =
+      "While manageable, this situation could weaken financial resilience over time.";
+  } else {
+    riskStatement =
+      "Overall financial risk remains low under current conditions.";
+  }
+
+  // 🔮 FORWARD OUTLOOK
+  forward =
+    "Maintaining disciplined spending and monitoring income trends will be key to sustaining financial stability.";
+
+  return `${opening} ${condition}, ${runwayContext}. ${trendContext}. ${riskStatement} ${forward}`;
+};
+
+const summary = generateSummary({
+  net,
+  income,
+  burn,
+  runwayDays,
+  burnRatio,
+  trend,
+  riskLevel
+});
+
+
+    // 🧠 AI ENHANCEMENT (SAFE)
+let aiSummary = summary;
+let aiInsights = insights;
+
+try {
+  const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: "openai/gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: "You are a sharp financial advisor. Be specific, actionable, and concise."
+        },
+        {
+          role: "user",
+          content: `
+Business Data:
+
+Balance: ${net}
+Income: ₹${income}
+Burn: ₹${burn}
+Runway: ${runwayDays} days
+Burn Ratio: ${Math.round(burnRatio * 100)}%
+Growth: ${(growth || 0).toFixed(1)}%
+Trend: ${trend}
+Top Expense: ${topCategory} (${(topCategoryPercent || 0).toFixed(1)}%)
+
+Priority: ${priority}
+
+---
+
+Give EXACTLY 3 insights.
+
+Each must include:
+- title
+- message (deep reasoning using numbers)
+- action (specific, numeric if possible)
+- impact (low | medium | high)
+
+When suggesting actions:
+- Use actual numbers from the data
+- Estimate impact (e.g., runway increase, % improvement)
+- Convert percentages into actual rupee values
+- Estimate impact on runway (in days)
+
+Make it practical and strategic.
+
+Also Include a "priority" field (1–2 lines, urgent and actionable)
+
+Return ONLY JSON:
+{
+  "priority": "...",
+  "summary": "...",
+  "riskLevel": "...",
+  "insights": [...]
+}
+  `
+            },
+            {
+              role: "user",
+              content: `
+Balance: ₹${net}
+Income: ₹${income}
+Burn: ₹${burn}
+Runway: ${runwayDays} days
+
+Return JSON with summary, riskLevel, insights.
+          `
+        }
+      ]
+    })
+  });
+
+  const data = await aiResponse.json();
+
+  if (data?.choices?.[0]?.message?.content) {
+    aiSummary = data.choices[0].message.content;
+  }
+
+} catch (err) {
+  console.log("AI failed, using base insights");
+}
+
+// ✅ FINAL RESPONSE (ONLY ONE)
+return res.json({
+  summary: aiSummary,
+  priority,
+  riskLevel,
+  insights: aiInsights
+});
+
+  } catch (err) {
+    console.error("SERVER ERROR:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// 🚀 Start Server
+const PORT = 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

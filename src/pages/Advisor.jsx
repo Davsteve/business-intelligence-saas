@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { useBusiness } from "../context/BusinessContext";
+import { calculateFinancialHealth } from "../utils/financialHealthEngine";
 
 export default function Advisor() {
   const { businessId, loading } = useBusiness();
@@ -9,6 +10,16 @@ export default function Advisor() {
   const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;  
   const [aiData, setAiData] = useState(null);
   const [loadingAI, setLoadingAI] = useState(false);
+  const financials = calculateFinancialHealth(transactions);
+
+const {
+  runwayMonths,
+  runwayDays,
+  avgMonthlyBurn,
+  net,
+  totalIncome,
+  incomeGrowth,
+} = financials;
   const getImpactColor = (impact) => {
   if (impact === "high") return "#ef4444";   // red
   if (impact === "medium") return "#f59e0b"; // yellow
@@ -41,14 +52,14 @@ export default function Advisor() {
   // ------------------------
 
   const income = transactions
-    .filter((t) => t.categories?.type === "income")
-    .reduce((acc, curr) => acc + curr.amount, 0);
+    ?.filter(t => t.categories?.type === "income")
+    ?.reduce((sum, t) => sum + Number(t.amount || 0), 0) || 0;
 
-  const expense = transactions
-    .filter((t) => t.categories?.type === "expense")
-    .reduce((acc, curr) => acc + curr.amount, 0);
+  const burn = transactions
+    ?.filter(t => t.categories?.type === "expense")
+    ?.reduce((sum, t) => sum + Number(t.amount || 0), 0) || 0;
 
-  const net = income - expense;
+  const netBalance = income - burn;
 
   // ------------------------
   // MONTHLY BURN + RUNWAY
@@ -59,34 +70,33 @@ export default function Advisor() {
     if (t.categories?.type !== "expense") return;
     const d = new Date(t.created_at);
     const key = `${d.getFullYear()}-${d.getMonth()}`;
-    monthlyExpenses[key] = (monthlyExpenses[key] || 0) + t.amount;
+    monthlyExpenses[key] = (monthlyExpenses[key] || 0) + Number(t.amount || 0);
   });
 
-  const avgMonthlyBurn =
-    Object.values(monthlyExpenses).length > 0
-      ? Object.values(monthlyExpenses).reduce((a, b) => a + b, 0) /
-        Object.values(monthlyExpenses).length
-      : 0;
-
-  const runway =
-    avgMonthlyBurn > 0 ? (net / avgMonthlyBurn).toFixed(1) : 0;
 
   // ------------------------
   // EXPENSE DEPENDENCY
   // ------------------------
 
   const expenseMap = {};
+  let totalExpense = 0;
+
   transactions.forEach((t) => {
     if (t.categories?.type !== "expense") return;
     const name = t.categories?.name || "Other";
-    expenseMap[name] = (expenseMap[name] || 0) + t.amount;
+    const amount = Number(t.amount || 0);
+
+    expenseMap[name] = (expenseMap[name] || 0) + amount;
+    totalExpense += amount;
   });
 
   let topCategory = "None";
   let topCategoryPercent = 0;
 
   Object.entries(expenseMap).forEach(([name, value]) => {
-    const percent = expense > 0 ? (value / expense) * 100 : 0;
+    const percent =
+      totalExpense > 0 ? (value / totalExpense) * 100 : 0;
+
     if (percent > topCategoryPercent) {
       topCategoryPercent = percent;
       topCategory = name;
@@ -113,14 +123,14 @@ export default function Advisor() {
       d.getMonth() === currentMonth &&
       d.getFullYear() === currentYear
     ) {
-      thisMonthIncome += t.amount;
+      thisMonthIncome += Number(t.amount || 0);
     }
 
     if (
       d.getMonth() === lastMonth.getMonth() &&
       d.getFullYear() === lastMonth.getFullYear()
     ) {
-      lastMonthIncome += t.amount;
+      lastMonthIncome += Number(t.amount || 0);
     }
   });
 
@@ -133,6 +143,8 @@ export default function Advisor() {
   // HEALTH SCORE
   // ------------------------
 
+  
+
 
       // ------------------------
 // VOLATILITY (Income Stability)
@@ -144,7 +156,7 @@ transactions.forEach((t) => {
   if (t.categories?.type !== "income") return;
   const d = new Date(t.created_at);
   const key = `${d.getFullYear()}-${d.getMonth()}`;
-  monthlyIncomeMap[key] = (monthlyIncomeMap[key] || 0) + t.amount;
+  monthlyIncomeMap[key] = (monthlyIncomeMap[key] || 0) + Number(t.amount || 0);
 });
 
 const monthlyIncomes = Object.values(monthlyIncomeMap);
@@ -165,27 +177,29 @@ if (monthlyIncomes.length > 1) {
   volatility = Math.sqrt(variance);
 }
 
-
 let score = 0;
 
-// Profitability
-if (net > 0) score += 25;
-if (net > income * 0.2) score += 5;
+// 🔥 Burn Efficiency
+const burnRatio = income > 0 ? burn / income : 1;
 
-// Runway
-if (runway >= 6) score += 25;
-else if (runway >= 3) score += 15;
-else if (runway > 0) score += 5;
+if (burnRatio <= 0.5) score += 25;
+else if (burnRatio <= 0.7) score += 15;
+else if (burnRatio <= 0.9) score += 8;
+else score += 0;
 
-// Growth
-if (growth > 10) score += 15;
-else if (growth > 0) score += 8;
+// 💰 Profitability (reduced weight)
+if (netBalance > 0) score += 10;
+if (netBalance > income * 0.2) score += 5;
 
-// Expense concentration
-if (topCategoryPercent < 40) score += 15;
-else if (topCategoryPercent < 60) score += 8;
+// 📈 Growth
+if (growth > 10) score += 10;
+else if (growth > 0) score += 5;
 
-// Volatility
+// 📊 Expense concentration
+if (topCategoryPercent < 40) score += 10;
+else if (topCategoryPercent < 60) score += 5;
+
+// 📉 Stability
 if (volatility < 500) score += 10;
 else if (volatility < 1500) score += 5;
 
@@ -227,110 +241,76 @@ if (last3Months.length === 3) {
 }
 
 
-const getAIAdvice = async (data) => {
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${API_KEY}`, // 🔥 replace this
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: "openai/gpt-3.5-turbo",
-      messages: [
-        {
-          role: "user",
-          content: `
-You are a STRICT financial advisor AI.
+const getAIAdvice = async () => {
 
-You MUST return ONLY valid JSON.
-
-NO text outside JSON.
-NO explanations.
-NO markdown.
-
-FORMAT:
-{
-  "summary": "...",
-  "riskLevel": "low | medium | high",
-  "insights": [
-    {
-      "title": "...",
-      "impact": "high | medium | low",
-      "message": "...",
-      "action": "...",
-      "numbers": "..."
-    }
-  ]
+    if (
+  !Number.isFinite(netBalance) ||
+  !Number.isFinite(burn) ||
+  !Number.isFinite(income)
+) {
+  console.error("Invalid data:", { netBalance, burn, income });
+  throw new Error("Invalid financial data");
 }
 
-DATA:
-Net Balance: ₹${data.netBalance}
-Monthly Burn: ₹${data.burn}
-Runway: ${data.runway} months
-Trend: ${data.trend}
-Volatility: ${data.volatility}
-Top Expense: ${data.topExpense}
+    const session = await supabase.auth.getSession();
+    const token = session.data.session.access_token;
 
-RULES:
-- Be specific with numbers
-- Mention ₹ values wherever possible
-- Prioritize survival first (runway)
-- Give realistic actions
-- Give out 3 insights
+    console.log("Sending to API:", {
+  netBalance,
+  burn,
+  income
+});
 
-CRITICAL RULES:
-- Calculate runway in days if < 1 month
-- Suggest EXACT ₹ reductions needed
-- Prioritize expense reduction over income increase
-- If one category >30%, mark it HIGH impact
-- Always quantify actions (₹ values)
-`
-        }
-      ]
-    })
-  });
-
-  const json = await res.json();
-  console.log("API RESPONSE:", json); // 🔥 debug
-
-  if (!json.choices) {
-    throw new Error("Invalid API response");
-  }
-
-  const text = json.choices[0].message.content;
-
-try {
-  return JSON.parse(text);
-} catch (e) {
-  console.error("Parsing failed:", text);
-  throw new Error("Invalid AI format");
-}
-};
-
-const handleGenerateAdvice = async () => {
-  setLoadingAI(true);
-
-  try {
-    const result = await getAIAdvice({
-      netBalance: net,
-      burn: avgMonthlyBurn,
-      runway,
-      trend,
-      volatility,
-      topExpense: topCategory,
+    const res = await fetch("http://localhost:5000/api/ai", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+  net: Number(netBalance),
+  income: Number(income),
+  burn: Number(burn),
+  runwayMonths: Number(runwayMonths),
+  runwayDays: Number(runwayDays),
+  burnRatio: Number(totalIncome) > 0 ? Number(avgMonthlyBurn) / Number(totalIncome) : 0,
+  growth: Number(incomeGrowth),
+  trend,
+  topCategory,
+  topCategoryPercent: Number(topCategoryPercent),
+  volatility: Number(volatility)
+})
     });
 
-    setAiData({
+    const result = await res.json();
+
+    if (!res.ok) {
+      console.error("API ERROR:", result);
+      throw new Error(result.error || "Failed to fetch AI advice");
+    }
+
+    return result.data || result;
+  };
+
+  const handleGenerateAdvice = async () => {
+    setLoadingAI(true);
+
+    try {
+      const result = await getAIAdvice();
+
+      setAiData({
+  priority: result.priority || "No priority available",
   summary: result.summary || "No summary available",
   riskLevel: result.riskLevel || "medium",
-  insights: result.insights || []
+  insights: result.insights || [],
 });
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setLoadingAI(false);
-  }
-};
+
+    } catch (err) {
+      console.error("❌ AI ERROR:", err);
+    } finally {
+      setLoadingAI(false);
+    }
+  };
 
 
   // ------------------------
@@ -423,9 +403,12 @@ const handleGenerateAdvice = async () => {
       gap: "20px",
       marginBottom: "40px"
     }}>
-      <MetricCard label="Net Position" value={`₹ ${net}`} />
+      <MetricCard label="Net Position" value={`₹ ${netBalance}`} />
       <MetricCard label="Avg Monthly Burn" value={`₹ ${avgMonthlyBurn.toFixed(0)}`} />
-      <MetricCard label="Runway" value={`${runway} months`} />
+      <MetricCard 
+  label="Runway" 
+  value={`${runwayDays.toFixed(0)} days`} 
+/>
       <MetricCard label="Top Expense" value={`${topCategory} (${topCategoryPercent.toFixed(1)}%)`} />
     </div>
 
@@ -473,6 +456,16 @@ const handleGenerateAdvice = async () => {
       ⚠️ {aiData.summary}
     </div>
 
+    <div style={{
+  padding: "12px",
+  background: "#1e293b",
+  borderRadius: "8px",
+  marginBottom: "12px",
+  borderLeft: "4px solid #ef4444"
+}}>
+  🚨 <strong>Priority:</strong> {aiData.priority}
+</div> 
+
     {/* RISK LEVEL */}
     <h3>Risk Level: {aiData.riskLevel.toUpperCase()}</h3>
 
@@ -492,7 +485,41 @@ const handleGenerateAdvice = async () => {
         <p>{item.message}</p>
         <p><b>Action:</b> {item.action}</p>
         <p><b>Impact:</b> {item.impact}</p>
-        <p><b>Numbers:</b> {item.numbers}</p>
+        <div style={{ marginTop: "6px" }}>
+  <b>Numbers:</b>
+
+  {item.numbers?.burn !== undefined && (
+    <div>💸 Burn: ₹{Math.round(item.numbers.burn)}</div>
+  )}
+
+  {item.numbers?.income !== undefined && (
+    <div>💰 Income: ₹{Math.round(item.numbers.income)}</div>
+  )}
+
+  {item.numbers?.runwayDays !== undefined && (
+    <div>⏳ Runway: {item.numbers.runwayDays} days</div>
+  )}
+
+  {item.numbers?.burnRatio !== undefined && (
+    <div>📊 Burn Ratio: {(item.numbers.burnRatio * 100).toFixed(1)}%</div>
+  )}
+
+  {item.numbers?.investableAmount !== undefined && (
+  <div>📈 Investable: ₹{Math.round(item.numbers.investableAmount)}</div>
+)}
+
+  {item.numbers?.surplus !== undefined && (
+  <div>💼 Surplus: ₹{Math.round(item.numbers.surplus)}</div>
+)}
+
+  {item.numbers?.gapToTarget !== undefined && (
+  <div>📉 Gap to Target: {item.numbers.gapToTarget}%</div>
+)}
+
+  {item.numbers?.reinvestment !== undefined && (
+  <div>🚀 Reinvestment: ₹{Math.round(item.numbers.reinvestment)}</div>
+)}
+</div>
       </div>
     ))}
 

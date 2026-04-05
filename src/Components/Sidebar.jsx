@@ -1,7 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
+import { supabase } from "../supabaseClient";
 <img src="/favicon.png" alt="Clariflow Logo" />
 
 export default function Sidebar({ collapsed, toggleSidebar }) {
+  const handleLogout = async () => {
+  await supabase.auth.signOut();
+  window.location.href = "/auth";
+};
   const location = useLocation();
 
   const menuItems = [
@@ -13,29 +18,34 @@ export default function Sidebar({ collapsed, toggleSidebar }) {
 
   return (
   <div
-style={{
-      width: collapsed ? "80px" : "240px",
-      flexShrink: 0,
-      transition: "width 0.3s ease",
-      background: "linear-gradient(180deg, #0b1220, #0f172a)",
-      borderRight: "1px solid rgba(255,255,255,0.05)",
-      minHeight: "100vh",
-      padding: collapsed ? "30px 10px" : "40px 25px",
-      position: "relative",
-      cursor: !collapsed ? "pointer" : "default",
-    }}
-  >
+  style={{
+    width: collapsed ? "80px" : "240px",
+    flexShrink: 0,
+    transition: "width 0.3s ease",
+    background: "linear-gradient(180deg, #0b1220, #0f172a)",
+    borderRight: "1px solid rgba(255,255,255,0.05)",
+    minHeight: "100vh",
+    padding: collapsed ? "30px 10px" : "40px 25px",
+
+    position: "relative", // ✅ ADD THIS HERE
+
+    display: "flex",              // ✅ ADD
+    flexDirection: "column",      // ✅ ADD
+  }}
+>
       {/* 3 DOT MENU BUTTON */}
       <div
         onClick={toggleSidebar}
         style={{
           position: "absolute",
-          top: "15px",
+          top: "32px",
           right: collapsed ? "20px" : "20px",
           cursor: "pointer",
           fontSize: "20px",
           opacity: 0.6,
           userSelect: "none",
+
+          zIndex: 10   // ✅ ADD THIS
         }}
       >
         ☰
@@ -55,7 +65,7 @@ style={{
     alt="Clariflow"
     style={{
       width: collapsed ? "34px" : "42px",
-      height: "auto",
+      height: "auto", 
       objectFit: "contain",
       filter: "drop-shadow(0px 0px 6px rgba(56,189,248,0.25))"
     }}
@@ -77,15 +87,15 @@ style={{
 
       {/* MENU */}
       <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "22px",
-          marginTop: collapsed ? "60px" : "0",
-        }}
-      >
-        {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      gap: "22px",
+      marginTop: collapsed ? "60px" : "0",
+    }}
+  >
+    {menuItems.map((item) => {
+      const isActive = location.pathname === item.path;
 
           return (
             <Link
@@ -119,6 +129,46 @@ onMouseLeave={(e) => {
             </Link>
           );
         })}
+
+        {/* LOGOUT BUTTON */}
+<div
+    style={{
+      marginTop: "auto",   // ✅ PUSHES TO BOTTOM
+      paddingTop: "20px"
+    }}
+  >
+  <button
+    onClick={handleLogout}
+
+    onMouseEnter={(e) => {
+  e.currentTarget.style.background = "rgba(239,68,68,0.25)";
+  e.currentTarget.style.transform = "scale(1.02)";
+}}
+onMouseLeave={(e) => {
+  e.currentTarget.style.background = "rgba(239,68,68,0.15)";
+  e.currentTarget.style.transform = "scale(1)";
+}}
+
+    style={{
+      width: "100%",
+      padding: "12px",
+      borderRadius: "10px",
+      border: "none",
+      background: "rgba(239,68,68,0.15)",
+      color: "#ef4444",
+      cursor: "pointer",
+      fontSize: "14px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: collapsed ? "center" : "flex-start",
+      gap: "10px",
+      transition: "all 0.2s ease"
+    }}
+  >
+    <span>🚪</span>
+    {!collapsed && "Logout"}
+  </button>
+</div>
       </div>
     </div>
   );

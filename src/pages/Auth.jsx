@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { signUp, signIn } from "../utils/Auth";
-<img src="/favicon.png" alt="logo" />
+
 
 export default function Auth() {
   const [email, setEmail] = useState("");
@@ -8,10 +8,15 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
 
   async function handleSignup() {
+  if (!email || !password) {
+    alert("Enter email & password");
+    return;
+  }
+
   setLoading(true);
   try {
     await signUp(email, password);
-    alert("Signup successful!");
+    alert("Signup successful! Check your email.");
   } catch (err) {
     alert(err.message);
   }
@@ -19,11 +24,16 @@ export default function Auth() {
 }
 
 async function handleLogin() {
+  if (!email || !password) {
+    alert("Enter email & password");
+    return;
+  }
+
   setLoading(true);
   try {
     await signIn(email, password);
     alert("Login successful!");
-    window.location.reload();
+    window.location.href = "/dashboard";
   } catch (err) {
     alert(err.message);
   }

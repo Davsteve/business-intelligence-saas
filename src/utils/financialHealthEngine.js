@@ -17,6 +17,7 @@ export function calculateFinancialHealth(transactions) {
 
   const monthlyMap = {};
   const expenseMap = {};
+  const monthlyExpenses = {};
 
   // 🔹 Aggregate Transactions
   transactions.forEach((t) => {
@@ -40,6 +41,9 @@ export function calculateFinancialHealth(transactions) {
     } else {
       totalExpense += t.amount;
       monthlyMap[key].expense += t.amount;
+
+      monthlyExpenses[key] =
+  (monthlyExpenses[key] || 0) + t.amount;
 
       const name = t.categories?.name || "Other";
       expenseMap[name] = (expenseMap[name] || 0) + t.amount;
@@ -69,12 +73,19 @@ export function calculateFinancialHealth(transactions) {
       : 0;
 
   // 🔹 Runway (only meaningful if burning cash)
-  const runwayMonths =
-    avgMonthlyNet < 0 && net > 0
-      ? Math.abs(net / avgMonthlyNet)
-      : avgMonthlyNet < 0
-      ? 0
-      : 24; // cap positive runway at 24 months for scoring sanity
+  // 🔥 Calculate monthly burn (expenses only)
+const expenseValues = Object.values(monthlyExpenses);
+
+const avgMonthlyBurn =
+  expenseValues.length > 0
+    ? expenseValues.reduce((a, b) => a + b, 0) / expenseValues.length
+    : 0;
+
+// 🔥 Correct runway
+const runwayMonths =
+  avgMonthlyBurn > 0 ? net / avgMonthlyBurn : 0;
+
+const runwayDays = runwayMonths * 30;
 
   // 🔹 Income Growth (last 2 sorted months)
   let incomeGrowth = 0;
@@ -219,9 +230,11 @@ export function calculateFinancialHealth(transactions) {
     riskLevel,
     profitMargin: Number(profitMargin.toFixed(2)),
     runwayMonths: Number(runwayMonths.toFixed(2)),
+    runwayDays: Number(runwayDays.toFixed(2)),
+    avgMonthlyBurn: Number(avgMonthlyBurn.toFixed(2)),
     incomeGrowth: Number(incomeGrowth.toFixed(2)),
     topExpensePercent: Number(topExpensePercent.toFixed(2)),
     volatility: Number(volatility.toFixed(2)),
     breakdown,
   };
-}
+} 

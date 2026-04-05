@@ -8,10 +8,29 @@ import Analytics from "./pages/Analytics";
 import Forecast from "./pages/Forecast";
 import Advisor from "./pages/Advisor"; // ✅ NEW
 import Auth from "./pages/Auth";
+import { useEffect } from "react";
+import { supabase } from "./supabaseClient";
+import { useNavigate } from "react-router-dom";
+
 
 export default function App() {
   const { session, loading } = useBusiness();
   const [collapsed, setCollapsed] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+  supabase.auth.getSession().then(({ data }) => {
+    if (!data.session) navigate("/auth");
+  });
+
+  const { data: listener } = supabase.auth.onAuthStateChange(
+    (_event, session) => {
+      if (!session) navigate("/auth");
+    }
+  );
+
+  return () => listener.subscription.unsubscribe();
+}, []);
 
   if (loading) return <div>Loading...</div>;
 

@@ -399,8 +399,27 @@ Return JSON with summary, riskLevel, insights.
   const data = await aiResponse.json();
 
   if (data?.choices?.[0]?.message?.content) {
-    aiSummary = data.choices[0].message.content;
+  const raw = data.choices[0].message.content;
+
+  try {
+    // 🔥 CLEAN markdown + parse JSON
+    const cleaned = raw
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
+    const parsed = JSON.parse(cleaned);
+
+    aiSummary = parsed.summary;
+    priority = parsed.priority;
+    riskLevel = parsed.riskLevel;
+    aiInsights = parsed.insights;
+
+  } catch (err) {
+    console.error("AI JSON parse failed:", err);
+    aiSummary = raw; // fallback
   }
+}
 
 } catch (err) {
   console.log("AI failed, using base insights");

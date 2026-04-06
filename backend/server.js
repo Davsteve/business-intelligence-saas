@@ -414,6 +414,20 @@ Return JSON with summary, riskLevel, insights.
     riskLevel = parsed.riskLevel;
     aiInsights = parsed.insights;
 
+    aiInsights = aiInsights.map(insight => ({
+  ...insight,
+  numbers: {
+    ...insight.numbers,
+
+    // 🔥 FORCE CONSISTENCY
+    surplus: Math.round(safeSurplus),
+    investableAmount: Math.round(investableAmount),
+    reinvestment: Math.round(reinvestment),
+    income: Math.round(income),
+    burn: Math.round(burn)
+  }
+}));
+
   } catch (err) {
     console.error("AI JSON parse failed:", err);
 
@@ -426,12 +440,37 @@ Return JSON with summary, riskLevel, insights.
   console.log("AI failed, using base insights");
 }
 
+// ------------------------
+// SMART CAPITAL ALLOCATION
+// ------------------------
+
+const surplus = income - burn;
+
+// Prevent negative values
+const safeSurplus = Math.max(0, surplus);
+
+// 50% safety buffer
+const safetyReserve = safeSurplus * 0.5;
+
+// What user can actually use
+const investableAmount = safeSurplus - safetyReserve;
+
+// Realistic reinvestment (not aggressive)
+const reinvestment = investableAmount * 0.6;
+
 // ✅ FINAL RESPONSE (ONLY ONE)
 return res.json({
   summary: aiSummary,
   priority,
   riskLevel,
-  insights: aiInsights
+  insights: aiInsights,
+  numbers: {
+    surplus: Math.round(safeSurplus),
+    investableAmount: Math.round(investableAmount),
+    reinvestment: Math.round(reinvestment),
+    income: Math.round(income),
+    burn: Math.round(burn)
+  }
 });
 
   } catch (err) {

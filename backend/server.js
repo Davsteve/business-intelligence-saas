@@ -70,21 +70,6 @@ app.post("/api/ai", verifyUser, async (req, res) => {
   topCategoryPercent
 } = req.body;
 
-// ------------------------
-// SMART FINANCIAL LOGIC (FIX)
-// ------------------------
-
-const surplus = income - burn;
-
-// Safety-first model (VERY IMPORTANT)
-const safetyReserve = surplus * 0.5;
-
-// Actual usable capital
-const investableAmount = surplus - safetyReserve;
-
-// Realistic reinvestment (not aggressive)
-const reinvestment = investableAmount * 0.6;
-
     // ✅ VALIDATION FIRST
     if (
       !Number.isFinite(net) ||
@@ -356,19 +341,14 @@ try {
           content: `
 Business Data:
 
+Balance: ${net}
 Income: ₹${income}
 Burn: ₹${burn}
-Net: ₹${net}
 Runway: ${runwayDays} days
 Burn Ratio: ${Math.round(burnRatio * 100)}%
 Growth: ${(growth || 0).toFixed(1)}%
 Trend: ${trend}
 Top Expense: ${topCategory} (${(topCategoryPercent || 0).toFixed(1)}%)
-
-Derived Metrics:
-Surplus: ₹${surplus}
-Safe Investable Amount: ₹${investableAmount}
-Suggested Reinvestment: ₹${reinvestment}
 
 Priority: ${priority}
 
@@ -431,14 +411,7 @@ return res.json({
   summary: aiSummary,
   priority,
   riskLevel,
-  insights: aiInsights,
-  numbers: {
-    surplus: Math.round(safeSurplus),
-    investableAmount: Math.round(investableAmount),
-    reinvestment: Math.round(reinvestment),
-    income: Math.round(income),
-    burn: Math.round(burn)
-  }
+  insights: aiInsights
 });
 
   } catch (err) {

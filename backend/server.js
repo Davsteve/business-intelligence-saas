@@ -402,13 +402,12 @@ Return JSON with summary, riskLevel, insights.
   const raw = data.choices[0].message.content;
 
   try {
-    // 🔥 CLEAN markdown + parse JSON
-    const cleaned = raw
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
+    // ✅ Extract ONLY JSON part (even if messy)
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
 
-    const parsed = JSON.parse(cleaned);
+    if (!jsonMatch) throw new Error("No JSON found");
+
+    const parsed = JSON.parse(jsonMatch[0]);
 
     aiSummary = parsed.summary;
     priority = parsed.priority;
@@ -417,7 +416,9 @@ Return JSON with summary, riskLevel, insights.
 
   } catch (err) {
     console.error("AI JSON parse failed:", err);
-    aiSummary = raw; // fallback
+
+    // ✅ CLEAN fallback (NOT raw anymore)
+    aiSummary = summary;
   }
 }
 

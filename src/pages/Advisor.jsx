@@ -243,6 +243,8 @@ if (last3Months.length === 3) {
 
 const getAIAdvice = async () => {
 
+  console.log("API URL:", import.meta.env.VITE_API_URL);
+
     if (
   !Number.isFinite(netBalance) ||
   !Number.isFinite(burn) ||

@@ -198,6 +198,8 @@ if (monthlyIncomes.length >= 2) {
   }
 }
 
+let score = 0;
+
 // 🔥 Burn Efficiency
 const burnRatio = income > 0 ? burn / income : 1;
 
@@ -297,7 +299,7 @@ const getAIAdvice = async () => {
   trend,
   topCategory,
   topCategoryPercent: Number(topCategoryPercent),
-  volatility: Number(volatility)
+  stability
 })
     });
 

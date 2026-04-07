@@ -10,6 +10,12 @@ export default function Advisor() {
   const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;  
   const [aiData, setAiData] = useState(null);
   const [loadingAI, setLoadingAI] = useState(false);
+  const getStabilityIndicator = (stability) => {
+  if (stability.includes("Very stable")) return "🟢";
+  if (stability.includes("Stable")) return "🟡";
+  if (stability.includes("Moderately")) return "🟠";
+  return "🔴";
+};
   const financials = calculateFinancialHealth(transactions);
 
 const {
@@ -387,12 +393,8 @@ const getAIAdvice = async () => {
 </p>
 
 <p>
-  <strong>Stability:</strong>{" "}
-  {volatility < 500
-    ? "Very stable income 🟢"
-    : volatility < 1500
-    ? "Some fluctuations 🟡"
-    : "Highly unstable income 🔴"}
+<strong>Stability:</strong>{" "}
+{data.stability} {getStabilityIndicator(data.stability)}
 </p>
     </div>
 

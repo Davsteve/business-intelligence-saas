@@ -190,11 +190,11 @@ if (monthlyIncomes.length >= 2) {
   const fluctuationRatio = fluctuations / (monthlyIncomes.length - 1);
 
   if (fluctuationRatio < 0.3) {
-    stability = "Very stable income";
+    stability = "Very stable";
   } else if (fluctuationRatio < 0.6) {
-    stability = "Moderately stable income";
+    stability = "Moderately stable";
   } else {
-    stability = "Highly unstable income";
+    stability = "Highly unstable";
   }
 }
 
@@ -409,7 +409,7 @@ const getAIAdvice = async () => {
 
 <p>
   <strong>Stability:</strong>{" "}
-  {stability} {getStabilityIndicator(stability)}
+  {stability.replace("income", "")} {getStabilityIndicator(stability)}
 </p>
     </div>
 

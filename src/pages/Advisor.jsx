@@ -17,6 +17,7 @@ export default function Advisor() {
   return "🔴";
 };
   const financials = calculateFinancialHealth(transactions);
+  const { stability } = financials;
 
 const {
   runwayMonths,
@@ -157,47 +158,6 @@ const {
 // STABILITY (SIMPLE + RELIABLE)
 // ------------------------
 
-const monthlyIncomeMap = {};
-
-transactions.forEach((t) => {
-  if (t.categories?.type !== "income") return;
-  const d = new Date(t.created_at);
-  const key = `${d.getFullYear()}-${d.getMonth()}`;
-  monthlyIncomeMap[key] =
-    (monthlyIncomeMap[key] || 0) + Number(t.amount || 0);
-});
-
-const monthlyIncomes = Object.values(monthlyIncomeMap);
-
-// Default
-let stability = "Insufficient data";
-
-// If we have enough data
-if (monthlyIncomes.length >= 2) {
-  let fluctuations = 0;
-
-  for (let i = 1; i < monthlyIncomes.length; i++) {
-    const prev = monthlyIncomes[i - 1];
-    const curr = monthlyIncomes[i];
-
-    if (prev === 0) continue;
-
-    const change = Math.abs((curr - prev) / prev);
-
-    if (change > 0.3) fluctuations++; // >30% change = unstable
-  }
-
-  const fluctuationRatio = fluctuations / (monthlyIncomes.length - 1);
-
-  if (fluctuationRatio < 0.3) {
-    stability = "Very stable";
-  } else if (fluctuationRatio < 0.6) {
-    stability = "Moderately stable";
-  } else {
-    stability = "Highly unstable";
-  }
-}
-
 let score = 0;
 
 // 🔥 Burn Efficiency
@@ -231,35 +191,13 @@ let risk = "High";
 if (score >= 75) risk = "Low";
 else if (score >= 50) risk = "Moderate";
 
-// ------------------------
-// CASH FLOW TREND (Last 3 Months)
-// ------------------------
 
-const last3Months = [];
-
-for (let i = 2; i >= 0; i--) {
-  const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-  const key = `${d.getFullYear()}-${d.getMonth()}`;
-
-  const incomeVal =
-    monthlyIncomeMap[key] || 0;
-
-  last3Months.push(incomeVal);
-}
-
-let trend = "Stable";
-
-if (last3Months.length === 3) {
-  if (last3Months[2] > last3Months[1] &&
-      last3Months[1] > last3Months[0]) {
-    trend = "Upward";
-  } else if (
-    last3Months[2] < last3Months[1] &&
-    last3Months[1] < last3Months[0]
-  ) {
-    trend = "Downward";
-  }
-}
+const trend =
+  incomeGrowth > 5
+    ? "Upward"
+    : incomeGrowth < -5
+    ? "Downward"
+    : "Stable";
 
 
 const getAIAdvice = async () => {

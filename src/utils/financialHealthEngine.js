@@ -181,8 +181,7 @@ const runwayDays = runwayMonths * 30;
     marginScore * weights.margin +
     runwayScore * weights.runway +
     growthScore * weights.growth +
-    concentrationScore * weights.concentration +
-    stabilityScore * weights.stability;
+    concentrationScore * weights.concentration;
 
   const score = Math.round(finalScore);
 

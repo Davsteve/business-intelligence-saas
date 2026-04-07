@@ -160,49 +160,36 @@ const {
 
 let score = 0;
 
-// 🔥 1. Burn Efficiency (smooth scoring)
+// 🔥 Burn Efficiency
 const burnRatio = income > 0 ? burn / income : 1;
-score += Math.max(0, 30 * (1 - burnRatio));
 
-// 🔥 2. Net Strength
-const netStrength = netBalance / (income || 1);
-score += Math.min(15, netStrength * 20);
+if (burnRatio <= 0.5) score += 25;
+else if (burnRatio <= 0.7) score += 15;
+else if (burnRatio <= 0.9) score += 8;
+else score += 0;
 
-// 🔥 3. Growth (continuous)
-score += Math.min(10, growth / 2);
+// 💰 Profitability (reduced weight)
+if (netBalance > 0) score += 10;
+if (netBalance > income * 0.2) score += 5;
 
-// 🔥 4. Expense concentration
+// 📈 Growth
+if (growth > 10) score += 10;
+else if (growth > 0) score += 5;
+
+// 📊 Expense concentration
 if (topCategoryPercent < 40) score += 10;
 else if (topCategoryPercent < 60) score += 5;
 
-// 🔥 5. Stability
+// 📉 Stability (NEW)
 if (stability.includes("Very stable")) score += 10;
 else if (stability.includes("Moderately")) score += 5;
 
-// 🔥 6. Scale factor (NEW)
-const scaleScore =
-  income > 1000000 ? 10 :
-  income > 100000 ? 7 :
-  income > 10000 ? 5 :
-  2;
-
-score += scaleScore;
-
-// Cap score
 if (score > 100) score = 100;
 
 let risk = "High";
 
 if (score >= 75) risk = "Low";
 else if (score >= 50) risk = "Moderate";
-
-
-const trend =
-  incomeGrowth > 5
-    ? "Upward"
-    : incomeGrowth < -5
-    ? "Downward"
-    : "Stable";
 
 
 const getAIAdvice = async () => {

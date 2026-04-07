@@ -215,9 +215,9 @@ else if (score >= 50) risk = "Moderate";
 const getAIAdvice = async () => {
 
     if (
-  !Number.isFinite(netBalance) ||
-  !Number.isFinite(burn) ||
-  !Number.isFinite(income)
+  !Number.isFinite(net) ||
+  !Number.isFinite(avgMonthlyBurn) ||
+  !Number.isFinite(totalIncome)
 ) {
   console.error("Invalid data:", { netBalance, burn, income });
   throw new Error("Invalid financial data");
@@ -227,9 +227,9 @@ const getAIAdvice = async () => {
     const token = session.data.session.access_token;
 
     console.log("Sending to API:", {
-  netBalance,
-  burn,
-  income
+  net,
+  burn: avgMonthlyBurn,
+  income: totalIncome
 });
 
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ai`, {

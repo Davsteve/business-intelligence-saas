@@ -192,6 +192,21 @@ if (score >= 75) risk = "Low";
 else if (score >= 50) risk = "Moderate";
 
 
+let trend = "Stable";
+
+if (last3Months.length === 3) {
+  if (last3Months[2] > last3Months[1] &&
+      last3Months[1] > last3Months[0]) {
+    trend = "Upward";
+  } else if (
+    last3Months[2] < last3Months[1] &&
+    last3Months[1] < last3Months[0]
+  ) {
+    trend = "Downward";
+  }
+}
+
+
 const getAIAdvice = async () => {
 
     if (

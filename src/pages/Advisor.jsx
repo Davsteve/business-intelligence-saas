@@ -141,6 +141,41 @@ const {
     }
   });
 
+  // 🔥 Build monthly income map (NEW BLOCK)
+const monthlyIncomeMap = {};
+
+transactions.forEach((t) => {
+  if (t.categories?.type !== "income") return;
+
+  const d = new Date(t.created_at);
+  const key = `${d.getFullYear()}-${d.getMonth()}`;
+
+  monthlyIncomeMap[key] =
+    (monthlyIncomeMap[key] || 0) + Number(t.amount || 0);
+});
+
+// Convert to array
+const monthlyIncomes = Object.values(monthlyIncomeMap);
+
+// Last 3 months
+const last3Months = monthlyIncomes.slice(-3);
+
+let trend = "Stable";
+
+if (last3Months.length === 3) {
+  if (
+    last3Months[2] > last3Months[1] &&
+    last3Months[1] > last3Months[0]
+  ) {
+    trend = "Upward";
+  } else if (
+    last3Months[2] < last3Months[1] &&
+    last3Months[1] < last3Months[0]
+  ) {
+    trend = "Downward";
+  }
+}
+
   const growth =
     lastMonthIncome > 0
       ? ((thisMonthIncome - lastMonthIncome) / lastMonthIncome) * 100
@@ -190,27 +225,6 @@ let risk = "High";
 
 if (score >= 75) risk = "Low";
 else if (score >= 50) risk = "Moderate";
-
-const monthlyIncomes = Object.values(monthlyIncomeMap);
-
-const last3Months = monthlyIncomes.slice(-3);
-
-let trend = "Stable";
-
-if (last3Months.length === 3) {
-  if (
-    last3Months[2] > last3Months[1] &&
-    last3Months[1] > last3Months[0]
-  ) {
-    trend = "Upward";
-  } else if (
-    last3Months[2] < last3Months[1] &&
-    last3Months[1] < last3Months[0]
-  ) {
-    trend = "Downward";
-  }
-}
-
 
 const getAIAdvice = async () => {
 

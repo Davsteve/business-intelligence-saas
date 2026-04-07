@@ -41,10 +41,18 @@ function calculateStability(transactions) {
 
   const stdDev = Math.sqrt(variance);
 
-  // Classification
-  if (stdDev < 1000) return "Very stable income";
-  if (stdDev < 5000) return "Moderately stable income";
-  return "Highly unstable income";
+  // Calculate trend (first vs last)
+const first = values[0];
+const last = values[values.length - 1];
+const change = last - first;
+
+// 🚨 If declining significantly → NOT stable
+if (change < -2000) return "Highly unstable income";
+
+// Normal classification
+if (stdDev < 1000) return "Very stable income";
+if (stdDev < 5000) return "Moderately stable income";
+return "Highly unstable income";
 }
 
   let totalIncome = 0;

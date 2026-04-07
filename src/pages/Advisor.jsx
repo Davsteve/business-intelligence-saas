@@ -55,20 +55,6 @@ const {
 }
 
   // ------------------------
-  // BASIC METRICS
-  // ------------------------
-
-  const income = transactions
-    ?.filter(t => t.categories?.type === "income")
-    ?.reduce((sum, t) => sum + Number(t.amount || 0), 0) || 0;
-
-  const burn = transactions
-    ?.filter(t => t.categories?.type === "expense")
-    ?.reduce((sum, t) => sum + Number(t.amount || 0), 0) || 0;
-
-  const netBalance = income - burn;
-
-  // ------------------------
   // MONTHLY BURN + RUNWAY
   // ------------------------
 
@@ -253,12 +239,12 @@ const getAIAdvice = async () => {
         Authorization: `Bearer ${token}`
       },
       body: JSON.stringify({
-  net: Number(netBalance),
-  income: Number(income),
-  burn: Number(burn),
+  net: Number(net),
+  income: Number(totalIncome),
+  burn: Number(avgMonthlyBurn),
   runwayMonths: Number(runwayMonths),
   runwayDays: Number(runwayDays),
-  burnRatio: Number(totalIncome) > 0 ? Number(avgMonthlyBurn) / Number(totalIncome) : 0,
+  burnRatio: totalIncome > 0 ? avgMonthlyBurn / totalIncome : 0,
   growth: Number(incomeGrowth),
   trend,
   topCategory,
@@ -384,7 +370,7 @@ const getAIAdvice = async () => {
       gap: "20px",
       marginBottom: "40px"
     }}>
-      <MetricCard label="Net Position" value={`₹ ${netBalance}`} />
+      <MetricCard label="Net Position" value={`₹ ${net}`} />
       <MetricCard label="Avg Monthly Burn" value={`₹ ${avgMonthlyBurn.toFixed(0)}`} />
       <MetricCard 
   label="Runway" 

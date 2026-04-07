@@ -182,7 +182,7 @@ if (last3Months.length === 3) {
 let score = 0;
 
 // 🔥 Burn Efficiency
-const burnRatio = income > 0 ? burn / income : 1;
+const burnRatio = totalIncome > 0 ? avgMonthlyBurn / totalIncome : 1;
 
 if (burnRatio <= 0.5) score += 25;
 else if (burnRatio <= 0.7) score += 15;
@@ -190,8 +190,8 @@ else if (burnRatio <= 0.9) score += 8;
 else score += 0;
 
 // 💰 Profitability (reduced weight)
-if (netBalance > 0) score += 10;
-if (netBalance > income * 0.2) score += 5;
+if (net > 0) score += 10;
+if (net > totalIncome * 0.2) score += 5;
 
 // 📈 Growth
 if (growth > 10) score += 10;

@@ -140,7 +140,9 @@ transactions.forEach((t) => {
     (monthlyIncomeMap[key] || 0) + Number(t.amount || 0);
 });
 
-const monthlyIncomes = Object.values(monthlyIncomeMap);
+const monthlyIncomes = Object.entries(monthlyIncomeMap)
+  .sort(([a], [b]) => new Date(a) - new Date(b))
+  .map(([_, value]) => value);
 const last3Months = monthlyIncomes.slice(-3);
 
 let trend = "stable";

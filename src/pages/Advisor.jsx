@@ -146,19 +146,21 @@ const monthlyIncomes = Object.values(monthlyIncomeMap);
 // Last 3 months
 const last3Months = monthlyIncomes.slice(-3);
 
-let trend = "Stable";
+let trend = "stable";
 
 if (last3Months.length === 3) {
   if (
     last3Months[2] > last3Months[1] &&
     last3Months[1] > last3Months[0]
   ) {
-    trend = "Upward";
+    trend = "growing";
   } else if (
     last3Months[2] < last3Months[1] &&
     last3Months[1] < last3Months[0]
   ) {
-    trend = "Downward";
+    trend = "declining";
+  } else {
+    trend = "stable";
   }
 }
 
@@ -350,11 +352,11 @@ const getAIAdvice = async () => {
 
 <p>
   <strong>Income Trend:</strong>{" "}
-  {trend === "Upward"
-    ? "Your income is growing 📈"
-    : trend === "Downward"
-    ? "Your income is declining 📉"
-    : "Your income is stable ➖"}
+  {trend === "growing"
+  ? "Your income is growing 📈"
+  : trend === "declining"
+  ? "Your income is declining 📉"
+  : "Your income is stable ➖"}
 </p>
 
 <p>

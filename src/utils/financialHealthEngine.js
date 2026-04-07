@@ -3,21 +3,18 @@ export function calculateFinancialHealth(transactions) {
   transactions = transactions || [];
 
   if (!transactions || transactions.length === 0) {
-
   return {
-  score: 0,
-  breakdown: {
-    profit: 0,
-    runway: 0,
-    growth: 0,
-    concentration: 0,
-    stability: 0,
-  },
-
-  // ✅ THESE MUST BE TOP-LEVEL
-  net,
-  totalIncome,
-};
+    score: 0,
+    breakdown: {
+      profit: 0,
+      runway: 0,
+      growth: 0,
+      concentration: 0,
+      stability: 0,
+    },
+    net: 0,
+    totalIncome: 0,
+  };
 }
 
 function calculateStability(transactions) {

@@ -148,18 +148,21 @@ let trend = "stable";
 if (last3Months.length === 3) {
   const [a, b, c] = last3Months;
 
+  // % change from previous month
+  const change = b !== 0 ? (c - b) / b : 0;
+
+  // volatility check (range vs avg)
   const avg = (a + b + c) / 3;
+  const max = Math.max(a, b, c);
+  const min = Math.min(a, b, c);
+  const volatility = avg > 0 ? (max - min) / avg : 0;
 
-  // % deviation from average
-  const deviation =
-    Math.abs(c - avg) / avg;
-
-  if (c > b && b > a) {
+  if (volatility > 0.4) {
+    trend = "volatile"; // 🔥 MOST IMPORTANT FIX
+  } else if (change > 0.1) {
     trend = "growing";
-  } else if (c < b && b < a) {
+  } else if (change < -0.1) {
     trend = "declining";
-  } else if (deviation > 0.25) {
-    trend = "volatile"; // 🔥 NEW CASE
   } else {
     trend = "stable";
   }

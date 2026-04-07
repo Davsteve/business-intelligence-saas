@@ -4,8 +4,7 @@ import { useBusiness } from "../context/BusinessContext";
 import { calculateFinancialHealth } from "../utils/financialHealthEngine";
 
 export default function Advisor() {
-  const { businessId, loading } = useBusiness();
-  const [data, setData] = useState(null);
+  const { businessId, loading } = useBusiness();  
   const [transactions, setTransactions] = useState([]);
   const [aiAdvice, setAiAdvice] = useState("");
   const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;  
@@ -154,7 +153,8 @@ const {
 
 
       // ------------------------
-// VOLATILITY (Income Stability)
+// ------------------------
+// STABILITY (SIMPLE + RELIABLE)
 // ------------------------
 
 const monthlyIncomeMap = {};
@@ -163,28 +163,40 @@ transactions.forEach((t) => {
   if (t.categories?.type !== "income") return;
   const d = new Date(t.created_at);
   const key = `${d.getFullYear()}-${d.getMonth()}`;
-  monthlyIncomeMap[key] = (monthlyIncomeMap[key] || 0) + Number(t.amount || 0);
+  monthlyIncomeMap[key] =
+    (monthlyIncomeMap[key] || 0) + Number(t.amount || 0);
 });
 
 const monthlyIncomes = Object.values(monthlyIncomeMap);
 
-let volatility = 0;
+// Default
+let stability = "Insufficient data";
 
-if (monthlyIncomes.length > 1) {
-  const avg =
-    monthlyIncomes.reduce((a, b) => a + b, 0) /
-    monthlyIncomes.length;
+// If we have enough data
+if (monthlyIncomes.length >= 2) {
+  let fluctuations = 0;
 
-  const variance =
-    monthlyIncomes.reduce(
-      (acc, val) => acc + Math.pow(val - avg, 2),
-      0
-    ) / monthlyIncomes.length;
+  for (let i = 1; i < monthlyIncomes.length; i++) {
+    const prev = monthlyIncomes[i - 1];
+    const curr = monthlyIncomes[i];
 
-  volatility = Math.sqrt(variance);
+    if (prev === 0) continue;
+
+    const change = Math.abs((curr - prev) / prev);
+
+    if (change > 0.3) fluctuations++; // >30% change = unstable
+  }
+
+  const fluctuationRatio = fluctuations / (monthlyIncomes.length - 1);
+
+  if (fluctuationRatio < 0.3) {
+    stability = "Very stable income";
+  } else if (fluctuationRatio < 0.6) {
+    stability = "Moderately stable income";
+  } else {
+    stability = "Highly unstable income";
+  }
 }
-
-let score = 0;
 
 // 🔥 Burn Efficiency
 const burnRatio = income > 0 ? burn / income : 1;
@@ -206,9 +218,9 @@ else if (growth > 0) score += 5;
 if (topCategoryPercent < 40) score += 10;
 else if (topCategoryPercent < 60) score += 5;
 
-// 📉 Stability
-if (volatility < 500) score += 10;
-else if (volatility < 1500) score += 5;
+// 📉 Stability (NEW)
+if (stability.includes("Very stable")) score += 10;
+else if (stability.includes("Moderately")) score += 5;
 
 if (score > 100) score = 100;
 
@@ -395,7 +407,7 @@ const getAIAdvice = async () => {
 
 <p>
   <strong>Stability:</strong>{" "}
-  {data?.stability} {data?.stability && getStabilityIndicator(data.stability)}
+  {stability} {getStabilityIndicator(stability)}
 </p>
     </div>
 

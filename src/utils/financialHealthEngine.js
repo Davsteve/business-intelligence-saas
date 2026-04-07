@@ -12,6 +12,41 @@ export function calculateFinancialHealth(transactions) {
   };
 }
 
+function calculateStability(transactions) {
+  const monthlyNet = {};
+
+  transactions.forEach((txn) => {
+    const date = new Date(txn.date);
+    const key = `${date.getFullYear()}-${date.getMonth()}`;
+
+    if (!monthlyNet[key]) monthlyNet[key] = 0;
+
+    if (txn.type === "income") {
+      monthlyNet[key] += txn.amount;
+    } else {
+      monthlyNet[key] -= txn.amount;
+    }
+  });
+
+  const values = Object.values(monthlyNet);
+
+  // Not enough data → fallback
+  if (values.length < 2) return "Moderately stable income";
+
+  const avg = values.reduce((a, b) => a + b, 0) / values.length;
+
+  const variance =
+    values.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) /
+    values.length;
+
+  const stdDev = Math.sqrt(variance);
+
+  // Classification
+  if (stdDev < 1000) return "Very stable income";
+  if (stdDev < 5000) return "Moderately stable income";
+  return "Highly unstable income";
+}
+
   let totalIncome = 0;
   let totalExpense = 0;
 
@@ -225,6 +260,8 @@ const runwayDays = runwayMonths * 30;
     },
   ];
 
+  const stability = calculateStability(transactions);
+
   return {
     score,
     riskLevel,
@@ -235,6 +272,7 @@ const runwayDays = runwayMonths * 30;
     incomeGrowth: Number(incomeGrowth.toFixed(2)),
     topExpensePercent: Number(topExpensePercent.toFixed(2)),
     volatility: Number(volatility.toFixed(2)),
+    stability: Number(stability.toFixed(2)),
     breakdown,
   };
 } 

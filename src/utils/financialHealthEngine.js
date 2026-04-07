@@ -13,46 +13,35 @@ export function calculateFinancialHealth(transactions) {
 }
 
 function calculateStability(transactions) {
-  const monthlyNet = {};
+  const monthlyIncome = {};
 
   transactions.forEach((txn) => {
+    if (txn.type !== "income") return;
+
     const date = new Date(txn.date);
     const key = `${date.getFullYear()}-${date.getMonth()}`;
 
-    if (!monthlyNet[key]) monthlyNet[key] = 0;
-
-    if (txn.type === "income") {
-      monthlyNet[key] += txn.amount;
-    } else {
-      monthlyNet[key] -= txn.amount;
-    }
+    if (!monthlyIncome[key]) monthlyIncome[key] = 0;
+    monthlyIncome[key] += txn.amount;
   });
 
-  const values = Object.values(monthlyNet);
+  const values = Object.values(monthlyIncome);
 
-  // Not enough data → fallback
   if (values.length < 2) return "Moderately stable income";
 
   const avg = values.reduce((a, b) => a + b, 0) / values.length;
 
-  const variance =
-    values.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) /
-    values.length;
+  // deviation from average
+  const maxDeviation = Math.max(
+    ...values.map((v) => Math.abs(v - avg))
+  );
 
-  const stdDev = Math.sqrt(variance);
+  const deviationPercent = (maxDeviation / (avg || 1)) * 100;
 
-  // Calculate trend (first vs last)
-const first = values[0];
-const last = values[values.length - 1];
-const change = last - first;
-
-// 🚨 If declining significantly → NOT stable
-if (change < -2000) return "Highly unstable income";
-
-// Normal classification
-if (stdDev < 1000) return "Very stable income";
-if (stdDev < 5000) return "Moderately stable income";
-return "Highly unstable income";
+  // 🚀 SIMPLE CLASSIFICATION
+  if (deviationPercent < 20) return "Very stable income";
+  if (deviationPercent < 50) return "Moderately stable income";
+  return "Highly unstable income";
 }
 
   let totalIncome = 0;

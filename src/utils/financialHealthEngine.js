@@ -18,7 +18,7 @@ function calculateStability(transactions) {
   const monthlyIncome = {};
 
   transactions.forEach((txn) => {
-    if (txn.type !== "income") return;
+    if (txn.categories?.type !== "income") return;
 
     const date = new Date(txn.date);
     const key = `${date.getFullYear()}-${date.getMonth()}`;

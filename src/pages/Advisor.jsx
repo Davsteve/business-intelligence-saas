@@ -191,6 +191,7 @@ let risk = "High";
 if (score >= 75) risk = "Low";
 else if (score >= 50) risk = "Moderate";
 
+const monthlyIncomes = Object.values(monthlyIncomeMap);
 
 const last3Months = monthlyIncomes.slice(-3);
 

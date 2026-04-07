@@ -31,17 +31,14 @@ function calculateStability(transactions) {
 
   const avg = values.reduce((a, b) => a + b, 0) / values.length;
 
-  // deviation from average
-  const maxDeviation = Math.max(
-    ...values.map((v) => Math.abs(v - avg))
-  );
+  const min = Math.min(...values);
+const max = Math.max(...values);
 
-  const deviationPercent = (maxDeviation / (avg || 1)) * 100;
+const ratio = min / (max || 1);
 
-  // 🚀 SIMPLE CLASSIFICATION
-  if (deviationPercent < 20) return "Very stable income";
-  if (deviationPercent < 50) return "Moderately stable income";
-  return "Highly unstable income";
+if (ratio > 0.7) return "Very stable income";
+if (ratio > 0.4) return "Moderately stable income";
+return "Highly unstable income";
 }
 
   let totalIncome = 0;

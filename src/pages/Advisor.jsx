@@ -5,6 +5,7 @@ import { calculateFinancialHealth } from "../utils/financialHealthEngine";
 
 export default function Advisor() {
   const { businessId, loading } = useBusiness();
+  const [data, setData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [aiAdvice, setAiAdvice] = useState("");
   const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;  
@@ -393,8 +394,8 @@ const getAIAdvice = async () => {
 </p>
 
 <p>
-<strong>Stability:</strong>{" "}
-{data.stability} {getStabilityIndicator(data.stability)}
+  <strong>Stability:</strong>{" "}
+  {data?.stability} {data?.stability && getStabilityIndicator(data.stability)}
 </p>
     </div>
 

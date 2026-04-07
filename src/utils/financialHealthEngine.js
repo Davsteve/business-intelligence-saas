@@ -157,8 +157,6 @@ const runwayDays = runwayMonths * 30;
         ) / monthlyNets.length
       : 0;
 
-  const volatility = Math.sqrt(variance);
-
   // 🔹 Scaling
   const clamp = (num) =>
     Math.max(0, Math.min(100, num));
@@ -168,9 +166,6 @@ const runwayDays = runwayMonths * 30;
   const growthScore = clamp((incomeGrowth + 20) * 2.5);
   const concentrationScore = clamp(
     100 - topExpensePercent * 1.5
-  );
-  const stabilityScore = clamp(
-    100 - (volatility / 1000) * 100
   );
 
   // 🔹 Weights
@@ -248,16 +243,6 @@ const runwayDays = runwayMonths * 30;
       ),
       status: getStatus(concentrationScore),
     },
-    {
-      name: "Stability",
-      rawValue: Number(volatility.toFixed(2)),
-      score: Math.round(stabilityScore),
-      weight: weights.stability,
-      contribution: Math.round(
-        stabilityScore * weights.stability
-      ),
-      status: getStatus(stabilityScore),
-    },
   ];
 
   const stability = calculateStability(transactions);
@@ -271,8 +256,7 @@ const runwayDays = runwayMonths * 30;
     avgMonthlyBurn: Number(avgMonthlyBurn.toFixed(2)),
     incomeGrowth: Number(incomeGrowth.toFixed(2)),
     topExpensePercent: Number(topExpensePercent.toFixed(2)),
-    volatility: Number(volatility.toFixed(2)),
-    stability: Number(stability.toFixed(2)),
+    stability: stability,
     breakdown,
   };
 } 

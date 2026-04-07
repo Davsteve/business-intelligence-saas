@@ -140,25 +140,26 @@ transactions.forEach((t) => {
     (monthlyIncomeMap[key] || 0) + Number(t.amount || 0);
 });
 
-// Convert to array
 const monthlyIncomes = Object.values(monthlyIncomeMap);
-
-// Last 3 months
 const last3Months = monthlyIncomes.slice(-3);
 
 let trend = "stable";
 
 if (last3Months.length === 3) {
-  if (
-    last3Months[2] > last3Months[1] &&
-    last3Months[1] > last3Months[0]
-  ) {
+  const [a, b, c] = last3Months;
+
+  const avg = (a + b + c) / 3;
+
+  // % deviation from average
+  const deviation =
+    Math.abs(c - avg) / avg;
+
+  if (c > b && b > a) {
     trend = "growing";
-  } else if (
-    last3Months[2] < last3Months[1] &&
-    last3Months[1] < last3Months[0]
-  ) {
+  } else if (c < b && b < a) {
     trend = "declining";
+  } else if (deviation > 0.25) {
+    trend = "volatile"; // 🔥 NEW CASE
   } else {
     trend = "stable";
   }
@@ -352,11 +353,13 @@ const getAIAdvice = async () => {
 
 <p>
   <strong>Income Trend:</strong>{" "}
-  {trend === "growing"
+  trend === "growing"
   ? "Your income is growing 📈"
   : trend === "declining"
   ? "Your income is declining 📉"
-  : "Your income is stable ➖"}
+  : trend === "volatile"
+  ? "Your income is inconsistent ⚠️"
+  : "Your income is stable ➖"
 </p>
 
 <p>

@@ -280,6 +280,9 @@ if (runwayDays < 15) {
 
   // 📉 TREND
   let trendContext = "";
+  if (trend === "volatile") {
+  trendContext = "Income shows high fluctuations with no clear direction";
+}
   if (trend === "declining") {
     trendContext = "Income trends indicate a downward trajectory";
   } else if (trend === "growing") {

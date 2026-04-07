@@ -14,7 +14,7 @@ export function calculateFinancialHealth(transactions) {
 
 function calculateStability(transactions) {
 
-  console.log("Monthly Income Values:", values);
+  
   const monthlyIncome = {};
 
   transactions.forEach((txn) => {
@@ -28,6 +28,8 @@ function calculateStability(transactions) {
   });
 
   const values = Object.values(monthlyIncome);
+
+  console.log("Monthly Income Values:", values);
 
   if (values.length < 2) return "Moderately stable income";
 

@@ -1,15 +1,23 @@
 export function calculateFinancialHealth(transactions) {
+
+  transactions = transactions || [];
+
   if (!transactions || transactions.length === 0) {
+
   return {
-    score: 0,
-    breakdown: {
-      profit: 0,
-      runway: 0,
-      growth: 0,
-      concentration: 0,
-      stability: 0,
-    },
-  };
+  score: 0,
+  breakdown: {
+    profit: 0,
+    runway: 0,
+    growth: 0,
+    concentration: 0,
+    stability: 0,
+  },
+
+  // ✅ THESE MUST BE TOP-LEVEL
+  net,
+  totalIncome,
+};
 }
 
 function calculateStability(transactions) {
@@ -245,15 +253,19 @@ const runwayDays = runwayMonths * 30;
   const stability = calculateStability(transactions);
 
   return {
-    score,
-    riskLevel,
-    profitMargin: Number(profitMargin.toFixed(2)),
-    runwayMonths: Number(runwayMonths.toFixed(2)),
-    runwayDays: Number(runwayDays.toFixed(2)),
-    avgMonthlyBurn: Number(avgMonthlyBurn.toFixed(2)),
-    incomeGrowth: Number(incomeGrowth.toFixed(2)),
-    topExpensePercent: Number(topExpensePercent.toFixed(2)),
-    stability: stability,
-    breakdown,
-  };
+  score,
+  riskLevel,
+  profitMargin: Number(profitMargin.toFixed(2)),
+  runwayMonths: Number(runwayMonths.toFixed(2)),
+  runwayDays: Number(runwayDays.toFixed(2)),
+  avgMonthlyBurn: Number(avgMonthlyBurn.toFixed(2)),
+  incomeGrowth: Number(incomeGrowth.toFixed(2)),
+  topExpensePercent: Number(topExpensePercent.toFixed(2)),
+  stability,
+  breakdown,
+
+  // 🔥 ADD THESE 2 LINES
+  net,
+  totalIncome,
+};
 } 

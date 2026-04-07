@@ -192,7 +192,7 @@ if (score >= 75) risk = "Low";
 else if (score >= 50) risk = "Moderate";
 
 
-const last3Months = monthlyIncome.slice(-3);
+const last3Months = monthlyIncomes.slice(-3);
 
 let trend = "Stable";
 

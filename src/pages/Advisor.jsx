@@ -219,7 +219,7 @@ const getAIAdvice = async () => {
   !Number.isFinite(avgMonthlyBurn) ||
   !Number.isFinite(totalIncome)
 ) {
-  console.error("Invalid data:", { netBalance, burn, income });
+  console.error("Invalid data:", { net, avgMonthlyBurn, totalIncome });
   throw new Error("Invalid financial data");
 }
 

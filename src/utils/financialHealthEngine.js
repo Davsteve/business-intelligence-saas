@@ -13,6 +13,8 @@ export function calculateFinancialHealth(transactions) {
 }
 
 function calculateStability(transactions) {
+
+  console.log("Monthly Income Values:", values);
   const monthlyIncome = {};
 
   transactions.forEach((txn) => {

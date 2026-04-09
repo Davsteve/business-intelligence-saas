@@ -120,8 +120,9 @@ const avgMonthlyBurn =
     : 0;
 
 // 🔥 Correct runway
-const runwayMonths =
-  avgMonthlyBurn > 0 ? net / avgMonthlyBurn : 0;
+const runwayMonths = avgMonthlyBurn > 0
+  ? Math.max(0, net) / avgMonthlyBurn
+  : 0;
 
 const runwayDays = runwayMonths * 30;
 

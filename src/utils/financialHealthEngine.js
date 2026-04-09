@@ -34,8 +34,6 @@ function calculateStability(transactions) {
 
   const values = Object.values(monthlyIncome);
 
-  console.log("Monthly Income Values:", values);
-
   if (values.length < 2) return "Moderately stable income";
 
   const avg = values.reduce((a, b) => a + b, 0) / values.length;

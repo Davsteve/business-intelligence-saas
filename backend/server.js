@@ -20,8 +20,6 @@ app.use(cors({
   })
 );
 
-app.options("/*", cors());
-
 // ✅ JSON parser
 app.use(express.json());
 

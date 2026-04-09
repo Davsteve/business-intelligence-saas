@@ -17,6 +17,7 @@ import {
 export default function Forecast() {
   const { session, businessId } = useBusiness();
   const [transactions, setTransactions] = useState([]);
+  const forecast = calculateForecast(transactions);
   const averageLineData = forecast
   ? [
       ...forecast.monthlyData.map(() => forecast.averageNet),

@@ -40,12 +40,13 @@ export default function Dashboard() {
   const [dateDropdownOpen, setDateDropdownOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState("latest");
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
-  const result = calculateFinancialHealth(transactions) || {
-  score: 0,
-  breakdown: {},
-};
+  const financials = calculateFinancialHealth(transactions);
 
-const { score, breakdown } = result;
+const {
+  score = 0,
+  breakdown = {},
+  riskLevel = "Low"
+} = financials || {};
   const mappedBreakdown = {
   profitMargin: breakdown?.profit || 0,
   runway: breakdown?.runway || 0,
@@ -53,10 +54,6 @@ const { score, breakdown } = result;
   expenseConcentration: breakdown?.concentration || 0,
   stability: breakdown?.stability || 0,
 };
-  const riskLevel =
-  score >= 75 ? "Low" :
-  score >= 50 ? "Moderate" :
-  "High";
 const getAIAdvice = async ({
   netBalance,
   burn,

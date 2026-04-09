@@ -127,32 +127,42 @@ const {
     }
   });
 
-  // 🔥 Build monthly income map (NEW BLOCK)
-const monthlyIncomeMap = {};
+// ------------------------
+// NET TREND (CORRECT LOGIC)
+// ------------------------
+
+const monthlyNetMap = {};
 
 transactions.forEach((t) => {
-  if (t.categories?.type !== "income") return;
-
   const d = new Date(t.created_at);
   const key = `${d.getFullYear()}-${d.getMonth()}`;
 
-  monthlyIncomeMap[key] =
-    (monthlyIncomeMap[key] || 0) + Number(t.amount || 0);
+  if (!monthlyNetMap[key]) {
+    monthlyNetMap[key] = 0;
+  }
+
+  if (t.categories?.type === "income") {
+    monthlyNetMap[key] += Number(t.amount || 0);
+  } else {
+    monthlyNetMap[key] -= Number(t.amount || 0);
+  }
 });
 
-const monthlyIncomes = Object.entries(monthlyIncomeMap)
+const monthlyNets = Object.entries(monthlyNetMap)
   .sort(([a], [b]) => {
-  const [yearA, monthA] = a.split("-").map(Number);
-  const [yearB, monthB] = b.split("-").map(Number);
+    const [yearA, monthA] = a.split("-").map(Number);
+    const [yearB, monthB] = b.split("-").map(Number);
 
-  if (yearA !== yearB) return yearA - yearB;
-  return monthA - monthB;
-})
+    if (yearA !== yearB) return yearA - yearB;
+    return monthA - monthB;
+  })
   .map(([_, value]) => value);
-const last3Months = monthlyIncomes.slice(-3);
 
-console.log("Monthly Incomes:", monthlyIncomes);
-console.log("Last 3 Months:", last3Months);
+const last3Months = monthlyNets.slice(-3);
+
+console.log("Monthly Nets:", monthlyNets);
+console.log("Last 3 Months (NET):", last3Months);
+
 
 let trend = "stable";
 
@@ -179,6 +189,10 @@ if (last3Months.length === 3) {
   } else {
     trend = volatility > 0.4 ? "volatile" : "stable";
   }
+  // 🔥 STRICT TREND CHECK
+if (c > b && b > a) {
+  trend = "growing";
+}
 }
 
   const growth =

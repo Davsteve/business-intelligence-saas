@@ -358,7 +358,7 @@ const getAIAdvice = async () => {
   {aiData ? (
   <div style={{
     padding: "16px",
-    borderRadius: "10px",
+    borderRadius: "9px",
     background: "#020617",
     border: "1px solid rgba(255,255,255,0.05)",
     lineHeight: "1.6"
@@ -366,7 +366,7 @@ const getAIAdvice = async () => {
     {aiData && (
   <div style={{
     padding: "16px",
-    borderRadius: "10px",
+    borderRadius: "9px",
     background: "#020617",
     border: "1px solid rgba(255,255,255,0.08)"
   }}>

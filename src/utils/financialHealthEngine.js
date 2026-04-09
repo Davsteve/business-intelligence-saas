@@ -247,7 +247,12 @@ const runwayDays = runwayMonths * 30;
     },
   ];
 
-  const stability = calculateStability(transactions);
+  let stability = calculateStability(transactions);
+
+// 🚨 CONTEXT OVERRIDE (CRITICAL FIX)
+if (net < 0 || runwayMonths <= 0) {
+  stability = "Financially unstable 🔴";
+}
 
   return {
   score,

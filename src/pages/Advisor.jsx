@@ -358,10 +358,10 @@ const getAIAdvice = async () => {
 
 <p>
   <strong>Income Trend:</strong>{" "}
-  {trend === "declining" && "Your income is growing 📈"}
-  {trend === "growing" && "Your income is declining 📉"}
-  {trend === "volatile" && "Your income is inconsistent ⚠️"}
-  {trend === "stable" && "Your income is stable ➖"}
+{trend === "growing" && "Your income is growing 📈"}
+{trend === "declining" && "Your income is declining 📉"}
+{trend === "volatile" && "Your income is inconsistent ⚠️"}
+{trend === "stable" && "Your income is stable ➖"}
 </p>
 
 <p>

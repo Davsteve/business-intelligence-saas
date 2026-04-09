@@ -4,6 +4,8 @@ import { useBusiness } from "../context/BusinessContext";
 import { calculateFinancialHealth } from "../utils/financialHealthEngine";
 import { calculateCashFlow } from "../utils/cashFlowEngine";
 import Card from "../Components/ui/Card";
+import ConfirmModal from "../Components/ConfirmModal";
+import toast from "react-hot-toast";
 import { getCurrentUser } from "../utils/Auth";
 
 import {
@@ -18,6 +20,8 @@ import {
 
 export default function Dashboard() {
   const { session, businessId } = useBusiness();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedCategoryToDelete, setSelectedCategoryToDelete] = useState(null);
 
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -200,12 +204,12 @@ async function fetchTransactions() {
   const cleanedName = newCategoryName.trim();
 
   if (cleanedName.length < 2) {
-    alert("Category name too short");
+    toast.error("Category name too short");
     return;
   }
 
   if (cleanedName.length > 30) {
-    alert("Category name too long");
+    toast.error("Category name too long");
     return;
   }
 
@@ -213,7 +217,7 @@ async function fetchTransactions() {
   const valid = /^[a-zA-Z0-9 ]+$/.test(cleanedName);
 
   if (!valid) {
-    alert("Only letters and numbers allowed");
+    toast.error("Only letters and numbers allowed");
     return;
   }
 
@@ -226,13 +230,10 @@ async function fetchTransactions() {
   ]);
 
   if (error) {
-  if (error.message.includes("duplicate")) {
-    alert("Category already exists");
-  } else {
-    console.error(error);
-  }
+  toast.error("Something went wrong");
   return;
 }
+toast.success("Done successfully");
 
   setNewCategoryName("");
   setCategoryModalOpen(false);
@@ -240,24 +241,22 @@ async function fetchTransactions() {
   await fetchCategories();  // 🔥 IMPORTANT
 }
 
-  async function deleteCategory(id, e) {
-    e.stopPropagation();
-    if (!window.confirm("Delete this category?")) return;
+  async function deleteCategory(id) {
+  const { error } = await supabase
+    .from("categories")
+    .delete()
+    .eq("id", id)
+    .eq("business_id", businessId);
 
-
-    const { error } = await supabase
-      .from("categories")
-      .delete()
-      .eq("id", id)
-      .eq("business_id", businessId);
-
-    if (error) {
-      alert("Cannot delete category with transactions.");
-      return;
-    }
-
-    fetchCategories();
+  if (error) {
+    toast.error("Cannot delete category with transactions");
+    return;
   }
+
+  toast.success("Category deleted 🗑️");
+
+  fetchCategories();
+}
 
   const handleGenerateAdvice = async () => {
   setLoadingAI(true);
@@ -281,12 +280,12 @@ async function fetchTransactions() {
   const user = await getCurrentUser();
 
   if (amount <= 0) {
-  alert("Invalid amount");
+  toast.error("Enter a valid amount");
   return;
 }
 
 if (!selectedCategory) {
-  alert("Select a category");
+  toast.error("Please select a category");
   return;
 }
 
@@ -299,6 +298,8 @@ if (!selectedCategory) {
     }
   ]);
 
+  toast.success("Transaction added 💰");
+
   setAmount("");
   setSelectedCategory("");
   setSelectedCategoryName("");
@@ -308,7 +309,6 @@ if (!selectedCategory) {
 }
 
   async function deleteTransaction(id) {
-    if (!window.confirm("Delete this transaction?")) return;
 
     const user = await getCurrentUser();
 
@@ -318,8 +318,11 @@ await supabase
   .eq("id", id)
   .eq("business_id", businessId);
 
+  toast.success("Transaction deleted 🗑️");
+
     fetchTransactions();
   }
+
 
   const totalIncome = transactions
     .filter((t) => t.categories?.type === "income")
@@ -349,9 +352,9 @@ const volatilityColor =
     <div>
       <h1 style={styles.title}>ClariFlow Dashboard</h1>
 
-      <button style={styles.addButton} onClick={() => setModalOpen(true)}>
-        + Add Transaction
-      </button>
+      <Button variant="primary" onClick={() => setModalOpen(true)}>
+  + Add Transaction
+</Button>
 
       {/* FINANCIAL HEALTH */}
       {score !== undefined && (
@@ -758,7 +761,16 @@ const volatilityColor =
       <>
         {/* ✅ RENDER FIXED */}
         {visibleTransactions.map((t) => (
-          <div key={t.id} style={styles.transactionRow}>
+          <div
+  key={t.id}
+  style={styles.transactionRow}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.background = "rgba(255,255,255,0.03)";
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.background = "transparent";
+  }}
+>
             <div>
               <div>{t.categories?.name}</div>
               <div style={{ fontSize: "12px", opacity: 0.6 }}>
@@ -854,7 +866,11 @@ const volatilityColor =
                         <span>{c.name}</span>
                         <span
                           style={styles.trash}
-                          onClick={(e) => deleteCategory(c.id, e)}
+                          onClick={(e) => {
+  e.stopPropagation();
+  setSelectedCategoryToDelete(c.id);
+  setConfirmOpen(true);
+}}
                         >
                           🗑
                         </span>
@@ -890,7 +906,11 @@ const volatilityColor =
                         <span>{c.name}</span>
                         <span
                           style={styles.trash}
-                          onClick={(e) => deleteCategory(c.id, e)}
+                          onClick={(e) => {
+  e.stopPropagation();
+  setSelectedCategoryToDelete(c.id);
+  setConfirmOpen(true);
+}}
                         >
                           🗑
                         </span>
@@ -952,6 +972,17 @@ const volatilityColor =
       </div>
     </div>
   </div>
+)}
+
+{confirmOpen && (
+  <ConfirmModal
+    message="Delete this category?"
+    onConfirm={() => {
+      deleteCategory(selectedCategoryToDelete);
+      setConfirmOpen(false);
+    }}
+    onCancel={() => setConfirmOpen(false)}
+  />
 )}
     </div>
   );
@@ -1047,11 +1078,12 @@ card: {
 },
 
   transactionRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    padding: "12px 0",
-    borderBottom: "1px solid rgba(255,255,255,0.06)",
-  },
+  display: "flex",
+  justifyContent: "space-between",
+  padding: "12px 0",
+  borderBottom: "1px solid rgba(255,255,255,0.06)",
+  transition: "all 0.2s ease",
+},
 
   trash: {
     cursor: "pointer",
@@ -1059,18 +1091,19 @@ card: {
   },
 
   modalOverlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    background: "rgba(0,0,0,0.75)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    backdropFilter: "blur(4px)",
-    zIndex: 1000,
-  },
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  background: "rgba(0,0,0,0.7)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  backdropFilter: "blur(6px)",
+  animation: "fadeIn 0.2s ease",
+  zIndex: 1000,
+},
 
   modal: {
     background: "linear-gradient(145deg, #111827, #1f2937)",

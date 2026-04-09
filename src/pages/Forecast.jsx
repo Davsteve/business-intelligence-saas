@@ -150,7 +150,17 @@ const parsedTarget =
             <CartesianGrid stroke="#222" />
             <XAxis dataKey="label" stroke="#aaa" />
             <YAxis stroke="#aaa" />
-            <Tooltip />
+            <Tooltip
+  formatter={(value, name) => {
+    const formatted = Number(value).toFixed(0); // ← removes decimals
+
+    if (name === "actualNet") return [`₹ ${formatted}`, "Actual"];
+    if (name === "projectedNet") return [`₹ ${formatted}`, "Projected"];
+    if (name === "average") return [`₹ ${formatted}`, "Average"];
+
+    return [`₹ ${formatted}`, name];
+  }}
+/>
 
             <Line
               type="monotone"

@@ -462,7 +462,7 @@ const volatilityColor =
           </Card>
 
           <Card>
-            <h3>12-Month Net Cash Flow Trend</h3>
+            <h3>Net Cash Flow Trend</h3>
 
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={cashFlow.monthlyData}>

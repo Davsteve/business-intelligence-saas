@@ -278,12 +278,6 @@ const getAIAdvice = async () => {
       AI Strategic Advisor
     </h1>
 
-{loadingAI && (
-  <p style={{ color: "#aaa", marginTop: "10px" }}>
-    Analyzing your financial data...
-  </p>
-)}
-
     {/* HEALTH CARD */}
     <div style={{
       background: "linear-gradient(145deg, #0f172a, #111827)",

@@ -249,8 +249,8 @@ const runwayDays = runwayMonths * 30;
 
   let stability = calculateStability(transactions);
 
-// 🚨 CONTEXT OVERRIDE (CRITICAL FIX)
-if (net < 0 || runwayMonths <= 0) {
+// 🔥 CONTEXT-AWARE OVERRIDE
+if (runwayMonths < 1 || net < avgMonthlyBurn) {
   stability = "Financially unstable 🔴";
 }
 

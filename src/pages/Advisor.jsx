@@ -17,6 +17,11 @@ export default function Advisor() {
   return "🔴";
 };
   const financials = calculateFinancialHealth(transactions);
+
+const {
+  score,
+  riskLevel
+} = financials;
   const { stability } = financials;
 
 const {
@@ -160,10 +165,6 @@ const monthlyNets = Object.entries(monthlyNetMap)
 
 const last3Months = monthlyNets.slice(-3);
 
-console.log("Monthly Nets:", monthlyNets);
-console.log("Last 3 Months (NET):", last3Months);
-
-
 let trend = "stable";
 
 if (last3Months.length === 3) {
@@ -199,51 +200,6 @@ if (c > b && b > a) {
     lastMonthIncome > 0
       ? ((thisMonthIncome - lastMonthIncome) / lastMonthIncome) * 100
       : 0;
-
-  // ------------------------
-  // HEALTH SCORE
-  // ------------------------
-
-  
-
-
-      // ------------------------
-// ------------------------
-// STABILITY (SIMPLE + RELIABLE)
-// ------------------------
-
-let score = 0;
-
-// 🔥 Burn Efficiency
-const burnRatio = totalIncome > 0 ? avgMonthlyBurn / totalIncome : 1;
-
-if (burnRatio <= 0.5) score += 25;
-else if (burnRatio <= 0.7) score += 15;
-else if (burnRatio <= 0.9) score += 8;
-else score += 0;
-
-// 💰 Profitability (reduced weight)
-if (net > 0) score += 10;
-if (net > totalIncome * 0.2) score += 5;
-
-// 📈 Growth
-if (growth > 10) score += 10;
-else if (growth > 0) score += 5;
-
-// 📊 Expense concentration
-if (topCategoryPercent < 40) score += 10;
-else if (topCategoryPercent < 60) score += 5;
-
-// 📉 Stability (NEW)
-if (stability.includes("Very stable")) score += 10;
-else if (stability.includes("Moderately")) score += 5;
-
-if (score > 100) score = 100;
-
-let risk = "High";
-
-if (score >= 75) risk = "Low";
-else if (score >= 50) risk = "Moderate";
 
 const getAIAdvice = async () => {
 
@@ -374,15 +330,17 @@ const getAIAdvice = async () => {
 
       <p>
   <strong>Financial Risk:</strong>{" "}
-  {risk === "Low"
+  {riskLevel === "Low"
     ? "You're in a safe position ✅"
-    : risk === "Moderate"
+    : riskLevel === "Moderate"
     ? "You're okay, but needs attention ⚠️"
-    : "You're at risk, act immediately 🚨"}
+    : riskLevel === "High"
+    ? "You're at risk, act immediately 🚨"
+    : "Critical condition 🚨"}
 </p>
 
 <p>
-  <strong>Income Trend:</strong>{" "}
+  <strong>Recent Trend:</strong>{" "}
 
 {trend === "growing" && "Your income is growing 📈"}
 {trend === "declining" && "Your income is declining 📉"}

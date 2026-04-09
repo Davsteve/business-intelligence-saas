@@ -141,9 +141,18 @@ transactions.forEach((t) => {
 });
 
 const monthlyIncomes = Object.entries(monthlyIncomeMap)
-  .sort(([a], [b]) => new Date(a) - new Date(b))
+  .sort(([a], [b]) => {
+  const [yearA, monthA] = a.split("-").map(Number);
+  const [yearB, monthB] = b.split("-").map(Number);
+
+  if (yearA !== yearB) return yearA - yearB;
+  return monthA - monthB;
+})
   .map(([_, value]) => value);
 const last3Months = monthlyIncomes.slice(-3);
+
+console.log("Monthly Incomes:", monthlyIncomes);
+console.log("Last 3 Months:", last3Months);
 
 let trend = "stable";
 

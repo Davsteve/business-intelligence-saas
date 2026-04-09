@@ -380,12 +380,11 @@ const volatilityColor =
 
           <p>Risk Level: {riskLevel}</p>
 
-          <button
-            onClick={() => setShowBreakdown((prev) => !prev)}
-            style={styles.breakdownButton}
-          >
-            {showBreakdown ? "Hide Breakdown ▲" : "View Breakdown ▼"}
-          </button>
+          <Button
+  onClick={() => setShowBreakdown((prev) => !prev)}
+>
+  {showBreakdown ? "Hide Breakdown ▲" : "View Breakdown ▼"}
+</Button>
 
           {showBreakdown && breakdown && Object.keys(breakdown).length > 0 && (
   <div style={{ marginTop: "20px" }}>

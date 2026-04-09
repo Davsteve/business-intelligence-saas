@@ -278,22 +278,6 @@ const getAIAdvice = async () => {
       AI Strategic Advisor
     </h1>
 
-    <button
-  onClick={handleGenerateAdvice}
-  disabled={loadingAI}
-  style={{
-    padding: "10px 16px",
-    borderRadius: "8px",
-    background: loadingAI ? "#555" : "#38bdf8",
-    border: "none",
-    color: "#000",
-    cursor: loadingAI ? "not-allowed" : "pointer",
-    marginBottom: "20px"
-  }}
->
-  {loadingAI ? "Generating..." : "Generate AI Advice"}
-</button>
-
 {loadingAI && (
   <p style={{ color: "#aaa", marginTop: "10px" }}>
     Analyzing your financial data...
@@ -369,20 +353,12 @@ const getAIAdvice = async () => {
     {/* SUMMARY */}
     <PremiumSection title="AI Insights">
 
-  <button
-    onClick={handleGenerateAdvice}
-    style={{
-      padding: "10px 16px",
-      borderRadius: "8px",
-      background: "#38bdf8",
-      border: "none",
-      color: "#000",
-      cursor: "pointer",
-      marginBottom: "16px"
-    }}
-  >
-    {loadingAI ? "Generating..." : "Generate AI Advice"}
-  </button>
+  <Button
+  onClick={handleGenerateAdvice}
+  disabled={loadingAI}
+>
+  {loadingAI ? "Generating..." : "Generate AI Advice"}
+</Button>
 
   {aiData ? (
   <div style={{

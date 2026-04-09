@@ -150,23 +150,25 @@ let trend = "stable";
 if (last3Months.length === 3) {
   const [a, b, c] = last3Months;
 
-  // % change from previous month
-  const change = b !== 0 ? (c - b) / b : 0;
+  // 🔥 Overall direction (NOT just last month)
+  const overallChange = a !== 0 ? (c - a) / a : 0;
 
-  // volatility check (range vs avg)
+  // 🔥 Short-term momentum
+  const recentChange = b !== 0 ? (c - b) / b : 0;
+
+  // 🔥 Volatility
   const avg = (a + b + c) / 3;
   const max = Math.max(a, b, c);
   const min = Math.min(a, b, c);
   const volatility = avg > 0 ? (max - min) / avg : 0;
 
-  if (volatility > 0.4) {
-    trend = "volatile"; // 🔥 MOST IMPORTANT FIX
-  } else if (change > 0.1) {
-    trend = "growing";
-  } else if (change < -0.1) {
-    trend = "declining";
+  // ✅ DECISION LOGIC
+  if (overallChange > 0.1) {
+    trend = volatility > 0.4 ? "growing_volatile" : "growing";
+  } else if (overallChange < -0.1) {
+    trend = volatility > 0.4 ? "declining_volatile" : "declining";
   } else {
-    trend = "stable";
+    trend = volatility > 0.4 ? "volatile" : "stable";
   }
 }
 
@@ -358,10 +360,13 @@ const getAIAdvice = async () => {
 
 <p>
   <strong>Income Trend:</strong>{" "}
+
 {trend === "growing" && "Your income is growing 📈"}
 {trend === "declining" && "Your income is declining 📉"}
-{trend === "volatile" && "Your income is inconsistent ⚠️"}
 {trend === "stable" && "Your income is stable ➖"}
+{trend === "volatile" && "Your income is inconsistent ⚠️"}
+{trend === "growing_volatile" && "Income is growing but inconsistent ⚠️📈"}
+{trend === "declining_volatile" && "Income is declining and unstable 📉⚠️"}
 </p>
 
 <p>

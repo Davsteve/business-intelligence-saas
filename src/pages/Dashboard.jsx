@@ -343,12 +343,25 @@ await supabase
     ? "#ef4444"
     : "#f59e0b";
 
-const volatilityColor =
-  cashFlow?.volatilityLevel === "Low"
-    ? "#00ff9d"
-    : cashFlow?.volatilityLevel === "Moderate"
-    ? "#f59e0b"
-    : "#ef4444";
+const volatilityColor = (() => {
+  const v = cashFlow?.volatilityLevel?.toLowerCase();
+
+  if (!v) return "#64748b"; // fallback
+
+  if (v.includes("stable") && !v.includes("moderate")) {
+    return "#10b981"; // green
+  }
+
+  if (v.includes("moderate")) {
+    return "#f59e0b"; // yellow
+  }
+
+  if (v.includes("unstable") || v.includes("volatile")) {
+    return "#ef4444"; // red
+  }
+
+  return "#64748b";
+})();
 
   return (
     <div>

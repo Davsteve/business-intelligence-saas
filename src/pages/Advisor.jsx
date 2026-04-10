@@ -3,6 +3,7 @@ import { supabase } from "../supabaseClient";
 import Button from "../Components/ui/Button";
 import { useBusiness } from "../context/BusinessContext";
 import { calculateFinancialHealth } from "../utils/financialHealthEngine";
+import { formatCurrency } from "../utils/formatcurrency";
 
 export default function Advisor() {
   const { businessId, loading } = useBusiness();  
@@ -336,11 +337,11 @@ const getAIAdvice = async () => {
       gap: "20px",
       marginBottom: "40px"
     }}>
-      <MetricCard label="Net Position" value={`₹ ${net}`} />
-      <MetricCard label="Avg Monthly Burn" value={`₹ ${avgMonthlyBurn.toFixed(0)}`} />
+      <MetricCard label="Net Position" value={formatCurrency(net)} />
+<MetricCard label="Avg Monthly Burn" value={formatCurrency(avgMonthlyBurn)} />
       <MetricCard 
   label="Runway" 
-  value={`${runwayDays.toFixed(0)} days`} 
+  value={`${Math.round(runwayDays)} days`} 
 />
       <MetricCard label="Top Expense" value={`${topCategory} (${topCategoryPercent.toFixed(1)}%)`} />
     </div>
@@ -414,11 +415,11 @@ const getAIAdvice = async () => {
   <b>Numbers:</b>
 
   {item.numbers?.burn !== undefined && (
-    <div>💸 Burn: ₹{Math.round(item.numbers.burn)}</div>
+    <div>💸 Burn: {formatCurrency(item.numbers.burn)}</div>
   )}
 
   {item.numbers?.income !== undefined && (
-    <div>💰 Income: ₹{Math.round(item.numbers.income)}</div>
+    <div>💰 Income: {formatCurrency(item.numbers.income)}</div>
   )}
 
   {item.numbers?.runwayDays !== undefined && (
@@ -430,19 +431,19 @@ const getAIAdvice = async () => {
   )}
 
   {item.numbers?.investableAmount !== undefined && (
-  <div>📈 Investable: ₹{Math.round(item.numbers.investableAmount)}</div>
+  <div>📈 Investable: {FormatCurrency(item.numbers.investableAmount)}</div>
 )}
 
   {item.numbers?.surplus !== undefined && (
-  <div>💼 Surplus: ₹{Math.round(item.numbers.surplus)}</div>
+  <div>💼 Surplus: {FormatCurrency(item.numbers.surplus)}</div>
 )}
 
   {item.numbers?.gapToTarget !== undefined && (
-  <div>📉 Gap to Target: {item.numbers.gapToTarget}%</div>
+  <div>📉 Gap to Target: {item.numbers?.gapToTarget?.toFixed(1)}%</div>
 )}
 
   {item.numbers?.reinvestment !== undefined && (
-  <div>🚀 Reinvestment: ₹{Math.round(item.numbers.reinvestment)}</div>
+  <div>🚀 Reinvestment: {FormatCurrency(item.numbers.reinvestment)}</div>
 )}
 </div>
       </div>

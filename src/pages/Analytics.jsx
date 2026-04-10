@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { useBusiness } from "../context/BusinessContext";
+import { formatCurrency } from "../utils/formatcurrency";
 
 import {
   BarChart,
@@ -252,7 +253,7 @@ export default function Analytics() {
         <div style={kpiCard}>
           <p>Top Expense Category</p>
           <h2>
-            {topExpenseCategory} (₹ {topExpenseAmount})
+            {topExpenseCategory} ({formatCurrency(topExpenseAmount)})
           </h2>
         </div>
       </div>
@@ -341,8 +342,7 @@ export default function Analytics() {
             <BarChart data={barData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
+              <YAxis tickFormatter={(value) => formatCurrency(value)} />
               <Bar dataKey="value" fill="#4db8ff" />
             </BarChart>
           </ResponsiveContainer>
@@ -357,7 +357,7 @@ export default function Analytics() {
                 dataKey="value"
                 nameKey="name"
                 outerRadius={120}
-                label
+                label={({ name, value }) => `${name}: ${formatCurrency(value)}`}
               >
                 {pieData.map((entry, index) => (
                   <Cell
@@ -366,7 +366,7 @@ export default function Analytics() {
                   />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip formatter={(value) => formatCurrency(value)} />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -380,7 +380,7 @@ export default function Analytics() {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" />
             <YAxis />
-            <Tooltip />
+            <Tooltip formatter={(value) => formatCurrency(value)} />
             <Legend />
             <Line
               type="monotone"

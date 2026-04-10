@@ -8,6 +8,7 @@ import ConfirmModal from "../Components/ConfirmModal";
 import toast from "react-hot-toast";
 import Button from "../Components/ui/Button";
 import { getCurrentUser } from "../utils/Auth";
+import { formatCurrency } from "../utils/formatcurrency";
 
 import {
   LineChart,
@@ -73,7 +74,7 @@ You are a financial advisor for a normal person (not an expert).
 Explain clearly and simply.
 
 User Data:
-- Net Balance: ₹${netBalance}
+- Net Balance: ${formatCurrency(netBalance)}
 - Monthly Burn: ₹${burn}
 - Runway: ${runway} months
 - Income Trend: ${trend}
@@ -429,12 +430,12 @@ const volatilityColor =
             <div style={styles.cashFlowGrid}>
               <div>
                 <p>Latest Month Net</p>
-                <h2>₹ {Number(cashFlow.latestMonthNet ?? 0).toFixed(0)}</h2>
+                <h2>{formatCurrency(cashFlow.latestMonthNet)}</h2>
               </div>
 
               <div>
                 <p>Average Net</p>
-                <h2>₹ {Number(cashFlow.averageNet ?? 0).toFixed(0)}</h2>
+                <h2>{formatCurrency(cashFlow.averageNet)}</h2>
               </div>
 
               <div>
@@ -468,8 +469,11 @@ const volatilityColor =
               <LineChart data={cashFlow.monthlyData}>
                 <CartesianGrid stroke="#333" />
                 <XAxis dataKey="label" stroke="#aaa" />
-                <YAxis stroke="#aaa" />
-                <Tooltip />
+                <YAxis
+  stroke="#aaa"
+  tickFormatter={(value) => formatCurrency(value)}
+/>
+                <Tooltip formatter={(value) => formatCurrency(value)} />
                 <Line
                   type="monotone"
                   dataKey="net"
@@ -505,7 +509,7 @@ const volatilityColor =
           letterSpacing: "-1px",
         }}
       >
-        ₹ {totalIncome}
+        {formatCurrency(totalIncome)}
       </h1>
     </div>
   </Card>
@@ -523,7 +527,7 @@ const volatilityColor =
           letterSpacing: "-1px",
         }}
       >
-        ₹ {totalExpense}
+        {formatCurrency(totalExpense)}
       </h1>
     </div>
   </Card>
@@ -541,7 +545,7 @@ const volatilityColor =
           letterSpacing: "-1px",
         }}
       >
-        ₹ {netBalance}
+        {formatCurrency(netBalance)}
       </h1>
     </div>
   </Card>
@@ -787,7 +791,7 @@ const volatilityColor =
                       : "#ff4d4d",
                 }}
               >
-                ₹ {t.amount}
+                {formatCurrency(t.amount)}
               </span>
 
               <span

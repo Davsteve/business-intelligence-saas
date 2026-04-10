@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { useBusiness } from "../context/BusinessContext";
 import { calculateForecast } from "../utils/forecastEngine";
+import { formatCurrency } from "../utils/formatcurrency";
 
 import {
   LineChart,
@@ -139,16 +140,19 @@ const parsedTarget =
           <LineChart data={combinedData}>
             <CartesianGrid stroke="#222" />
             <XAxis dataKey="label" stroke="#aaa" />
-            <YAxis stroke="#aaa" />
+            <YAxis
+  stroke="#aaa"
+  tickFormatter={(value) => formatCurrency(value)}
+/>
             <Tooltip
   formatter={(value, name) => {
-    const formatted = Number(value).toFixed(0); // ← removes decimals
+    const formatted = formatCurrency(value);
 
-    if (name === "actualNet") return [`₹ ${formatted}`, "Actual"];
-    if (name === "projectedNet") return [`₹ ${formatted}`, "Projected"];
-    if (name === "average") return [`₹ ${formatted}`, "Average"];
+    if (name === "actualNet") return [formatted, "Actual"];
+    if (name === "projectedNet") return [formatted, "Projected"];
+    if (name === "average") return [formatted, "Average"];
 
-    return [`₹ ${formatted}`, name];
+    return [formatted, name];
   }}
 />
 
@@ -188,7 +192,7 @@ const parsedTarget =
     strokeWidth={2}
     strokeDasharray="4 4"
     label={{
-      value: "Target",
+  value: `Target (${formatCurrency(parsedTarget)})`,
       position: "right",
       fill: "#ff4d4d",
       fontSize: 12,
@@ -237,12 +241,12 @@ const parsedTarget =
 
           <div style={styles.metricRow}>
             <p>Average Monthly Net</p>
-            <h3>₹ {averageNet.toFixed(0)}</h3>
+            <h3>{formatCurrency(averageNet)}</h3>
           </div>
 
           <p className="text-sm text-gray-400">Latest Month Net</p>
           <h2 className="text-xl font-bold">
-          ₹ {(forecastData?.latestMonthNet || 0).toFixed(0)}
+          {formatCurrency(forecastData?.latestMonthNet)}
           </h2>
 
           <input
@@ -258,7 +262,7 @@ const parsedTarget =
               <div style={styles.metricRow}>
                 <p>Required Net Increase</p>
                 <h3 style={{ color: requiredNetIncrease > 0 ? "#ff4d4d" : "#00ff9d" }}>
-                  ₹ {requiredNetIncrease?.toFixed(0)}
+                  {formatCurrency(requiredNetIncrease)}
                 </h3>
               </div>
 
@@ -282,7 +286,7 @@ const parsedTarget =
 
               {monthsToTarget && averageNet > 0 && (
                 <div style={{ marginTop: "15px", fontSize: "14px", opacity: 0.7 }}>
-                  Estimated {monthsToTarget.toFixed(1)} months to reach target at current pace.
+                  Estimated {Math.ceil(monthsToTarget)} months
                 </div>
               )}
             </>

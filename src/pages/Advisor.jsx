@@ -431,11 +431,11 @@ const getAIAdvice = async () => {
   )}
 
   {item.numbers?.investableAmount !== undefined && (
-  <div>📈 Investable: {FormatCurrency(item.numbers.investableAmount)}</div>
+  <div>📈 Investable: {formatCurrency(item.numbers.investableAmount)}</div>
 )}
 
   {item.numbers?.surplus !== undefined && (
-  <div>💼 Surplus: {FormatCurrency(item.numbers.surplus)}</div>
+  <div>💼 Surplus: {formatCurrency(item.numbers.surplus)}</div>
 )}
 
   {item.numbers?.gapToTarget !== undefined && (
@@ -443,7 +443,7 @@ const getAIAdvice = async () => {
 )}
 
   {item.numbers?.reinvestment !== undefined && (
-  <div>🚀 Reinvestment: {FormatCurrency(item.numbers.reinvestment)}</div>
+  <div>🚀 Reinvestment: {formatCurrency(item.numbers.reinvestment)}</div>
 )}
 </div>
       </div>

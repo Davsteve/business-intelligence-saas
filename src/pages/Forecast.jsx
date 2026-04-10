@@ -17,19 +17,9 @@ import {
 export default function Forecast() {
   const { session, businessId } = useBusiness();
   const [transactions, setTransactions] = useState([]);
-  const forecast = calculateForecast(transactions);
-  const averageLineData = forecast
-  ? [
-      ...forecast.monthlyData.map(() => forecast.averageNet),
-      ...forecast.projectionData.map(() => forecast.averageNet),
-    ]
-  : [];
-
   const [cashReserve, setCashReserve] = useState("");
-
   const [revenueGrowth, setRevenueGrowth] = useState("");
   const [expenseReduction, setExpenseReduction] = useState("");
-
   const [targetNet, setTargetNet] = useState("");
 
   useEffect(() => {
@@ -48,7 +38,7 @@ export default function Forecast() {
   }
 
   const forecastData = calculateForecast(transactions);
-  const latestMonthNet = forecast?.latestMonthNet || 0;
+  const latestMonthNet = forecastData?.latestMonthNet || 0;
 
   if (!forecastData) {
     return <h2 style={{ color: "#fff" }}>No data available</h2>;
@@ -67,15 +57,15 @@ const parsedTarget =
     ? parseFloat(targetNet)
     : null;
 
-  const combinedData = forecast
+  const combinedData = forecastData
   ? [
-      ...forecast.monthlyData,
-      ...forecast.projectionData,
+      ...forecastData.monthlyData,
+      ...forecastData.projectionData,
     ]
       .filter((item) => item.actualNet !== 0 || item.projectedNet !== null)
       .map((item) => ({
         ...item,
-        average: forecast.averageNet,
+        average: forecastData.averageNet,
       }))
   : [];
 
@@ -252,7 +242,7 @@ const parsedTarget =
 
           <p className="text-sm text-gray-400">Latest Month Net</p>
           <h2 className="text-xl font-bold">
-          ₹ {(forecast?.latestMonthNet || 0).toFixed(0)}
+          ₹ {(forecastData?.latestMonthNet || 0).toFixed(0)}
           </h2>
 
           <input

@@ -72,17 +72,17 @@ const parsedTarget =
 
   // ---------------- RUNWAY ----------------
 
-  const runwayMonths =
-    cashReserve && averageExpense > 0
-      ? parseFloat(cashReserve) / averageExpense
-      : null;
+  const runwayDays =
+  cashReserve && averageExpense > 0
+    ? Math.floor((parseFloat(cashReserve) / averageExpense) * 30)
+    : null;
 
-  const survivalDate =
-    runwayMonths
-      ? new Date(
-          new Date().setMonth(new Date().getMonth() + runwayMonths)
-        ).toLocaleDateString()
-      : null;
+const depletionDate =
+  runwayDays
+    ? new Date(
+        new Date().getTime() + runwayDays * 24 * 60 * 60 * 1000
+      ).toLocaleDateString()
+    : null;
 
   // ---------------- MONTHLY NET TARGET ----------------
 
@@ -218,19 +218,19 @@ const parsedTarget =
             style={styles.input}
           />
 
-          {runwayMonths && (
-            <>
-              <div style={styles.metricRow}>
-                <p>Runway</p>
-                <h3>{runwayMonths.toFixed(1)} Months</h3>
-              </div>
+          {runwayDays !== null && (
+  <>
+    <div style={styles.metricRow}>
+      <p>Cash lasts for</p>
+      <h3>{runwayDays} days</h3>
+    </div>
 
-              <div style={styles.metricRow}>
-                <p>Survival Until</p>
-                <h3>{survivalDate}</h3>
-              </div>
-            </>
-          )}
+    <div style={styles.metricRow}>
+      <p>You’ll run out by</p>
+      <h3>{depletionDate}</h3>
+    </div>
+  </>
+)}
         </div>
 
         {/* MONTHLY NET TARGET PANEL */}

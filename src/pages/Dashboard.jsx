@@ -54,7 +54,7 @@ const {
   riskLevel = "Low"
 } = financials || {};
   const mappedBreakdown = {
-  profitMargin: breakdown?.profit || 0,
+  IncomeMargin: breakdown?.profit || 0,
   runway: breakdown?.runway || 0,
   incomeGrowth: breakdown?.growth || 0,
   expenseConcentration: breakdown?.concentration || 0,
@@ -374,7 +374,7 @@ const volatilityColor = (() => {
       {/* FINANCIAL HEALTH */}
       {score !== undefined && (
         <Card>
-          <h3>Financial Health Index</h3>
+          <h3>Financial Fitness scores</h3>
           <h1>{score} / 100</h1>
 
           <div style={styles.progressBar}>
@@ -392,7 +392,7 @@ const volatilityColor = (() => {
             />
           </div>
 
-          <p>Risk Level: {riskLevel}</p>
+          <p>Stability Level: {riskLevel}</p>
 
           <Button
   onClick={() => setShowBreakdown((prev) => !prev)}
@@ -438,7 +438,7 @@ const volatilityColor = (() => {
       {cashFlow && cashFlow.monthlyData?.length > 0 && (
         <>
           <Card>
-            <h3>Cash Flow Intelligence ({cashFlow.periodLabel})</h3>
+            <h3>Cash Flow ({cashFlow.periodLabel})</h3>
 
             <div style={styles.cashFlowGrid}>
               <div>

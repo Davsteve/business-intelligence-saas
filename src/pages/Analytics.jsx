@@ -24,28 +24,41 @@ export default function Analytics() {
   const { businessId, loading } = useBusiness();
   const [transactions, setTransactions] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const totalIncome = transactions
+  const now = new Date();
+
+const currentMonthTransactions = transactions.filter((t) => {
+  const date = new Date(t.created_at);
+
+  return (
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear()
+  );
+});
+  
+const totalIncome = currentMonthTransactions
   .filter(t => t.categories?.type === "income")
   .reduce((acc, curr) => acc + curr.amount, 0);
 
-const totalExpense = transactions
+const totalExpense = currentMonthTransactions
   .filter(t => t.categories?.type === "expense")
   .reduce((acc, curr) => acc + curr.amount, 0);
 
 const savings = totalIncome - totalExpense;
 
 const getSpendingMessage = () => {
-  if (totalIncome === 0) return "Start tracking to see insights";
+  if (currentMonthTransactions.length === 0) {
+    return "Add your first transaction this month 🚀";
+  }
 
   if (savings < 0) {
-    return `👉 You are overspending by ₹${Math.abs(savings)}`;
+    return `⚠️ You're overspending by ₹${formatCurrency(Math.abs(savings))}`;
   }
 
   if (savings === 0) {
     return "👉 You're breaking even";
   }
 
-  return `👉 You saved ₹${savings}`;
+  return `💰 You saved ₹${formatCurrency(savings)} — Well done, good job!`;
 };
   const [filter, setFilter] = useState("all");
 
@@ -75,8 +88,6 @@ const getSpendingMessage = () => {
   if (!transactions.length) {
   return <p>No financial data yet.</p>
 }
-
-  const now = new Date();
 
   // -----------------------
   // FILTER

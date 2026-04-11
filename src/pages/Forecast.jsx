@@ -238,7 +238,7 @@ const formattedDate = runOutDate.toLocaleDateString("en-IN", {
             style={styles.input}
           />
 
-          {runwayMonths && (
+          {runwayDays && (
             <>
               <div style={styles.metricRow}>
                 <p>Cash lasts for</p>

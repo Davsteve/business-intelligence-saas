@@ -25,11 +25,11 @@ export default function Analytics() {
   const [transactions, setTransactions] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const totalIncome = transactions
-  .filter(t => t.type === "income")
+  .filter(t => t.categories?.type === "income")
   .reduce((acc, curr) => acc + curr.amount, 0);
 
 const totalExpense = transactions
-  .filter(t => t.type === "expense")
+  .filter(t => t.categories?.type === "expense")
   .reduce((acc, curr) => acc + curr.amount, 0);
 
 const savings = totalIncome - totalExpense;

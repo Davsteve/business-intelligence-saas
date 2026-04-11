@@ -464,11 +464,18 @@ const getAIAdvice = async () => {
         <p><b>Action:</b> {item.action}</p>
         <p>
   <b>Priority:</b>{" "}
-  <span style={{ color: getImpactColor(item.impact) }}>
+  <span style={{
+    color:
+      item.impact === "high"
+        ? "#ff4d4d"   // red
+        : item.impact === "medium"
+        ? "#facc15"   // 🔥 proper yellow
+        : "#22c55e"   // green
+  }}>
     {item.impact === "high"
       ? "High"
       : item.impact === "medium"
-      ? "Medium"
+      ? "Moderate"
       : "Low"}
   </span>
 </p>

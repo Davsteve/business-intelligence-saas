@@ -72,6 +72,8 @@ const parsedTarget =
 
   // ---------------- RUNWAY ----------------
 
+  const balance = totalIncome - totalExpense;
+
   const runwayDays = Math.floor((balance / avgMonthlyExpense) * 30);
   const runOutDate = new Date();
 runOutDate.setDate(runOutDate.getDate() + runwayDays);

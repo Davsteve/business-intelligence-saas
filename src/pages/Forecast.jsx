@@ -104,13 +104,6 @@ const formattedDate = runOutDate.toLocaleDateString("en-IN", {
   year: "numeric",
 });
 
-  const survivalDate =
-    runwayMonths
-      ? new Date(
-          new Date().setMonth(new Date().getMonth() + runwayMonths)
-        ).toLocaleDateString()
-      : null;
-
   // ---------------- MONTHLY NET TARGET ----------------
 
   const requiredNetIncrease =

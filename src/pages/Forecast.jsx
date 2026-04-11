@@ -72,10 +72,15 @@ const parsedTarget =
 
   // ---------------- RUNWAY ----------------
 
-  const runwayMonths =
-    cashReserve && averageExpense > 0
-      ? parseFloat(cashReserve) / averageExpense
-      : null;
+  const runwayDays = Math.floor((balance / avgMonthlyExpense) * 30);
+  const runOutDate = new Date();
+runOutDate.setDate(runOutDate.getDate() + runwayDays);
+
+const formattedDate = runOutDate.toLocaleDateString("en-IN", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+});
 
   const survivalDate =
     runwayMonths
@@ -221,13 +226,13 @@ const parsedTarget =
           {runwayMonths && (
             <>
               <div style={styles.metricRow}>
-                <p>Runway</p>
-                <h3>{runwayMonths.toFixed(1)} Months</h3>
+                <p>Cash lasts for</p>
+<p>{runwayDays} days</p>
               </div>
 
               <div style={styles.metricRow}>
-                <p>Survival Until</p>
-                <h3>{survivalDate}</h3>
+                <p>You’ll run out by</p>
+<p>{formattedDate}</p>
               </div>
             </>
           )}

@@ -54,7 +54,7 @@ const {
   riskLevel = "Low"
 } = financials || {};
   const mappedBreakdown = {
-  IncomeMargin: breakdown?.profit || 0,
+  profitMargin: breakdown?.profit || 0,
   runway: breakdown?.runway || 0,
   incomeGrowth: breakdown?.growth || 0,
   expenseConcentration: breakdown?.concentration || 0,

@@ -94,11 +94,22 @@ const totalExpense = latestMonthTransactions
   ? parseFloat(cashReserve)
   : totalIncome - totalExpense;
 
-  const avgMonthlyExpense = totalExpense;
+  const avgMonthlyExpense =
+  transactions.length > 0
+    ? transactions
+        .filter((t) => t.type === "expense")
+        .reduce((sum, t) => sum + t.amount, 0) /
+      new Set(
+        transactions.map((t) => {
+          const d = new Date(t.date);
+          return `${d.getMonth()}-${d.getFullYear()}`;
+        })
+      ).size
+    : 0;
 
   const runwayDays =
   avgMonthlyExpense > 0
-    ? Math.floor((balance / avgMonthlyExpense) * 30)
+    ? Math.ceil((balance / avgMonthlyExpense) * 30)
     : 0;
   const runOutDate = new Date();
 runOutDate.setDate(runOutDate.getDate() + runwayDays);

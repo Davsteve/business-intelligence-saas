@@ -261,7 +261,7 @@ const monthsToTarget =
             <>
               <div style={styles.metricRow}>
                 <p>Required Savings Increase</p>
-                <h3 style={{ color: requiredNetIncrease > 0 ? "#ff4d4d" : "#00ff9d" }}>
+                <h3 style={{ color: requiredSavingsIncrease > 0 ? "#ff4d4d" : "#00ff9d" }}>
                   {formatCurrency(requiredSavingsIncrease)}
                 </h3>
               </div>

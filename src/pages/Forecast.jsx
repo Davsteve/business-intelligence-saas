@@ -72,6 +72,24 @@ const parsedTarget =
 
   // ---------------- RUNWAY ----------------
 
+  const now = new Date();
+
+const latestMonthTransactions = transactions.filter((t) => {
+  const date = new Date(t.date);
+  return (
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear()
+  );
+});
+
+  const totalIncome = latestMonthTransactions
+  .filter((t) => t.type === "income")
+  .reduce((sum, t) => sum + t.amount, 0);
+
+const totalExpense = latestMonthTransactions
+  .filter((t) => t.type === "expense")
+  .reduce((sum, t) => sum + t.amount, 0);
+
   const balance = totalIncome - totalExpense;
 
   const runwayDays = Math.floor((balance / avgMonthlyExpense) * 30);

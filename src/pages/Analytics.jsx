@@ -294,13 +294,14 @@ const getSpendingMessage = () => {
       </div>
 
 <Card
-  className="mt-4"
   style={{
-    marginTop: "16px",
-    lineHeight: "1.8",
+    marginTop: "20px",
+    padding: "20px",
+    borderRadius: "12px",
+    background: "#111827",
   }}
 >
-  <h3 style={{ marginBottom: "10px", fontSize: "18px", fontWeight: "600" }}>
+  <h3 style={{ marginBottom: "12px", fontSize: "18px", fontWeight: "600" }}>
     💡 This Month Summary
   </h3>
 
@@ -310,7 +311,7 @@ const getSpendingMessage = () => {
 
   <p
     style={{
-      marginTop: "10px",
+      marginTop: "12px",
       fontWeight: "bold",
       color:
         savings < 0

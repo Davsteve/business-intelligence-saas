@@ -108,23 +108,23 @@ const monthsToTarget =
     if (averageNet < 0) {
       progressColor = "#ff4d4d";
       performanceMessage =
-        "Currently operating at a net loss. Stabilization required before scaling.";
+        "You're spending more than you earn — start by cutting non-essential expenses.";
     } else if (progressPercent < 50) {
       progressColor = "#ff4d4d";
       performanceMessage =
-        "Significant performance acceleration required.";
+        "You're far from your goal — consider cutting expenses or boosting income.";
     } else if (progressPercent < 80) {
       progressColor = "#ffaa00";
       performanceMessage =
-        "Healthy progress. Maintain operational momentum.";
+        "You're getting closer — a little more consistency will get you there.";
     } else if (progressPercent < 100) {
       progressColor = "#4db8ff";
       performanceMessage =
-        "Strong positioning. Target nearly achieved.";
+        "You're almost there — keep going, you're doing great.";
     } else {
       progressColor = "#00ff9d";
       performanceMessage =
-        "Target achieved. Consider raising next milestone.";
+        "You've hit your goal — great job staying on track!! Consider raising next milestone.";
     }
   }
 

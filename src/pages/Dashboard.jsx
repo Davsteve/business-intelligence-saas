@@ -402,7 +402,7 @@ const volatilityColor = (() => {
       {/* FINANCIAL HEALTH */}
       {score !== undefined && (
         <Card>
-          <h3>Financial Fitness scores</h3>
+          <h3>Financial Fitness Score</h3>
           <h1>{score} / 100</h1>
 
           <div style={styles.progressBar}>

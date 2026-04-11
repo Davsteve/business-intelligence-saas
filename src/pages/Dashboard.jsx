@@ -420,6 +420,12 @@ const volatilityColor = (() => {
             />
           </div>
 
+          <Card style={styles.insightCard}>
+  <p style={styles.insightText}>
+    {insight}
+  </p>
+</Card>
+
           <p>Stability Level: {riskLevel}</p>
 
           <Button
@@ -461,12 +467,6 @@ const volatilityColor = (() => {
           )}
         </Card>
       )}
-
-      <Card style={styles.insightCard}>
-  <p style={styles.insightText}>
-    {insight}
-  </p>
-</Card>
 
       {/* CASH FLOW */}
       {cashFlow && cashFlow.monthlyData?.length > 0 && (

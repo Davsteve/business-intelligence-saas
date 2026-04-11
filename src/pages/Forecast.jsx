@@ -92,6 +92,8 @@ const totalExpense = latestMonthTransactions
 
   const balance = totalIncome - totalExpense;
 
+  const avgMonthlyExpense = totalExpense;
+
   const runwayDays = Math.floor((balance / avgMonthlyExpense) * 30);
   const runOutDate = new Date();
 runOutDate.setDate(runOutDate.getDate() + runwayDays);

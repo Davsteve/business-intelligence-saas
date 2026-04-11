@@ -72,53 +72,17 @@ const parsedTarget =
 
   // ---------------- RUNWAY ----------------
 
-  const now = new Date();
+  const runwayMonths =
+    cashReserve && averageExpense > 0
+      ? parseFloat(cashReserve) / averageExpense
+      : null;
 
-const latestMonthTransactions = transactions.filter((t) => {
-  const date = new Date(t.date);
-  return (
-    date.getMonth() === now.getMonth() &&
-    date.getFullYear() === now.getFullYear()
-  );
-});
-
-  const totalIncome = latestMonthTransactions
-  .filter((t) => t.type === "income")
-  .reduce((sum, t) => sum + t.amount, 0);
-
-const totalExpense = latestMonthTransactions
-  .filter((t) => t.type === "expense")
-  .reduce((sum, t) => sum + t.amount, 0);
-
-  const balance = cashReserve
-  ? parseFloat(cashReserve)
-  : totalIncome - totalExpense;
-
-  const avgMonthlyExpense =
-  transactions.length > 0
-    ? transactions
-        .filter((t) => t.type === "expense")
-        .reduce((sum, t) => sum + t.amount, 0) /
-      new Set(
-        transactions.map((t) => {
-          const d = new Date(t.date);
-          return `${d.getMonth()}-${d.getFullYear()}`;
-        })
-      ).size
-    : 0;
-
-  const runwayDays =
-  avgMonthlyExpense > 0
-    ? Math.ceil((balance / avgMonthlyExpense) * 30)
-    : 0;
-  const runOutDate = new Date();
-runOutDate.setDate(runOutDate.getDate() + runwayDays);
-
-const formattedDate = runOutDate.toLocaleDateString("en-IN", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
+  const survivalDate =
+    runwayMonths
+      ? new Date(
+          new Date().setMonth(new Date().getMonth() + runwayMonths)
+        ).toLocaleDateString()
+      : null;
 
   // ---------------- MONTHLY NET TARGET ----------------
 
@@ -254,16 +218,16 @@ const formattedDate = runOutDate.toLocaleDateString("en-IN", {
             style={styles.input}
           />
 
-          {runwayDays !== null && (
+          {runwayMonths && (
             <>
               <div style={styles.metricRow}>
-                <p>Cash lasts for</p>
-<p>{runwayDays} days</p>
+                <p>Runway</p>
+                <h3>{runwayMonths.toFixed(1)} Months</h3>
               </div>
 
               <div style={styles.metricRow}>
-                <p>You’ll run out by</p>
-<p>{formattedDate}</p>
+                <p>Survival Until</p>
+                <h3>{survivalDate}</h3>
               </div>
             </>
           )}

@@ -293,20 +293,33 @@ const getSpendingMessage = () => {
         </div>
       </div>
 
-      <Card
+<Card
+  className="mt-4"
   style={{
     marginTop: "16px",
-    padding: "16px",
-    borderRadius: "10px",
-    background: "rgba(255,255,255,0.05)",
-    lineHeight: "1.6"
+    lineHeight: "1.8",
   }}
 >
-  <p>You earned: ₹{totalIncome}</p>
-  <p>You spent: ₹{totalExpense}</p>
-  <p>You saved: ₹{savings}</p>
+  <h3 style={{ marginBottom: "10px", fontSize: "18px", fontWeight: "600" }}>
+    💡 This Month Summary
+  </h3>
 
-  <p style={{ marginTop: "8px", fontWeight: "bold" }}>
+  <p>💰 You earned: {formatCurrency(totalIncome)}</p>
+  <p>💸 You spent: {formatCurrency(totalExpense)}</p>
+  <p>📈 You saved: {formatCurrency(savings)}</p>
+
+  <p
+    style={{
+      marginTop: "10px",
+      fontWeight: "bold",
+      color:
+        savings < 0
+          ? "#ef4444"
+          : savings === 0
+          ? "#f59e0b"
+          : "#00ff9d",
+    }}
+  >
     {getSpendingMessage()}
   </p>
 </Card>

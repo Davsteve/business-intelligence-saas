@@ -12,14 +12,6 @@ export default function Advisor() {
   const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;  
   const [aiData, setAiData] = useState(null);
   const [loadingAI, setLoadingAI] = useState(false);
-  const risk = aiData.riskLevel?.toLowerCase();
-
-color:
-  risk === "low"
-    ? "#00ff9d"
-    : risk === "moderate"
-    ? "#ffaa00"
-    : "#ff4d4d"
   const normalizedInsights = aiData?.insights?.length
   ? [
       // ✅ Insight 1 → Positive
@@ -68,11 +60,9 @@ const {
   incomeGrowth,
 } = financials;
   const getImpactColor = (impact) => {
-  const val = impact?.toLowerCase();
-
-  if (val === "high") return "#ef4444";
-  if (val === "medium") return "#facc15"; // yellow
-  return "#22c55e";
+  if (impact === "high") return "#ef4444";   // red
+  if (impact === "medium") return "#f59e0b"; // yellow
+  return "#22c55e"; // green
 };
 
   useEffect(() => {
@@ -446,15 +436,15 @@ const getAIAdvice = async () => {
     <h3>
   Financial Risk:{" "}
   <span style={{
-  color:
-    risk === "low"
-      ? "#00ff9d"
-      : risk === "moderate"
-      ? "#ffaa00"
-      : "#ff4d4d"
-}}>
-  {risk?.toUpperCase()}
-</span>
+    color:
+      aiData.riskLevel === "low"
+        ? "#00ff9d"
+        : aiData.riskLevel === "moderate"
+        ? "#ffaa00"
+        : "#ff4d4d"
+  }}>
+    {aiData.riskLevel.toUpperCase()}
+  </span>
 </h3>
 
     {/* INSIGHTS */}

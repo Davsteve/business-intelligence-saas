@@ -237,7 +237,7 @@ const depletionDate =
 
 
         <div style={styles.card}>
-          <h2>Monthly Net Profit Target</h2>
+          <h2>Monthly Net Savings Target</h2>
 
           <div style={styles.metricRow}>
             <p>Average Monthly Net</p>

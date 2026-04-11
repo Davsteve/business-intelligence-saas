@@ -21,7 +21,7 @@ export default function Forecast() {
   const [cashReserve, setCashReserve] = useState("");
   const [revenueGrowth, setRevenueGrowth] = useState("");
   const [expenseReduction, setExpenseReduction] = useState("");
-  const [targetNet, setTargetNet] = useState("");
+  const [targetSavings, setTargetSavings] = useState("");
 
   useEffect(() => {
     if (session && businessId) {
@@ -54,8 +54,8 @@ export default function Forecast() {
 
   // ---------------- TARGET PARSE ----------------
 const parsedTarget =
-  targetNet && !isNaN(targetNet)
-    ? parseFloat(targetNet)
+  targetSavings && !isNaN(targetSavings)
+    ? parseFloat(targetSavings)
     : null;
 
   const combinedData = forecastData
@@ -86,20 +86,20 @@ const depletionDate =
 
   // ---------------- MONTHLY NET TARGET ----------------
 
-  const requiredNetIncrease =
-    targetNet && averageNet
-      ? parseFloat(targetNet) - averageNet
-      : null;
+  const requiredSavingsIncrease =
+  targetSavings && averageNet
+    ? parseFloat(targetSavings) - averageNet
+    : null;
 
-  const progressPercent =
-    targetNet && averageNet
-      ? (averageNet / parseFloat(targetNet)) * 100
-      : null;
+const progressPercent =
+  targetSavings && averageNet
+    ? (averageNet / parseFloat(targetSavings)) * 100
+    : null;
 
-  const monthsToTarget =
-    requiredNetIncrease && averageNet > 0
-      ? requiredNetIncrease / averageNet
-      : null;
+const monthsToTarget =
+  requiredSavingsIncrease && averageNet > 0
+    ? requiredSavingsIncrease / averageNet
+    : null;
 
   let progressColor = "#666";
   let performanceMessage = "";
@@ -250,19 +250,19 @@ const depletionDate =
           </h2>
 
           <input
-            type="number"
-            placeholder="Target Monthly Net (₹)"
-            value={targetNet}
-            onChange={(e) => setTargetNet(e.target.value)}
-            style={styles.input}
-          />
+  type="number"
+  placeholder="Target Monthly Savings (₹)"
+  value={targetSavings}
+  onChange={(e) => setTargetSavings(e.target.value)}
+  style={styles.input}
+/>
 
-          {targetNet && (
+          {targetSavings && (
             <>
               <div style={styles.metricRow}>
-                <p>Required Net Increase</p>
+                <p>Required Savings Increase</p>
                 <h3 style={{ color: requiredNetIncrease > 0 ? "#ff4d4d" : "#00ff9d" }}>
-                  {formatCurrency(requiredNetIncrease)}
+                  {formatCurrency(requiredSavingsIncrease)}
                 </h3>
               </div>
 

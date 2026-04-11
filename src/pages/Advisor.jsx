@@ -12,6 +12,29 @@ export default function Advisor() {
   const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;  
   const [aiData, setAiData] = useState(null);
   const [loadingAI, setLoadingAI] = useState(false);
+  const normalizedInsights = aiData?.insights?.length
+  ? [
+      // ✅ Insight 1 → Positive
+      {
+        ...aiData.insights[0],
+        title: "Strong Financial Behavior",
+      },
+
+      // ⚠️ Insight 2 → Risk
+      {
+        ...aiData.insights[1],
+        title: "Improve Financial Safety Buffer",
+        impact: "high",
+      },
+
+      // 🚀 Insight 3 → Growth
+      {
+        ...aiData.insights[2],
+        title: "Growth Opportunity",
+        impact: "medium",
+      },
+    ]
+  : [];
   const getStabilityIndicator = (stability) => {
   if (!stability) return "";
 
@@ -381,7 +404,14 @@ const getAIAdvice = async () => {
       borderRadius: "8px",
       marginBottom: "12px"
     }}>
-      ⚠️ {aiData.summary}
+      <div style={{
+  padding: "12px",
+  background: "#020617",
+  borderRadius: "8px",
+  marginBottom: "12px"
+}}>
+  💡 {aiData.summary}
+</div>
     </div>
 
     <div style={{
@@ -391,16 +421,36 @@ const getAIAdvice = async () => {
   marginBottom: "12px",
   borderLeft: "4px solid #ef4444"
 }}>
-  🚨 <strong>Priority:</strong> {aiData.priority}
+  <div style={{
+  padding: "12px",
+  background: "#1e293b",
+  borderRadius: "8px",
+  marginBottom: "12px",
+  borderLeft: "4px solid #ef4444"
+}}>
+  🎯 <strong>Focus Area:</strong> {aiData.priority}
+</div>
 </div> 
 
     {/* RISK LEVEL */}
-    <h3>Risk Level: {aiData.riskLevel.toUpperCase()}</h3>
+    <h3>
+  Financial Risk:{" "}
+  <span style={{
+    color:
+      aiData.riskLevel === "low"
+        ? "#00ff9d"
+        : aiData.riskLevel === "moderate"
+        ? "#ffaa00"
+        : "#ff4d4d"
+  }}>
+    {aiData.riskLevel.toUpperCase()}
+  </span>
+</h3>
 
     {/* INSIGHTS */}
     <h3 style={{ marginTop: "16px" }}>Key Insights</h3>
 
-    {aiData.insights.map((item, i) => (
+    {normalizedInsights.map((item, i) => (
       <div key={i} style={{
         marginBottom: "12px",
         padding: "12px",
@@ -412,32 +462,42 @@ const getAIAdvice = async () => {
         <strong>{item.title}</strong>
         <p>{item.message}</p>
         <p><b>Action:</b> {item.action}</p>
-        <p><b>Impact:</b> {item.impact}</p>
+        <p>
+  <b>Priority:</b>{" "}
+  <span style={{ color: getImpactColor(item.impact) }}>
+    {item.impact === "high"
+      ? "High"
+      : item.impact === "medium"
+      ? "Medium"
+      : "Low"}
+  </span>
+</p>
         <div style={{ marginTop: "6px" }}>
   <b>Numbers:</b>
 
   {item.numbers?.burn !== undefined && (
-    <div>💸 Burn: {formatCurrency(item.numbers.burn)}</div>
+    <div>💸 Monthly Expenses: {formatCurrency(item.numbers.burn)}</div>
   )}
 
   {item.numbers?.income !== undefined && (
-    <div>💰 Income: {formatCurrency(item.numbers.income)}</div>
+    <div>💰 Monthly Income: {formatCurrency(item.numbers.income)}</div>
+
   )}
 
   {item.numbers?.runwayDays !== undefined && (
-    <div>⏳ Runway: {item.numbers.runwayDays} days</div>
+    <div>⏳ Financial Buffer: {item.numbers.runwayDays} days</div>
   )}
 
   {item.numbers?.burnRatio !== undefined && (
-    <div>📊 Burn Ratio: {(item.numbers.burnRatio * 100).toFixed(1)}%</div>
+    <div>📊 Expense Ratio: {(item.numbers.burnRatio * 100).toFixed(1)}%</div>
   )}
 
   {item.numbers?.investableAmount !== undefined && (
-  <div>📈 Investable: {formatCurrency(item.numbers.investableAmount)}</div>
+  <div>📈 Available to Invest: {formatCurrency(item.numbers.investableAmount)}</div>
 )}
 
   {item.numbers?.surplus !== undefined && (
-  <div>💼 Surplus: {formatCurrency(item.numbers.surplus)}</div>
+  <div>💼 Net Savings: {formatCurrency(item.numbers.surplus)}</div>
 )}
 
   {item.numbers?.gapToTarget !== undefined && (

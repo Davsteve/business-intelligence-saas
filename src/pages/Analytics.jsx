@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { useBusiness } from "../context/BusinessContext";
 import { formatCurrency } from "../utils/formatcurrency";
+import Card from "../components/ui/Card";
 
 import {
   BarChart,

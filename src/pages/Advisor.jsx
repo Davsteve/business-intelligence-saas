@@ -13,9 +13,11 @@ export default function Advisor() {
   const [aiData, setAiData] = useState(null);
   const [loadingAI, setLoadingAI] = useState(false);
   const getStabilityIndicator = (stability) => {
-  if (stability.includes("Very stable")) return "🟢";
-  if (stability.includes("Stable")) return "🟡";
-  if (stability.includes("Moderately")) return "🟠";
+  if (!stability) return "";
+
+  if (stability.toLowerCase().includes("very stable")) return "🟢";
+  if (stability.toLowerCase().includes("stable")) return "🟡";
+  if (stability.toLowerCase().includes("moderate")) return "🟠";
   return "🔴";
 };
   const financials = calculateFinancialHealth(transactions);
@@ -277,7 +279,7 @@ const getAIAdvice = async () => {
   <div style={{ padding: "40px" }}>
 
     <h1 style={{ fontSize: "32px", marginBottom: "30px" }}>
-      AI Strategic Advisor
+      Smart Financial Advisor
     </h1>
 
     {/* HEALTH CARD */}
@@ -289,7 +291,7 @@ const getAIAdvice = async () => {
       boxShadow: "0 0 40px rgba(0, 255, 157, 0.05)"
     }}>
       <h2 style={{ fontSize: "26px" }}>
-        Health Score:{" "}
+        Financial Health Score:{" "}
         <span style={{
           color:
             score >= 75
@@ -303,30 +305,30 @@ const getAIAdvice = async () => {
       </h2>
 
       <p>
-  <strong>Financial Risk:</strong>{" "}
+  <strong>Financial Status:</strong>{" "}
   {riskLevel === "Low"
-    ? "You're in a safe position ✅"
-    : riskLevel === "Moderate"
-    ? "You're okay, but needs attention ⚠️"
-    : riskLevel === "High"
-    ? "You're at risk, act immediately 🚨"
-    : "Critical condition 🚨"}
+  ? "You're in a strong financial position ✅"
+  : riskLevel === "Moderate"
+  ? "Stable overall, but there's room for improvement ⚠️"
+  : riskLevel === "High"
+  ? "You're under financial pressure — take action soon ⚠️"
+  : "Financial situation needs immediate attention 🚨"}
 </p>
 
 <p>
-  <strong>Recent Trend:</strong>{" "}
+  <strong>Income Trend:</strong>{" "}
 
-{trend === "growing" && "Your income is growing 📈"}
-{trend === "declining" && "Your income is declining 📉"}
-{trend === "stable" && "Your income is stable ➖"}
-{trend === "volatile" && "Your income is inconsistent ⚠️"}
-{trend === "growing_volatile" && "Income is growing but inconsistent ⚠️📈"}
-{trend === "declining_volatile" && "Income is declining and unstable 📉⚠️"}
+{trend === "growing" && "Growing steadily 📈"}
+{trend === "declining" && "Declining — needs attention 📉"}
+{trend === "stable" && "Stable ➖"}
+{trend === "volatile" && "Irregular income pattern ⚠️"}
+{trend === "growing_volatile" && "Growing but inconsistent ⚠️📈"}
+{trend === "declining_volatile" && "Declining and unstable ⚠️📉"}
 </p>
 
 <p>
-  <strong>Stability:</strong>{" "}
-  {stability.replace("income", "")} {getStabilityIndicator(stability)}
+  <strong>Financial Stability:</strong>{" "}
+  {stability} {getStabilityIndicator(stability)}
 </p>
     </div>
 
@@ -337,10 +339,10 @@ const getAIAdvice = async () => {
       gap: "20px",
       marginBottom: "40px"
     }}>
-      <MetricCard label="Net Position" value={formatCurrency(net)} />
-<MetricCard label="Avg Monthly Burn" value={formatCurrency(avgMonthlyBurn)} />
+      <MetricCard label="Net Savings" value={formatCurrency(net)} />
+<MetricCard label="Avg Monthly Expenses" value={formatCurrency(avgMonthlyBurn)} />
       <MetricCard 
-  label="Runway" 
+  label="Cash Runway" 
   value={`${Math.round(runwayDays)} days`} 
 />
       <MetricCard label="Top Expense" value={`${topCategory} (${topCategoryPercent.toFixed(1)}%)`} />

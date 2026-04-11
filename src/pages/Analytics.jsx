@@ -23,6 +23,29 @@ export default function Analytics() {
   const { businessId, loading } = useBusiness();
   const [transactions, setTransactions] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const totalIncome = transactions
+  .filter(t => t.type === "income")
+  .reduce((acc, curr) => acc + curr.amount, 0);
+
+const totalExpense = transactions
+  .filter(t => t.type === "expense")
+  .reduce((acc, curr) => acc + curr.amount, 0);
+
+const savings = totalIncome - totalExpense;
+
+const getSpendingMessage = () => {
+  if (totalIncome === 0) return "Start tracking to see insights";
+
+  if (savings < 0) {
+    return `👉 You are overspending by ₹${Math.abs(savings)}`;
+  }
+
+  if (savings === 0) {
+    return "👉 You're breaking even";
+  }
+
+  return `👉 You saved ₹${savings}`;
+};
   const [filter, setFilter] = useState("all");
 
   useEffect(() => {
@@ -237,7 +260,7 @@ export default function Analytics() {
       {/* KPI CARDS */}
       <div style={kpiContainer}>
         <div style={kpiCard}>
-          <p>Net Profit Margin</p>
+          <p>Net Savings Margin</p>
           <h2 style={{ color: profitMargin >= 0 ? "#00ff9d" : "#ff4d4d" }}>
             {profitMargin}%
           </h2>
@@ -257,6 +280,24 @@ export default function Analytics() {
           </h2>
         </div>
       </div>
+
+      <Card
+  style={{
+    marginTop: "16px",
+    padding: "16px",
+    borderRadius: "10px",
+    background: "rgba(255,255,255,0.05)",
+    lineHeight: "1.6"
+  }}
+>
+  <p>You earned: ₹{totalIncome}</p>
+  <p>You spent: ₹{totalExpense}</p>
+  <p>You saved: ₹{savings}</p>
+
+  <p style={{ marginTop: "8px", fontWeight: "bold" }}>
+    {getSpendingMessage()}
+  </p>
+</Card>
 
       {/* FILTER */}
       <div style={{ marginBottom: "30px" }}>

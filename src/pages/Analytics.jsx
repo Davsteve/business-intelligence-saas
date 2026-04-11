@@ -293,37 +293,32 @@ const getSpendingMessage = () => {
         </div>
       </div>
 
-<Card
-  style={{
-    marginTop: "20px",
-    padding: "20px",
-    borderRadius: "12px",
-    background: "#111827",
-  }}
->
-  <h3 style={{ marginBottom: "12px", fontSize: "18px", fontWeight: "600" }}>
-    💡 This Month Summary
-  </h3>
+<div style={{ marginTop: "30px", marginBottom: "20px" }}>
+  <Card>
+    <h3 style={{ marginBottom: "12px", fontSize: "18px", fontWeight: "600" }}>
+      💡 This Month Summary
+    </h3>
 
-  <p>💰 You earned: {formatCurrency(totalIncome)}</p>
-  <p>💸 You spent: {formatCurrency(totalExpense)}</p>
-  <p>📈 You saved: {formatCurrency(savings)}</p>
+    <p>💰 You earned: {formatCurrency(totalIncome)}</p>
+    <p>💸 You spent: {formatCurrency(totalExpense)}</p>
+    <p>📈 You saved: {formatCurrency(savings)}</p>
 
-  <p
-    style={{
-      marginTop: "12px",
-      fontWeight: "bold",
-      color:
-        savings < 0
-          ? "#ef4444"
-          : savings === 0
-          ? "#f59e0b"
-          : "#00ff9d",
-    }}
-  >
-    {getSpendingMessage()}
-  </p>
-</Card>
+    <p
+      style={{
+        marginTop: "12px",
+        fontWeight: "bold",
+        color:
+          savings < 0
+            ? "#ef4444"
+            : savings === 0
+            ? "#f59e0b"
+            : "#00ff9d",
+      }}
+    >
+      {getSpendingMessage()}
+    </p>
+  </Card>
+</div>
 
       {/* FILTER */}
       <div style={{ marginBottom: "30px" }}>

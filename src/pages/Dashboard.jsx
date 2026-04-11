@@ -46,6 +46,34 @@ export default function Dashboard() {
   const [dateDropdownOpen, setDateDropdownOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState("latest");
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+  const generateInsight = () => {
+  if (!cashFlow) return "Start adding transactions to see insights";
+
+  if (cashFlow.latestMonthNet < 0) {
+    return "⚠️ You spent more than you earned this month";
+  }
+
+  if (cashFlow.averageNet < 0) {
+    return "⚠️ You're consistently overspending";
+  }
+
+  if (cashFlow.runway < 30) {
+    return "🚨 At this rate, your money may run out soon";
+  }
+
+  if (cashFlow.trend === "Upward") {
+    return "📈 You're improving your money habits";
+  }
+
+  if (cashFlow.volatilityLevel === "High") {
+    return "⚠️ Your spending is very unpredictable";
+  }
+
+  return "👍 You're managing your money well";
+};
+
+const insight = generateInsight();
+
   const financials = calculateFinancialHealth(transactions);
 
 const {
@@ -433,6 +461,12 @@ const volatilityColor = (() => {
           )}
         </Card>
       )}
+
+      <Card style={styles.insightCard}>
+  <p style={styles.insightText}>
+    {insight}
+  </p>
+</Card>
 
       {/* CASH FLOW */}
       {cashFlow && cashFlow.monthlyData?.length > 0 && (
@@ -1252,5 +1286,18 @@ modalCancel: {
   color: "#e2e8f0",
   cursor: "pointer",
 },
+
+insightCard: {
+    background: "rgba(255,255,255,0.05)",
+    padding: "12px 16px",
+    borderRadius: "10px",
+    marginTop: "16px",
+    marginBottom: "10px",
+    borderLeft: "3px solid #4ade80"
+  },
+  insightText: {
+    fontSize: "14px",
+    opacity: 0.9
+  }
 
 };

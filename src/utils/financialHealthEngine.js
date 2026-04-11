@@ -204,7 +204,7 @@ const runwayDays = runwayMonths * 30;
   // 🔹 Breakdown Object
   const breakdown = [
     {
-      name: "Profit Margin",
+      name: "Savings Rate",
       rawValue: Number(profitMargin.toFixed(2)),
       score: Math.round(marginScore),
       weight: weights.margin,

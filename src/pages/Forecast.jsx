@@ -86,12 +86,6 @@ const depletionDate =
 
   // ---------------- MONTHLY NET TARGET ----------------
 
-const progressPercent = targetSavings
-  ? (forecastData.averageMonthlyNet / targetSavings) * 100
-  : 0;
-
-  const safeProgress = Math.min(progressPercent || 0, 100);
-
 const monthsToTarget =
   requiredSavingsIncrease && averageNet > 0
     ? requiredSavingsIncrease / averageNet
@@ -105,6 +99,12 @@ const avgNet = forecastData?.averageMonthlyNet || 0;
 const requiredSavingsIncrease = Math.max(targetSavings - latestNet, 0);
 
 const isTargetAchieved = latestNet >= targetSavings;
+
+const progressPercent = targetSavings
+  ? (forecastData.averageMonthlyNet / targetSavings) * 100
+  : 0;
+
+  const safeProgress = Math.min(progressPercent || 0, 100);
 
 let performanceMessage = "";
 

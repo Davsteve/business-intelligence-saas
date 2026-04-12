@@ -87,46 +87,50 @@ const depletionDate =
   // ---------------- MONTHLY NET TARGET ----------------
 
   const requiredSavingsIncrease =
-  targetSavings && averageNet
-    ? parseFloat(targetSavings) - averageNet
+  parsedTarget !== null
+    ? Math.max(parsedTarget - latestMonthNet, 0)
     : null;
 
 const progressPercent =
-  targetSavings && averageNet
-    ? (averageNet / parseFloat(targetSavings)) * 100
+  parsedTarget !== null && parsedTarget > 0
+    ? Math.min((latestMonthNet / parsedTarget) * 100, 100)
     : null;
 
+const safeProgress = Math.max(progressPercent || 0, 0);
+
+const improvementCapacity = Math.max(averageNet, latestMonthNet, 1);
+
 const monthsToTarget =
-  requiredSavingsIncrease && averageNet > 0
-    ? requiredSavingsIncrease / averageNet
-    : null;
+  requiredSavingsIncrease > 0
+    ? Math.ceil(requiredSavingsIncrease / improvementCapacity)
+    : 0;
 
   let progressColor = "#666";
   let performanceMessage = "";
 
-  if (progressPercent !== null) {
-    if (averageNet < 0) {
-      progressColor = "#ff4d4d";
-      performanceMessage =
-        "You're spending more than you earn — start by cutting non-essential expenses.";
-    } else if (progressPercent < 50) {
-      progressColor = "#ff4d4d";
-      performanceMessage =
-        "You're far from your goal — consider cutting expenses or boosting income.";
-    } else if (progressPercent < 80) {
-      progressColor = "#ffaa00";
-      performanceMessage =
-        "You're getting closer — a little more consistency will get you there.";
-    } else if (progressPercent < 100) {
-      progressColor = "#4db8ff";
-      performanceMessage =
-        "You're almost there — keep going, you're doing great.";
-    } else {
-      progressColor = "#00ff9d";
-      performanceMessage =
-        "You've hit your goal — great job staying on track!! Consider raising next milestone.";
-    }
+  if (safeProgress !== null) {
+  if (latestMonthNet < 0) {
+    progressColor = "#ff4d4d";
+    performanceMessage =
+      "You're spending more than you earn — focus on cutting unnecessary expenses first.";
+  } else if (safeProgress < 40) {
+    progressColor = "#ff4d4d";
+    performanceMessage =
+      "You're far from your goal — increase income or reduce expenses aggressively.";
+  } else if (safeProgress < 75) {
+    progressColor = "#ffaa00";
+    performanceMessage =
+      "Good progress — you're moving in the right direction. Stay consistent.";
+  } else if (safeProgress < 100) {
+    progressColor = "#4db8ff";
+    performanceMessage =
+      "You're close — a little more effort will get you there.";
+  } else {
+    progressColor = "#00ff9d";
+    performanceMessage =
+      "Goal achieved — great job! Consider setting a higher target.";
   }
+}
 
   return (
     <div style={styles.container}>
@@ -272,7 +276,7 @@ const monthsToTarget =
                     <div
                       style={{
                         ...styles.progressFill,
-                        width: `${Math.min(progressPercent, 120)}%`,
+                        width: `${safeProgress}%`,
                         background: progressColor,
                       }}
                     />
@@ -284,7 +288,7 @@ const monthsToTarget =
                 </>
               )}
 
-              {monthsToTarget && averageNet > 0 && (
+              {parsedTarget && monthsToTarget > 0 && (
                 <div style={{ marginTop: "15px", fontSize: "14px", opacity: 0.7 }}>
                   Estimated {Math.ceil(monthsToTarget)} months
                 </div>

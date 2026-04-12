@@ -98,11 +98,16 @@ const progressPercent =
 
 const safeProgress = Math.max(progressPercent || 0, 0);
 
-const improvementCapacity = Math.max(averageNet, latestMonthNet, 1);
+const baseCapacity = Math.max(latestMonthNet, 1);
+
+// Assume user can improve only 30% per month realistically
+const growthFactor = 0.3;
+
+const effectiveCapacity = baseCapacity * growthFactor;
 
 const monthsToTarget =
   requiredSavingsIncrease > 0
-    ? Math.ceil(requiredSavingsIncrease / improvementCapacity)
+    ? Math.ceil(requiredSavingsIncrease / effectiveCapacity)
     : 0;
 
   let progressColor = "#666";

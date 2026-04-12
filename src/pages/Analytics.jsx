@@ -51,14 +51,14 @@ const getSpendingMessage = () => {
   }
 
   if (savings < 0) {
-    return `⚠️ You're overspending by ₹${formatCurrency(Math.abs(savings))}`;
+    return `⚠️ You're overspending by ${formatCurrency(Math.abs(savings))}`;
   }
 
   if (savings === 0) {
     return "👉 You're breaking even";
   }
 
-  return `💰 You saved ₹${formatCurrency(savings)} — Well done, good job!`;
+  return `💰 You saved ${formatCurrency(savings)} — Well done, good job!`;
 };
   const [filter, setFilter] = useState("all");
 

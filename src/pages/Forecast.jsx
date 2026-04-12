@@ -106,9 +106,9 @@ const progressPercent = targetSavings
 
   const safeProgress = Math.min(progressPercent || 0, 100);
 
-let performanceMessage = "";
-
 let progressColor = "#666";
+
+let performanceMessage = "";
 
 if (!targetSavings) {
   performanceMessage = "Set a savings target to start tracking.";

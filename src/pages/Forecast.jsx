@@ -21,6 +21,7 @@ export default function Forecast() {
   const [cashReserve, setCashReserve] = useState("");
   const [revenueGrowth, setRevenueGrowth] = useState("");
   const [expenseReduction, setExpenseReduction] = useState("");
+  const [targetSavings, setTargetSavings] = useState("");
 
   useEffect(() => {
     if (session && businessId) {
@@ -85,46 +86,47 @@ const depletionDate =
 
   // ---------------- MONTHLY NET TARGET ----------------
 
+  const requiredSavingsIncrease =
+  targetSavings && averageNet
+    ? parseFloat(targetSavings) - averageNet
+    : null;
+
+const progressPercent =
+  targetSavings && averageNet
+    ? (averageNet / parseFloat(targetSavings)) * 100
+    : null;
+
 const monthsToTarget =
   requiredSavingsIncrease && averageNet > 0
     ? requiredSavingsIncrease / averageNet
     : null;
 
-  
+  let progressColor = "#666";
+  let performanceMessage = "";
 
-  const latestNet = forecastData?.latestMonthNet || 0;
-const avgNet = forecastData?.averageMonthlyNet || 0;
-const targetSavings = Number(userInputTarget) || 0;
-
-const requiredSavingsIncrease = Math.max(targetSavings - latestNet, 0);
-
-const isTargetAchieved = latestNet >= targetSavings;
-
-const progressPercent = targetSavings
-  ? (forecastData.averageMonthlyNet / targetSavings) * 100
-  : 0;
-
-  const safeProgress = Math.min(progressPercent || 0, 100);
-
-let progressColor = "#666";
-
-let performanceMessage = "";
-
-if (!targetSavings) {
-  performanceMessage = "Set a savings target to start tracking.";
-} else if (isTargetAchieved) {
-  progressColor = "#00ff9d";
-  performanceMessage = "Target achieved — now focus on consistency.";
-} else if (requiredSavingsIncrease <= targetSavings * 0.2) {
-  progressColor = "#4db8ff";
-  performanceMessage = "You're close — small improvements will get you there.";
-} else if (requiredSavingsIncrease <= targetSavings * 0.5) {
-  progressColor = "#ffaa00";
-  performanceMessage = "Good progress — stay consistent and keep improving.";
-} else {
-  progressColor = "#ff4d4d";
-  performanceMessage = "You're far from your goal — focus on increasing income or reducing expenses.";
-}
+  if (progressPercent !== null) {
+    if (averageNet < 0) {
+      progressColor = "#ff4d4d";
+      performanceMessage =
+        "You're spending more than you earn — start by cutting non-essential expenses.";
+    } else if (progressPercent < 50) {
+      progressColor = "#ff4d4d";
+      performanceMessage =
+        "You're far from your goal — consider cutting expenses or boosting income.";
+    } else if (progressPercent < 80) {
+      progressColor = "#ffaa00";
+      performanceMessage =
+        "You're getting closer — a little more consistency will get you there.";
+    } else if (progressPercent < 100) {
+      progressColor = "#4db8ff";
+      performanceMessage =
+        "You're almost there — keep going, you're doing great.";
+    } else {
+      progressColor = "#00ff9d";
+      performanceMessage =
+        "You've hit your goal — great job staying on track!! Consider raising next milestone.";
+    }
+  }
 
   return (
     <div style={styles.container}>
@@ -259,10 +261,8 @@ if (!targetSavings) {
             <>
               <div style={styles.metricRow}>
                 <p>Required Savings Increase</p>
-                <h3 style={{ color: isTargetAchieved ? "#00ff9d" : "#ff4d4d" }}>
-                  {isTargetAchieved
-  ? "Target Achieved 🎉"
-  : formatCurrency(requiredSavingsIncrease)}
+                <h3 style={{ color: requiredSavingsIncrease > 0 ? "#ff4d4d" : "#00ff9d" }}>
+                  {formatCurrency(requiredSavingsIncrease)}
                 </h3>
               </div>
 
@@ -272,7 +272,7 @@ if (!targetSavings) {
                     <div
                       style={{
                         ...styles.progressFill,
-                        width: `${Math.min(safeProgress, 120)}%`,
+                        width: `${Math.min(progressPercent, 120)}%`,
                         background: progressColor,
                       }}
                     />

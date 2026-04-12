@@ -21,7 +21,6 @@ export default function Forecast() {
   const [cashReserve, setCashReserve] = useState("");
   const [revenueGrowth, setRevenueGrowth] = useState("");
   const [expenseReduction, setExpenseReduction] = useState("");
-  const [targetSavings, setTargetSavings] = useState("");
 
   useEffect(() => {
     if (session && businessId) {
@@ -95,6 +94,7 @@ const monthsToTarget =
 
   const latestNet = forecastData?.latestMonthNet || 0;
 const avgNet = forecastData?.averageMonthlyNet || 0;
+const targetSavings = Number(userInputTarget) || 0;
 
 const requiredSavingsIncrease = Math.max(targetSavings - latestNet, 0);
 

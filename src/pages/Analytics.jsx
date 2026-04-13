@@ -183,6 +183,27 @@ filteredTransactions.forEach((t) => {
 
   const COLORS = ["#00ff9d", "#ff4d4d", "#4db8ff", "#ffaa00", "#aa66ff"];
 
+  const incomeCategoryMap = {};
+
+filteredTransactions.forEach((t) => {
+  if (t.categories?.type !== "income") return;
+
+  const name = t.categories?.name || "Other";
+  incomeCategoryMap[name] =
+    (incomeCategoryMap[name] || 0) + t.amount;
+});
+
+const incomePieData = Object.entries(incomeCategoryMap)
+  .map(([name, value]) => ({ name, value }))
+  .sort((a, b) => b.value - a.value);
+
+  <div style={{
+  display: "flex",
+  gap: "60px",
+  flexWrap: "wrap",
+  alignItems: "stretch"
+}}></div>
+
   // -----------------------
   // TOP EXPENSE CATEGORY
   // -----------------------
@@ -435,6 +456,31 @@ filteredTransactions.forEach((t) => {
           </ResponsiveContainer>
         </div>
       </div>
+
+      <div style={{ width: "100%", maxWidth: "600px", height: "350px" }}>
+  <h3>Income Breakdown</h3>
+  <ResponsiveContainer width="100%" height={300}>
+    <PieChart>
+      <Pie
+        data={incomePieData}
+        dataKey="value"
+        nameKey="name"
+        outerRadius={120}
+        label={({ name, value }) =>
+          `${name}: ${formatCurrency(value)}`
+        }
+      >
+        {incomePieData.map((entry, index) => (
+          <Cell
+            key={`income-cell-${index}`}
+            fill={COLORS[index % COLORS.length]}
+          />
+        ))}
+      </Pie>
+      <Tooltip formatter={(value) => formatCurrency(value)} />
+    </PieChart>
+  </ResponsiveContainer>
+</div>
 
       {/* MONTHLY TREND */}
       <div style={{ marginTop: "60px", height: "400px" }}>

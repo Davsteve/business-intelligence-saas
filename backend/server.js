@@ -78,11 +78,9 @@ app.post("/api/ai", verifyUser, async (req, res) => {
     }
 
     // ✅ DERIVED METRICS (ADD HERE)
-const runwayMonths = burn > 0 ? net / burn : 0;
-
-const runwayDays = Math.max(0, Math.floor(runwayMonths * 30));
-
-const burnRatio = income > 0 ? burn / income : 0;
+const runwayMonths = Number(req.body.runwayMonths || 0);
+const runwayDays = Number(req.body.runwayDays || 0);
+    const burnRatio = income > 0 ? burn / income : 0;
 
     // ✅ RISK LEVEL (DEFINE EARLY)
     const riskLevel =

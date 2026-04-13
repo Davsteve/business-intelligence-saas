@@ -87,19 +87,6 @@ const {
 }
 
   // ------------------------
-  // MONTHLY BURN + RUNWAY
-  // ------------------------
-
-  const monthlyExpenses = {};
-  transactions.forEach((t) => {
-    if (t.categories?.type !== "expense") return;
-    const d = new Date(t.created_at);
-    const key = `${d.getFullYear()}-${d.getMonth()}`;
-    monthlyExpenses[key] = (monthlyExpenses[key] || 0) + Number(t.amount || 0);
-  });
-
-
-  // ------------------------
   // EXPENSE DEPENDENCY
   // ------------------------
 
@@ -366,7 +353,11 @@ const getAIAdvice = async () => {
 <MetricCard label="Avg Monthly Expenses" value={formatCurrency(avgMonthlyBurn)} />
       <MetricCard 
   label="Cash Runway" 
-  value={`${Math.round(runwayDays)} days`} 
+  value={
+    avgMonthlyBurn === 0
+      ? "Unlimited"
+      : `${Math.round(runwayDays)} days`
+  }
 />
       <MetricCard label="Top Expense" value={`${topCategory} (${topCategoryPercent.toFixed(1)}%)`} />
     </div>

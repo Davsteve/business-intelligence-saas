@@ -169,15 +169,17 @@ console.log("Growth:", incomeGrowth);
   // -----------------------
 
   const categoryMap = {};
-  filteredTransactions.forEach((t) => {
-    const name = t.categories?.name || "Other";
-    categoryMap[name] = (categoryMap[name] || 0) + t.amount;
-  });
 
-  const pieData = Object.keys(categoryMap).map((key) => ({
-    name: key,
-    value: categoryMap[key],
-  }));
+filteredTransactions.forEach((t) => {
+  if (t.categories?.type !== "expense") return; // 🔥 FIX
+
+  const name = t.categories?.name || "Other";
+  categoryMap[name] = (categoryMap[name] || 0) + t.amount;
+});
+
+  const pieData = Object.entries(categoryMap)
+  .map(([name, value]) => ({ name, value }))
+  .sort((a, b) => b.value - a.value);
 
   const COLORS = ["#00ff9d", "#ff4d4d", "#4db8ff", "#ffaa00", "#aa66ff"];
 

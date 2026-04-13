@@ -357,7 +357,8 @@ const summary = generateSummary({
   runwayDays,
   burnRatio,
   trend,
-  riskLevel
+  riskLevel, 
+  score
 });
 
 

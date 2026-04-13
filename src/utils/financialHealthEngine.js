@@ -159,39 +159,58 @@ const runwayDays = runwayMonths * 30;
         ) / monthlyNets.length
       : 0;
 
-  // 🔹 Scaling
-  const clamp = (num) =>
-    Math.max(0, Math.min(100, num));
+// 🔥 NEW SCORING MODEL
 
-  const marginScore = clamp((profitMargin / 40) * 100);
-  const runwayScore = clamp((runwayMonths / 12) * 100);
-  const growthScore = clamp((incomeGrowth + 20) * 2.5);
-  const concentrationScore = clamp(
-    100 - topExpensePercent * 1.5
-  );
+let score = 0;
 
-  // 🔹 Weights
-  const weights = {
-    margin: 0.25,
-    runway: 0.25,
-    growth: 0.2,
-    concentration: 0.15,
-    stability: 0.15,
-  };
+// 1. RUNWAY SCORE (40)
+if (runwayDays >= 180) score += 40;
+else if (runwayDays >= 90) score += 30;
+else if (runwayDays >= 45) score += 20;
+else if (runwayDays >= 30) score += 10;
+else score += 5;
 
-  const finalScore =
-    marginScore * weights.margin +
-    runwayScore * weights.runway +
-    growthScore * weights.growth +
-    concentrationScore * weights.concentration;
+// 2. BURN RATIO SCORE (25)
+const burnRatio = totalIncome > 0 ? totalExpense / totalIncome : 1;
 
-  const score = Math.round(finalScore);
+if (burnRatio <= 0.3) score += 25;
+else if (burnRatio <= 0.5) score += 18;
+else if (burnRatio <= 0.7) score += 10;
+else score += 5;
+
+// 3. SAVINGS RATE SCORE (20)
+const savingsRate = totalIncome > 0 ? net / totalIncome : 0;
+
+if (savingsRate >= 0.5) score += 20;
+else if (savingsRate >= 0.3) score += 15;
+else if (savingsRate >= 0.1) score += 10;
+else score += 5;
+
+// 4. INCOME TREND SCORE (15)
+let incomeTrend = "stable";
+
+if (sortedMonths.length >= 2) {
+  const prevIncome = sortedMonths[sortedMonths.length - 2].income;
+  const currIncome = sortedMonths[sortedMonths.length - 1].income;
+
+  if (currIncome > prevIncome) incomeTrend = "growing";
+  else if (currIncome < prevIncome) incomeTrend = "declining";
+}
+
+if (incomeTrend === "growing") score += 15;
+else if (incomeTrend === "stable") score += 10;
+else score += 5;
+
+// FINAL SCORE
+score = Math.min(100, Math.max(0, Math.round(score)));
 
   // 🔹 Risk Classification
-  let riskLevel = "Low";
-  if (score < 70) riskLevel = "Moderate";
-  if (score < 50) riskLevel = "High";
-  if (score < 30) riskLevel = "Critical";
+  let riskLevel;
+
+if (runwayDays < 30) riskLevel = "Critical";
+else if (runwayDays < 90) riskLevel = "High";
+else if (score < 60) riskLevel = "Moderate";
+else riskLevel = "Low";
 
   // 🔹 Status Label Helper
   const getStatus = (metricScore) => {
@@ -203,48 +222,23 @@ const runwayDays = runwayMonths * 30;
 
   // 🔹 Breakdown Object
   const breakdown = [
-    {
-      name: "Savings Rate",
-      rawValue: Number(profitMargin.toFixed(2)),
-      score: Math.round(marginScore),
-      weight: weights.margin,
-      contribution: Math.round(
-        marginScore * weights.margin
-      ),
-      status: getStatus(marginScore),
-    },
-    {
-      name: "Runway",
-      rawValue: Number(runwayMonths.toFixed(2)),
-      score: Math.round(runwayScore),
-      weight: weights.runway,
-      contribution: Math.round(
-        runwayScore * weights.runway
-      ),
-      status: getStatus(runwayScore),
-    },
-    {
-      name: "Income Growth",
-      rawValue: Number(incomeGrowth.toFixed(2)),
-      score: Math.round(growthScore),
-      weight: weights.growth,
-      contribution: Math.round(
-        growthScore * weights.growth
-      ),
-      status: getStatus(growthScore),
-    },
-    {
-      name: "Expense Concentration",
-      rawValue: Number(topExpensePercent.toFixed(2)),
-      score: Math.round(concentrationScore),
-      weight: weights.concentration,
-      contribution: Math.round(
-        concentrationScore *
-          weights.concentration
-      ),
-      status: getStatus(concentrationScore),
-    },
-  ];
+  {
+    name: "Runway Strength",
+    value: runwayDays,
+  },
+  {
+    name: "Burn Ratio",
+    value: burnRatio,
+  },
+  {
+    name: "Savings Rate",
+    value: savingsRate,
+  },
+  {
+    name: "Income Trend",
+    value: incomeTrend,
+  },
+];
 
   let stability = calculateStability(transactions);
 

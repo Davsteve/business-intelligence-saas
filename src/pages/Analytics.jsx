@@ -443,31 +443,6 @@ const incomePieData = Object.entries(incomeCategoryMap)
     alignItems: "flex-start",
   }}
 >
-  {/* EXPENSE PIE */}
-  <div style={{ width: "400px" }}>
-    <h3>Expense Breakdown</h3>
-    <ResponsiveContainer width="100%" height={300}>
-      <PieChart>
-        <Pie
-          data={pieData}
-          dataKey="value"
-          nameKey="name"
-          outerRadius={120}
-          label={({ name, value }) =>
-            `${name}: ${formatCurrency(value)}`
-          }
-        >
-          {pieData.map((entry, index) => (
-            <Cell
-              key={`cell-${index}`}
-              fill={COLORS[index % COLORS.length]}
-            />
-          ))}
-        </Pie>
-        <Tooltip formatter={(value) => formatCurrency(value)} />
-      </PieChart>
-    </ResponsiveContainer>
-  </div>
 
   {/* INCOME PIE */}
   <div style={{ width: "400px" }}>
@@ -486,6 +461,32 @@ const incomePieData = Object.entries(incomeCategoryMap)
           {incomePieData.map((entry, index) => (
             <Cell
               key={`income-cell-${index}`}
+              fill={COLORS[index % COLORS.length]}
+            />
+          ))}
+        </Pie>
+        <Tooltip formatter={(value) => formatCurrency(value)} />
+      </PieChart>
+    </ResponsiveContainer>
+  </div>
+
+  {/* EXPENSE PIE */}
+  <div style={{ width: "400px" }}>
+    <h3>Expense Breakdown</h3>
+    <ResponsiveContainer width="100%" height={300}>
+      <PieChart>
+        <Pie
+          data={pieData}
+          dataKey="value"
+          nameKey="name"
+          outerRadius={120}
+          label={({ name, value }) =>
+            `${name}: ${formatCurrency(value)}`
+          }
+        >
+          {pieData.map((entry, index) => (
+            <Cell
+              key={`cell-${index}`}
               fill={COLORS[index % COLORS.length]}
             />
           ))}

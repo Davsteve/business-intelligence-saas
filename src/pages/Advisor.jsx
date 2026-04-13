@@ -17,7 +17,7 @@ export default function Advisor() {
       // ✅ Insight 1 → Positive
       {
         ...aiData.insights[0],
-        title: "Strong Financial Behavior",
+        title: "Current Financial Position",
       },
 
       // ⚠️ Insight 2 → Risk

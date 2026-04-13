@@ -64,7 +64,6 @@ app.post("/api/ai", verifyUser, async (req, res) => {
   burn,
   growth,
   trend,
-  score, 
   topCategory,
   topCategoryPercent
 } = req.body;
@@ -93,35 +92,7 @@ const runwayDays = Number(req.body.runwayDays || 0);
     // ✅ INSIGHTS (ALWAYS 3)
     const insights = [];
 
-    // 🔥 SCORE-BASED PRIMARY INSIGHT
-if (score !== undefined) {
-  if (score < 35) {
-    insights.push({
-      title: "Financial Danger Zone",
-      message: `Your financial health score is ${score}/100. Your current financial position is at risk.`,
-      action: "Reduce expenses immediately and increase income sources to stabilize your finances.",
-      impact: "high"
-    });
-  } 
-  else if (score < 60) {
-    insights.push({
-      title: "Financial Stability at Risk",
-      message: `Your score of ${score}/100 indicates moderate financial risk.`,
-      action: "Focus on improving savings and extending your runway.",
-      impact: "medium"
-    });
-  } 
-  else {
-    insights.push({
-      title: "Healthy Financial Position",
-      message: `Your financial health score of ${score}/100 reflects good financial discipline.`,
-      action: "Maintain your current habits and explore growth opportunities.",
-      impact: "low"
-    });
-  }
-}
-
-    // 2️⃣ CASH BUFFER
+    // 1️⃣ CASH BUFFER
     if (runwayDays < 30) {
       insights.push({
   title: "Low Cash Buffer",
@@ -268,8 +239,7 @@ if (runwayDays < 15) {
   runwayDays,
   burnRatio,
   trend,
-  riskLevel, 
-  score
+  riskLevel
 }) => {
   let opening = "";
   let condition = "";
@@ -333,22 +303,8 @@ if (runwayDays < 15) {
   forward =
     "Maintaining disciplined spending and monitoring income trends will be key to sustaining financial stability.";
 
-    // 🔥 SCORE CONTEXT
-let scoreContext = "";
-
-if (score >= 75) {
-  scoreContext = "Your financial health is strong overall.";
-} else if (score >= 60) {
-  scoreContext = "Your financial position is fairly stable.";
-} else if (score >= 40) {
-  scoreContext = "Your financial situation needs attention.";
-} else {
-  scoreContext = "Your financial condition is currently under pressure.";
-}
-
-  return `${scoreContext} ${opening} ${condition}, ${runwayContext}. ${trendContext}. ${riskStatement} ${forward}`;
+  return `${opening} ${condition}, ${runwayContext}. ${trendContext}. ${riskStatement} ${forward}`;
 };
-
 
 const summary = generateSummary({
   net,
@@ -357,8 +313,7 @@ const summary = generateSummary({
   runwayDays,
   burnRatio,
   trend,
-  riskLevel, 
-  score
+  riskLevel
 });
 
 
@@ -423,7 +378,6 @@ Here is the user's financial data:
 - Expense Ratio: ${Math.round(burnRatio * 100)}%
 - Income Growth: ${(growth || 0).toFixed(1)}%
 - Income Trend: ${trend}
-- Score: ${score}
 - Top Expense Category: ${topCategory} (${(topCategoryPercent || 0).toFixed(1)}%)
 
 Priority Context:

@@ -273,7 +273,7 @@ console.log("Growth:", incomeGrowth);
         </div>
 
         <div style={kpiCard}>
-          <p>Income Growth (MoM)</p>
+          <p>Income Growth (This month vs last month)</p>
           <h2 style={{ color: incomeGrowth >= 0 ? "#00ff9d" : "#ff4d4d" }}>
             {formattedGrowth}%
           </h2>

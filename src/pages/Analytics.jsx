@@ -24,26 +24,10 @@ export default function Analytics() {
   const { businessId, loading } = useBusiness();
   const [transactions, setTransactions] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const now = new Date();
-
-const currentMonthTransactions = transactions.filter((t) => {
-  const date = new Date(t.created_at);
-
-  return (
-    date.getMonth() === now.getMonth() &&
-    date.getFullYear() === now.getFullYear()
-  );
-});
   
-const totalIncome = currentMonthTransactions
-  .filter(t => t.categories?.type === "income")
-  .reduce((acc, curr) => acc + curr.amount, 0);
-
-const totalExpense = currentMonthTransactions
-  .filter(t => t.categories?.type === "expense")
-  .reduce((acc, curr) => acc + curr.amount, 0);
-
-const savings = totalIncome - totalExpense;
+const totalIncome = income;
+const totalExpense = expense;
+const savings = netSavings;
 
 const getSpendingMessage = () => {
   if (currentMonthTransactions.length === 0) {
@@ -60,7 +44,7 @@ const getSpendingMessage = () => {
 
   return `💰 You saved ${formatCurrency(savings)} — Well done, good job!`;
 };
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState("thisMonth");
 
   useEffect(() => {
     if (!businessId) return;
@@ -129,46 +113,53 @@ const getSpendingMessage = () => {
     .reduce((acc, curr) => acc + curr.amount, 0);
 
   const netProfit = income - expense;
-  const profitMargin =
-    income > 0 ? ((savings / income) * 100).toFixed(1) : 0;
+  const netSavings = income - expense;
+
+const profitMargin =
+  income > 0 ? ((netSavings / income) * 100).toFixed(1) : 0;
 
   // -----------------------
   // MONTH-OVER-MONTH INCOME GROWTH
   // -----------------------
 
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
-  const lastMonthDate = new Date(currentYear, currentMonth - 1, 1);
+  const now = new Date();
 
-  let thisMonthIncome = 0;
-  let lastMonthIncome = 0;
+const currentMonth = now.getMonth();
+const currentYear = now.getFullYear();
 
-  transactions.forEach((t) => {
-    const date = new Date(t.created_at);
-    if (t.categories?.type !== "income") return;
+const lastMonthDate = new Date(currentYear, currentMonth - 1, 1);
 
-    if (
-      date.getMonth() === currentMonth &&
-      date.getFullYear() === currentYear
-    ) {
-      thisMonthIncome += t.amount;
-    }
+const thisMonthIncome = transactions
+  .filter((t) => {
+    const d = new Date(t.created_at);
+    return (
+      t.categories?.type === "income" &&
+      d.getMonth() === currentMonth &&
+      d.getFullYear() === currentYear
+    );
+  })
+  .reduce((sum, t) => sum + t.amount, 0);
 
-    if (
-      date.getMonth() === lastMonthDate.getMonth() &&
-      date.getFullYear() === lastMonthDate.getFullYear()
-    ) {
-      lastMonthIncome += t.amount;
-    }
-  });
+const lastMonthIncome = transactions
+  .filter((t) => {
+    const d = new Date(t.created_at);
+    return (
+      t.categories?.type === "income" &&
+      d.getMonth() === lastMonthDate.getMonth() &&
+      d.getFullYear() === lastMonthDate.getFullYear()
+    );
+  })
+  .reduce((sum, t) => sum + t.amount, 0);
 
-  const incomeGrowth =
-    lastMonthIncome > 0
-      ? (
-          ((thisMonthIncome - lastMonthIncome) / lastMonthIncome) *
-          100
-        ).toFixed(1)
-      : 0;
+let incomeGrowth = 0;
+
+if (lastMonthIncome > 0) {
+  incomeGrowth =
+    ((thisMonthIncome - lastMonthIncome) / lastMonthIncome) * 100;
+}
+
+const formattedGrowth = incomeGrowth.toFixed(1);
+
 
   // -----------------------
   // CATEGORY BREAKDOWN
@@ -281,7 +272,7 @@ const getSpendingMessage = () => {
         <div style={kpiCard}>
           <p>Income Growth (MoM)</p>
           <h2 style={{ color: incomeGrowth >= 0 ? "#00ff9d" : "#ff4d4d" }}>
-            {incomeGrowth}%
+            {formattedGrowth}%
           </h2>
         </div>
 
@@ -296,7 +287,13 @@ const getSpendingMessage = () => {
 <div style={{ marginTop: "30px", marginBottom: "20px" }}>
   <Card>
     <h3 style={{ marginBottom: "12px", fontSize: "18px", fontWeight: "600" }}>
-      💡 This Month Summary
+      💡 {
+    filter === "thisMonth"
+      ? "This Month Summary"
+      : filter === "lastMonth"
+      ? "Last Month Summary"
+      : "All Time Summary"
+  }
     </h3>
 
     <p>💰 You earned: {formatCurrency(totalIncome)}</p>

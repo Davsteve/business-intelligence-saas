@@ -457,29 +457,66 @@ const incomePieData = Object.entries(incomeCategoryMap)
         </div>
       </div>
 
-      <div style={{ width: "100%", maxWidth: "600px", height: "350px" }}>
-  <h3>Income Breakdown</h3>
-  <ResponsiveContainer width="100%" height={300}>
-    <PieChart>
-      <Pie
-        data={incomePieData}
-        dataKey="value"
-        nameKey="name"
-        outerRadius={120}
-        label={({ name, value }) =>
-          `${name}: ${formatCurrency(value)}`
-        }
-      >
-        {incomePieData.map((entry, index) => (
-          <Cell
-            key={`income-cell-${index}`}
-            fill={COLORS[index % COLORS.length]}
-          />
-        ))}
-      </Pie>
-      <Tooltip formatter={(value) => formatCurrency(value)} />
-    </PieChart>
-  </ResponsiveContainer>
+      <div
+  style={{
+    display: "flex",
+    gap: "40px",
+    flexWrap: "wrap", // keeps responsive
+    justifyContent: "center",
+    alignItems: "flex-start",
+  }}
+>
+  {/* EXPENSE PIE */}
+  <div style={{ width: "400px" }}>
+    <h3>Expense Breakdown</h3>
+    <ResponsiveContainer width="100%" height={300}>
+      <PieChart>
+        <Pie
+          data={pieData}
+          dataKey="value"
+          nameKey="name"
+          outerRadius={120}
+          label={({ name, value }) =>
+            `${name}: ${formatCurrency(value)}`
+          }
+        >
+          {pieData.map((entry, index) => (
+            <Cell
+              key={`cell-${index}`}
+              fill={COLORS[index % COLORS.length]}
+            />
+          ))}
+        </Pie>
+        <Tooltip formatter={(value) => formatCurrency(value)} />
+      </PieChart>
+    </ResponsiveContainer>
+  </div>
+
+  {/* INCOME PIE */}
+  <div style={{ width: "400px" }}>
+    <h3>Income Breakdown</h3>
+    <ResponsiveContainer width="100%" height={300}>
+      <PieChart>
+        <Pie
+          data={incomePieData}
+          dataKey="value"
+          nameKey="name"
+          outerRadius={120}
+          label={({ name, value }) =>
+            `${name}: ${formatCurrency(value)}`
+          }
+        >
+          {incomePieData.map((entry, index) => (
+            <Cell
+              key={`income-cell-${index}`}
+              fill={COLORS[index % COLORS.length]}
+            />
+          ))}
+        </Pie>
+        <Tooltip formatter={(value) => formatCurrency(value)} />
+      </PieChart>
+    </ResponsiveContainer>
+  </div>
 </div>
 
       {/* MONTHLY TREND */}

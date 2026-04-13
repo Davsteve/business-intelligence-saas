@@ -436,23 +436,6 @@ const incomePieData = Object.entries(incomeCategoryMap)
         <div style={{ width: "100%", maxWidth: "600px", height: "350px", minHeight: "350px" }}>
           <h3>Category Breakdown</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={pieData}
-                dataKey="value"
-                nameKey="name"
-                outerRadius={120}
-                label={({ name, value }) => `${name}: ${formatCurrency(value)}`}
-              >
-                {pieData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value) => formatCurrency(value)} />
-            </PieChart>
           </ResponsiveContainer>
         </div>
       </div>

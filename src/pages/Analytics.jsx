@@ -130,7 +130,7 @@ const getSpendingMessage = () => {
 
   const netProfit = income - expense;
   const profitMargin =
-    income > 0 ? ((netProfit / income) * 100).toFixed(1) : 0;
+    income > 0 ? ((savings / income) * 100).toFixed(1) : 0;
 
   // -----------------------
   // MONTH-OVER-MONTH INCOME GROWTH

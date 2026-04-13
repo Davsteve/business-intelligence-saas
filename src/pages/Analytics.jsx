@@ -432,12 +432,6 @@ const incomePieData = Object.entries(incomeCategoryMap)
             </BarChart>
           </ResponsiveContainer>
         </div>
-
-        <div style={{ width: "100%", maxWidth: "600px", height: "350px", minHeight: "350px" }}>
-          <h3>Category Breakdown</h3>
-          <ResponsiveContainer width="100%" height={300}>
-          </ResponsiveContainer>
-        </div>
       </div>
 
       <div

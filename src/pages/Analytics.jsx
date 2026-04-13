@@ -159,6 +159,10 @@ if (lastMonthIncome > 0) {
 
 const formattedGrowth = incomeGrowth.toFixed(1);
 
+console.log("==== MoM DEBUG ====");
+console.log("This Month Income:", thisMonthIncome);
+console.log("Last Month Income:", lastMonthIncome);
+console.log("Growth:", incomeGrowth);
 
   // -----------------------
   // CATEGORY BREAKDOWN

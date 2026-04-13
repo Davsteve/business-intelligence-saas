@@ -24,13 +24,10 @@ export default function Analytics() {
   const { businessId, loading } = useBusiness();
   const [transactions, setTransactions] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  
-const totalIncome = income;
-const totalExpense = expense;
-const savings = netSavings;
+  const now = new Date();
 
 const getSpendingMessage = () => {
-  if (currentMonthTransactions.length === 0) {
+  if (filteredTransactions.length === 0) {
     return "Add your first transaction this month 🚀";
   }
 
@@ -115,14 +112,16 @@ const getSpendingMessage = () => {
   const netProfit = income - expense;
   const netSavings = income - expense;
 
+  const totalIncome = income;
+const totalExpense = expense;
+const savings = netSavings;
+
 const profitMargin =
   income > 0 ? ((netSavings / income) * 100).toFixed(1) : 0;
 
   // -----------------------
   // MONTH-OVER-MONTH INCOME GROWTH
   // -----------------------
-
-  const now = new Date();
 
 const currentMonth = now.getMonth();
 const currentYear = now.getFullYear();

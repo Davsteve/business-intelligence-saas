@@ -351,12 +351,15 @@ const getAIAdvice = async () => {
     }}>
       <MetricCard label="Net Savings" value={formatCurrency(net)} />
 <MetricCard label="Avg Monthly Expenses" value={formatCurrency(avgMonthlyBurn)} />
-      <MetricCard 
-  label="Cash Runway" 
+      <MetricCard
+  label="Estimated Runway"
   value={
-    avgMonthlyBurn === 0
-      ? "Unlimited"
-      : `${Math.round(runwayDays)} days`
+    <div>
+      <div>{runwayDisplay}</div>
+      <span style={{ fontSize: "12px", opacity: 0.6 }}>
+        Based on your historical income and expenses
+      </span>
+    </div>
   }
 />
       <MetricCard label="Top Expense" value={`${topCategory} (${topCategoryPercent.toFixed(1)}%)`} />

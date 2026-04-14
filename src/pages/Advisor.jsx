@@ -361,7 +361,7 @@ const getAIAdvice = async () => {
     <div>
       <div>{runwayDisplay}</div>
       <span style={{ fontSize: "12px", opacity: 0.6 }}>
-        Based on your historical income and expenses
+        Calculated from your net savings and spending patterns
       </span>
     </div>
   }

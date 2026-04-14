@@ -119,7 +119,7 @@ if (
     } else if (runwayDays < 90) {
   insights.push({
     title: "Moderate Cash Buffer",
-    message: `You currently have ${runwayDays} days of runway. While this provides some stability, it may not be sufficient to handle unexpected financial shocks.`,
+    message: `Based on your historical income and expense, You currently have ${runwayDays} days of runway. While this provides some stability, it may not be sufficient to handle unexpected financial shocks.`,
     action: `Increase your runway to at least 120 days by reducing expenses by approximately ₹${Math.round(burn * 0.15)} or improving income streams.`,
     impact: "medium",
     numbers: {

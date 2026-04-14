@@ -132,13 +132,13 @@ income: totalIncome
   insights.push({
     title: "Moderate Cash Buffer",
     message: `Based on your historical income and expense, You currently have ${runwayDays} days of runway. While this provides some stability, it may not be sufficient to handle unexpected financial shocks.`,
-    action: `Increase your runway to at least 120 days by reducing expenses by approximately ₹${Math.round(burn * 0.15)} or improving income streams.`,
+    action: `Increase your runway to at least 120 days by reducing expenses by approximately ₹${Math.round(avgMonthlyExpenses * 0.15)} or improving income streams.`,
     impact: "medium",
     numbers: {
       runwayDays,
       burn: avgMonthlyExpenses,
 income: totalIncome,
-      suggestedCut: Math.round(burn * 0.15)
+      suggestedCut: Math.round(avgMonthlyExpenses * 0.15)
     }
   });
 
@@ -161,8 +161,8 @@ income: totalIncome,
     if (burnRatio > 0.7) {
       insights.push({
   title: "High Burn Rate",
-  message: `You are spending ₹${burn} against an income of ₹${income}, resulting in a ${Math.round(burnRatio * 100)}% burn ratio.`,
-  action: `Reduce expenses by ₹${Math.round(burn * 0.2)} to bring burn ratio below 60%.`,
+  message: `You are spending ₹${avgMonthlyExpenses} against an income of ₹${income}, resulting in a ${Math.round(burnRatio * 100)}% burn ratio.`,
+  action: `Reduce expenses by ₹${Math.round(avgMonthlyExpenses * 0.2)} to bring burn ratio below 60%.`,
   impact: "high",
   numbers: {
     burn: avgMonthlyExpenses,
@@ -173,14 +173,14 @@ income: totalIncome,
     } else if (burnRatio > 0.5) {
   insights.push({
     title: "Moderate Burn",
-    message: `Your burn ratio is ${Math.round(burnRatio * 100)}%, with expenses of ₹${burn} against income of ₹${income}. This is manageable but leaves limited margin for error.`,
-    action: `Optimize expenses by cutting approximately ₹${Math.round(burn * 0.1)} to improve financial flexibility.`,
+    message: `Your burn ratio is ${Math.round(burnRatio * 100)}%, with expenses of ₹${avgMonthlyExpenses} against income of ₹${totalIncome}. This is manageable but leaves limited margin for error.`,
+    action: `Optimize expenses by cutting approximately ₹${Math.round(avgMonthlyExpenses * 0.1)} to improve financial flexibility.`,
     impact: "medium",
     numbers: {
       burn: avgMonthlyExpenses,
 income: totalIncome,
       burnRatio,
-      suggestedCut: Math.round(burn * 0.1)
+      suggestedCut: Math.round(avgMonthlyExpenses * 0.1)
     }
   });
 
@@ -188,14 +188,14 @@ income: totalIncome,
   insights.push({
     title: "Efficient Spending",
     message: `Your burn ratio is a healthy ${Math.round(burnRatio * 100)}%, with expenses well aligned to your income of ₹${income}.`,
-    action: `Maintain current discipline. You may consider reallocating ₹${Math.round((income - burn) * 0.2)} towards savings or growth.`,
+    action: `Maintain current discipline. You may consider reallocating ₹${Math.round((totalIncome - avgMonthlyExpenses) * 0.2)} towards savings or growth.`,
     impact: "low",
     numbers: {
       burn: avgMonthlyExpenses,
 income: totalIncome,
       burnRatio,
-      surplus: income - burn,
-      investableAmount: Math.round((income - burn) * 0.2)
+      surplus: totalIncome - avgMonthlyExpenses,
+      investableAmount: Math.round((totalIncome - avgMonthlyExpenses) * 0.2)
     }
       });
     }
@@ -204,7 +204,7 @@ income: totalIncome,
 if (incomeGrowth < 0) {
   insights.push({
     title: "Declining Income",
-    message: `Your income growth is ${growth.toFixed(1)}%, indicating a downward trend.`,
+    message: `Your income growth is ${incomeGrowth.toFixed(1)}%, indicating a downward trend.`,
     action: `Increase revenue streams or pricing to reverse the decline within the next month.`,
     impact: "high",
     numbers: {
@@ -216,21 +216,21 @@ if (incomeGrowth < 0) {
 } else if (incomeGrowth < 10) {
   insights.push({
     title: "Slow Growth",
-    message: `Your income is growing at ${growth.toFixed(1)}%, which is positive but relatively slow for sustainable expansion.`,
+    message: `Your income is growing at ${incomeGrowth.toFixed(1)}%, which is positive but relatively slow for sustainable expansion.`,
     action: `Aim to increase growth to at least 10–15% by adding new income streams or improving conversion efficiency.`,
     impact: "medium",
     numbers: {
       incomeGrowth,
       income: totalIncome,
       targetGrowth: 12,
-      gapToTarget: +(12 - growth).toFixed(1)
+      gapToTarget: +(12 - incomeGrowth).toFixed(1)
     }
   });
 
 } else {
   insights.push({
     title: "Strong Growth",
-    message: `Your income is growing at a healthy ${growth.toFixed(1)}%, indicating strong upward momentum.`,
+    message: `Your income is growing at a healthy ${incomeGrowth.toFixed(1)}%, indicating strong upward momentum.`,
     action: `Capitalize on this by reinvesting approximately ₹${Math.round(totalIncome * 0.2)} into scaling operations or marketing.`,
     impact: "low",
     numbers: {
@@ -343,6 +343,10 @@ const summary = generateSummary({
     // 🧠 AI ENHANCEMENT (SAFE)
 let aiSummary = summary;
 let aiInsights = insights;
+let score = 50; // temporary
+let riskLevel = "MODERATE";
+let totalExpense = avgMonthlyExpenses;
+let avgMonthlyIncome = totalIncome;
 
 try {
   const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {

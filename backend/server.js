@@ -69,13 +69,7 @@ app.post("/api/ai", verifyUser, async (req, res) => {
 } = req.body;
 
     // ✅ VALIDATION FIRST
-    if (
-      !Number.isFinite(net) ||
-      !Number.isFinite(burn) ||
-      !Number.isFinite(income)
-    ) {
-      return res.status(400).json({ error: "Invalid input data" });
-    }
+    
 
     // ✅ DERIVED METRICS (ADD HERE)
     const { transactions } = req.body;
@@ -96,6 +90,15 @@ const {
   runwayDays,
   stability
 } = financialData;
+
+if (
+  !Number.isFinite(net) ||
+  !Number.isFinite(avgMonthlyExpenses) ||
+  !Number.isFinite(totalIncome)
+) {
+  console.error("Invalid data:", { net, avgMonthlyExpenses, totalIncome });
+  return res.status(400).json({ error: "Invalid financial data" });
+}
 
     // ✅ INSIGHTS (ALWAYS 3)
     const insights = [];
@@ -505,6 +508,7 @@ return res.json({
   priority,
   riskLevel,
   insights: aiInsights,
+  avgMonthlyBurn: avgMonthlyExpenses,
   numbers: {
     surplus: Math.round(safeSurplus),
     investableAmount: Math.round(investableAmount),

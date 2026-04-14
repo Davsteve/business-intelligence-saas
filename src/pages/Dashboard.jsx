@@ -440,13 +440,13 @@ const volatilityColor = (() => {
                 <div key={index} style={styles.breakdownCard}>
                   <div style={styles.breakdownRow}>
                     <span>{value.name}</span>
-<span>{value.score} / 100</span>
+<span>{value.value} / 100</span>
                   </div>
 
                   <div style={styles.innerProgress}>
                     <div
                       style={{
-                        width: `${value.score}%`,
+                        width: `${value.value}%`,
                         height: "100%",
                         background:
   value.score >= 75
@@ -459,7 +459,6 @@ const volatilityColor = (() => {
                   </div>
 
                   <div style={styles.breakdownMeta}>
-  <span>Status: {value.status}</span>
 </div>
                 </div>
               ))}

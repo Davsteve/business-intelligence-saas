@@ -219,11 +219,11 @@ const getAIAdvice = async () => {
 
     if (
   !Number.isFinite(net) ||
-  !Number.isFinite(avgMonthlyBurn) ||
+  !Number.isFinite(avgMonthlyBurn ?? 0) ||
   !Number.isFinite(totalIncome)
 ) {
   console.error("Invalid data:", { net, avgMonthlyBurn, totalIncome });
-  throw new Error("Invalid financial data");
+  return;
 }
 
     const session = await supabase.auth.getSession();
@@ -238,7 +238,7 @@ const getAIAdvice = async () => {
       body: JSON.stringify({
   net: Number(net),
   income: Number(totalIncome),
-  burn: Number(avgMonthlyBurn),
+  burn: Number(avgMonthlyBurn || 0),
   runwayMonths: Number(runwayMonths),
   runwayDays: Number(runwayDays),
   burnRatio: totalIncome > 0 ? avgMonthlyBurn / totalIncome : 0,

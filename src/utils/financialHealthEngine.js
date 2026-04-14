@@ -273,6 +273,9 @@ if (runwayMonths < 1 || net < avgMonthlyBurn) {
   avgMonthlyExpenses: Number(
     (totalExpense / (sortedMonths.length || 1)).toFixed(2)
   ),
+  avgMonthlyBurn: Number(
+  (totalExpense / (sortedMonths.length || 1)).toFixed(2)
+),
 
   // Growth & Trend
   incomeGrowth: Number(incomeGrowth.toFixed(2)),

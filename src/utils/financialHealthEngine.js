@@ -232,48 +232,23 @@ else riskLevel = "Low";
 
   // 🔹 Breakdown Object
   const breakdown = [
-    {
-      name: "Savings Rate",
-      rawValue: Number(profitMargin.toFixed(2)),
-      score: Math.round(marginScore),
-      weight: weights.margin,
-      contribution: Math.round(
-        marginScore * weights.margin
-      ),
-      status: getStatus(marginScore),
-    },
-    {
-      name: "Runway",
-      rawValue: Number(runwayMonths.toFixed(2)),
-      score: Math.round(runwayScore),
-      weight: weights.runway,
-      contribution: Math.round(
-        runwayScore * weights.runway
-      ),
-      status: getStatus(runwayScore),
-    },
-    {
-      name: "Income Growth",
-      rawValue: Number(incomeGrowth.toFixed(2)),
-      score: Math.round(growthScore),
-      weight: weights.growth,
-      contribution: Math.round(
-        growthScore * weights.growth
-      ),
-      status: getStatus(growthScore),
-    },
-    {
-      name: "Expense Concentration",
-      rawValue: Number(topExpensePercent.toFixed(2)),
-      score: Math.round(concentrationScore),
-      weight: weights.concentration,
-      contribution: Math.round(
-        concentrationScore *
-          weights.concentration
-      ),
-      status: getStatus(concentrationScore),
-    },
-  ];
+  {
+    name: "Runway Strength",
+    value: Math.round((runwayMonths / 6) * 100),
+  },
+  {
+    name: "Savings Rate",
+    value: Math.round(savingsRate),
+  },
+  {
+    name: "Burn Control",
+    value: Math.round((1 - burnRatio) * 100),
+  },
+  {
+    name: "Income Growth",
+    value: Math.round(incomeGrowth),
+  },
+];
 
   let stability = calculateStability(transactions);
 

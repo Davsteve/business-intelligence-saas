@@ -12,10 +12,6 @@ export default function Advisor() {
   const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;  
   const [aiData, setAiData] = useState(null);
   const [loadingAI, setLoadingAI] = useState(false);
-  const runwayDisplay =
-  avgMonthlyBurn <= 0
-    ? "Unlimited"
-    : `${Math.round(runwayDays)} days`;
   const normalizedInsights = aiData?.insights?.length
   ? [
       // ✅ Insight 1 → Positive
@@ -63,6 +59,10 @@ const {
   totalIncome,
   incomeGrowth,
 } = financials;
+const runwayDisplay =
+  avgMonthlyBurn <= 0
+    ? "Unlimited"
+    : `${Math.round(runwayDays)} days`;
   const getImpactColor = (impact) => {
   if (impact === "high") return "#ef4444";   // red
   if (impact === "medium") return "#f59e0b"; // yellow

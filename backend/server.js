@@ -71,6 +71,16 @@ console.log("📥 Incoming transactions:", transactions);
 
 const financialData = calculateFinancialHealth(transactions);
 
+// ✅ CURRENT MONTH EXTRACTION (CRITICAL)
+const latestMonthIncome =
+  financialData?.monthlyIncomeArray?.slice(-1)[0] || 0;
+
+const latestMonthNet =
+  financialData?.monthlyNets?.slice(-1)[0] || 0;
+
+// If net = income - expense → expense = income - net
+const latestMonthExpense = latestMonthIncome - latestMonthNet;
+
 console.log("financialData:", financialData);
 
 if (!financialData) {
@@ -106,18 +116,11 @@ if (
   return res.status(400).json({ error: "Invalid financial data" });
 }
 
-const surplus = totalIncome - avgMonthlyExpenses;
-
-// Prevent negative values
+const surplus = latestMonthIncome - latestMonthExpense;
 const safeSurplus = Math.max(0, surplus);
 
-// 50% safety buffer
 const safetyReserve = safeSurplus * 0.5;
-
-// What user can actually use
 const investableAmount = safeSurplus - safetyReserve;
-
-// Realistic reinvestment (not aggressive)
 const reinvestment = investableAmount * 0.6;
 
     // ✅ INSIGHTS (ALWAYS 3)
@@ -132,21 +135,21 @@ const reinvestment = investableAmount * 0.6;
   impact: "high",
   numbers: {
     runwayDays,
-    burn: avgMonthlyExpenses,
-income: totalIncome
+    income: latestMonthIncome,
+burn: latestMonthExpense
   }
 });
     } else if (runwayDays < 90) {
   insights.push({
     title: "Moderate Cash Buffer",
     message: `Based on your historical income and expense, You currently have ${runwayDays} days of runway. While this provides some stability, it may not be sufficient to handle unexpected financial shocks.`,
-    action: `Increase your runway to at least 120 days by reducing expenses by approximately ₹${Math.round(avgMonthlyExpenses * 0.15)} or improving income streams.`,
+    action: `Increase your runway to at least 120 days by reducing expenses by approximately ₹${Math.round(latestMonthExpense * 0.15)} or improving income streams.`,
     impact: "medium",
     numbers: {
       runwayDays,
-      burn: avgMonthlyExpenses,
-income: totalIncome,
-      suggestedCut: Math.round(avgMonthlyExpenses * 0.15)
+      income: latestMonthIncome,
+burn: latestMonthExpense,
+      suggestedCut: Math.round(latestMonthExpense * 0.15)
     }
   });
 
@@ -158,8 +161,8 @@ income: totalIncome,
     impact: "low",
     numbers: {
       runwayDays,
-      burn: avgMonthlyExpenses,
-income: totalIncome,
+      income: latestMonthIncome,
+burn: latestMonthExpense,
       investableAmount: Math.round(net * 0.2)
     }
       });
@@ -169,41 +172,41 @@ income: totalIncome,
     if (burnRatio > 0.7) {
       insights.push({
   title: "High Burn Rate",
-  message: `You are spending ₹${avgMonthlyExpenses} against an income of ₹${totalIncome}, resulting in a ${Math.round(burnRatio * 100)}% burn ratio.`,
-  action: `Reduce expenses by ₹${Math.round(avgMonthlyExpenses * 0.2)} to bring burn ratio below 60%.`,
+  message: `You are spending ₹${latestMonthExpense} against an income of ₹${latestMonthIncome}, resulting in a ${Math.round(burnRatio * 100)}% burn ratio.`,
+  action: `Reduce expenses by ₹${Math.round(latestMonthExpense * 0.2)} to bring burn ratio below 60%.`,
   impact: "high",
   numbers: {
-    burn: avgMonthlyExpenses,
-income: totalIncome,
+    income: latestMonthIncome,
+burn: latestMonthExpense,
     burnRatio
   }
 });
     } else if (burnRatio > 0.5) {
   insights.push({
     title: "Moderate Burn",
-    message: `Your burn ratio is ${Math.round(burnRatio * 100)}%, with expenses of ₹${avgMonthlyExpenses} against income of ₹${totalIncome}. This is manageable but leaves limited margin for error.`,
-    action: `Optimize expenses by cutting approximately ₹${Math.round(avgMonthlyExpenses * 0.1)} to improve financial flexibility.`,
+    message: `Your burn ratio is ${Math.round(burnRatio * 100)}%, with expenses of ₹${latestMonthExpense} against income of ₹${latestMonthIncome}. This is manageable but leaves limited margin for error.`,
+    action: `Optimize expenses by cutting approximately ₹${Math.round(latestMonthExpense * 0.1)} to improve financial flexibility.`,
     impact: "medium",
     numbers: {
-      burn: avgMonthlyExpenses,
-income: totalIncome,
+      income: latestMonthIncome,
+burn: latestMonthExpense,
       burnRatio,
-      suggestedCut: Math.round(avgMonthlyExpenses * 0.1)
+      suggestedCut: Math.round(latestMonthExpense * 0.1)
     }
   });
 
 } else {
   insights.push({
     title: "Efficient Spending",
-    message: `Your burn ratio is a healthy ${Math.round(burnRatio * 100)}%, with expenses well aligned to your income of ₹${totalIncome}.`,
-    action: `Maintain current discipline. You may consider reallocating ₹${Math.round((totalIncome - avgMonthlyExpenses) * 0.2)} towards savings or growth.`,
+    message: `Your burn ratio is a healthy ${Math.round(burnRatio * 100)}%, with expenses well aligned to your income of ₹${latestMonthIncome}.`,
+    action: `Maintain current discipline. You may consider reallocating ₹${Math.round((latestMonthIncome - latestMonthExpense) * 0.2)} towards savings or growth.`,
     impact: "low",
     numbers: {
-      burn: avgMonthlyExpenses,
-income: totalIncome,
+      income: latestMonthIncome,
+burn: latestMonthExpense,
       burnRatio,
-      surplus: totalIncome - avgMonthlyExpenses,
-      investableAmount: Math.round((totalIncome - avgMonthlyExpenses) * 0.2)
+      surplus: latestMonthIncome - latestMonthExpense,
+      investableAmount: Math.round((latestMonthIncome - latestMonthExpense) * 0.2)
     }
       });
     }
@@ -217,7 +220,7 @@ if (incomeGrowth < 0) {
     impact: "high",
     numbers: {
       incomeGrowth,
-      income: totalIncome
+      income: latestMonthIncome
     }
   });
 
@@ -229,7 +232,7 @@ if (incomeGrowth < 0) {
     impact: "medium",
     numbers: {
       incomeGrowth,
-      income: totalIncome,
+      income: latestMonthIncome,
       targetGrowth: 12,
       gapToTarget: +(12 - incomeGrowth).toFixed(1)
     }
@@ -239,12 +242,12 @@ if (incomeGrowth < 0) {
   insights.push({
     title: "Strong Growth",
     message: `Your income is growing at a healthy ${incomeGrowth.toFixed(1)}%, indicating strong upward momentum.`,
-    action: `Capitalize on this by reinvesting approximately ₹${Math.round(totalIncome * 0.2)} into scaling operations or marketing.`,
+    action: `Capitalize on this by reinvesting approximately ₹${Math.round(latestMonthIncome * 0.2)} into scaling operations or marketing.`,
     impact: "low",
     numbers: {
       incomeGrowth,
-      income: totalIncome,
-      reinvestment: Math.round(totalIncome * 0.2)
+      income: latestMonthIncome,
+      reinvestment: Math.round(latestMonthIncome * 0.2)
     }
   });
 }
@@ -339,8 +342,8 @@ if (runwayDays < 15) {
 
 const summary = generateSummary({
   net,
-  income: totalIncome,
-  burn: avgMonthlyExpenses,
+  income: latestMonthIncome,
+burn: latestMonthExpense,
   runwayDays,
   burnRatio,
   trend,
@@ -352,8 +355,8 @@ const summary = generateSummary({
 let aiSummary = summary;
 let aiInsights = insights;
 let score = 50; // temporary
-let totalExpense = avgMonthlyExpenses;
-let avgMonthlyIncome = totalIncome;
+let totalExpense = totalExpense;
+let avgMonthlyIncome = avgMonthlyIncome;
 
 try {
   const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -410,12 +413,9 @@ Here is the user's financial data:
 - Financial Score: ${score}/100
 - Risk Level: ${riskLevel}
 
-- Total Income: ₹${totalIncome}
-- Total Expenses: ₹${totalExpense}
-- Net Savings: ₹${net}
-
-- Avg Monthly Income: ₹${avgMonthlyIncome}
-- Avg Monthly Expenses: ₹${avgMonthlyExpenses}
+- Current Month Income: ₹${latestMonthIncome}
+- Current Month Expenses: ₹${latestMonthExpense}
+- Current Month Savings: ₹${latestMonthNet}
 
 - Income Growth: ${incomeGrowth}%
 - Income Trend: ${incomeTrendLabel}
@@ -490,8 +490,9 @@ Return ONLY valid JSON:
     surplus: Math.round(safeSurplus),
     investableAmount: Math.round(investableAmount),
     reinvestment: Math.round(reinvestment),
-    income: Math.round(totalIncome),
-burn: Math.round(avgMonthlyExpenses)
+    income: Math.round(latestMonthIncome),
+burn: Math.round(latestMonthExpense),
+monthlySavings: Math.round(latestMonthNet),
   }
 }));
 
@@ -521,12 +522,13 @@ return res.json({
   insights: aiInsights,
   avgMonthlyBurn: avgMonthlyExpenses,
   numbers: {
-    surplus: Math.round(safeSurplus),
-    investableAmount: Math.round(investableAmount),
-    reinvestment: Math.round(reinvestment),
-    income: Math.round(totalIncome),
-burn: Math.round(avgMonthlyExpenses)
-  }
+  surplus: Math.round(safeSurplus),
+  investableAmount: Math.round(investableAmount),
+  reinvestment: Math.round(reinvestment),
+  income: Math.round(latestMonthIncome),
+  burn: Math.round(latestMonthExpense),
+  savings: Math.round(latestMonthNet)
+}
 });
 
   } catch (error) {

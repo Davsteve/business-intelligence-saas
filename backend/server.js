@@ -89,6 +89,14 @@ let {
   incomeTrendLabel = "unknown"
 } = financialData || {};
 
+let riskLevel = "MODERATE";
+
+if (runwayDays < 30) {
+  riskLevel = "HIGH";
+} else if (runwayDays > 90) {
+  riskLevel = "LOW";
+}
+
 if (
   !Number.isFinite(net) ||
   !Number.isFinite(avgMonthlyExpenses) ||
@@ -344,7 +352,6 @@ const summary = generateSummary({
 let aiSummary = summary;
 let aiInsights = insights;
 let score = 50; // temporary
-let riskLevel = "MODERATE";
 let totalExpense = avgMonthlyExpenses;
 let avgMonthlyIncome = totalIncome;
 

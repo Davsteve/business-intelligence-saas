@@ -152,6 +152,16 @@ if (incomeGrowth > 10) incomeTrendLabel = "growing";
 else if (incomeGrowth < -10) incomeTrendLabel = "declining";
 
 // 🔥 Burn Ratio
+
+const avgMonthlyIncome =
+  sortedMonths.length > 0
+    ? totalIncome / sortedMonths.length
+    : 0;
+
+const avgMonthlyExpenses =
+  sortedMonths.length > 0
+    ? totalExpense / sortedMonths.length
+    : 0;
 const burnRatio =
   avgMonthlyIncome === 0
     ? 0

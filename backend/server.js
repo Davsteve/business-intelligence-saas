@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import rateLimit from "express-rate-limit";
 import { createClient } from "@supabase/supabase-js";
 import fetch from "node-fetch";
-import { calculateFinancialHealth } from "./utils/financialHealthEngine";
+import { calculateFinancialHealth } from "./utils/financialHealthEngine.js";
 
 dotenv.config();
 

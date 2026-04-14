@@ -58,6 +58,9 @@ const {
   net,
   totalIncome,
   incomeGrowth,
+  avgMonthlyIncome,
+  avgMonthlyExpenses,
+  burnRatio,
 } = financials;
 const runwayDisplay =
   avgMonthlyBurn <= 0

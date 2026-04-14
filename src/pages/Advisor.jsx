@@ -12,6 +12,10 @@ export default function Advisor() {
   const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;  
   const [aiData, setAiData] = useState(null);
   const [loadingAI, setLoadingAI] = useState(false);
+  const runwayDisplay =
+  avgMonthlyBurn <= 0
+    ? "Unlimited"
+    : `${Math.round(runwayDays)} days`;
   const normalizedInsights = aiData?.insights?.length
   ? [
       // ✅ Insight 1 → Positive

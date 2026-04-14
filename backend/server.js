@@ -67,7 +67,7 @@ app.post("/api/ai", verifyUser, async (req, res) => {
 } = req.body;
 
 // ✅ DERIVED METRICS (ADD HERE)
-
+console.log("📥 Incoming transactions:", transactions);
 
 const financialData = calculateFinancialHealth(transactions);
 
@@ -518,10 +518,15 @@ burn: Math.round(avgMonthlyExpenses)
   }
 });
 
-  } catch (err) {
-    console.error("SERVER ERROR:", err);
-    return res.status(500).json({ error: "Internal server error" });
-  }
+  } catch (error) {
+  console.error("🚨 AI ROUTE CRASH:", error);
+  console.error("STACK:", error.stack);
+
+  return res.status(500).json({
+    error: "Internal server error",
+    message: error.message
+  });
+}
 });
 
 // 🚀 Start Server

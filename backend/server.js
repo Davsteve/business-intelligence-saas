@@ -116,7 +116,7 @@ if (
   return res.status(400).json({ error: "Invalid financial data" });
 }
 
-const surplus = latestMonthIncome - latestMonthExpense;
+const surplus = latestMonthNet;
 const safeSurplus = Math.max(0, surplus);
 
 const safetyReserve = safeSurplus * 0.5;
@@ -205,8 +205,8 @@ burn: latestMonthExpense,
       income: latestMonthIncome,
 burn: latestMonthExpense,
       burnRatio,
-      surplus: latestMonthIncome - latestMonthExpense,
-      investableAmount: Math.round((latestMonthIncome - latestMonthExpense) * 0.2)
+      surplus: latestMonthNet,
+      investableAmount: Math.round(latestMonthNet * 0.2)
     }
       });
     }
@@ -354,9 +354,11 @@ burn: latestMonthExpense,
     // 🧠 AI ENHANCEMENT (SAFE)
 let aiSummary = summary;
 let aiInsights = insights;
-let score = 50; // temporary
-let totalExpense = totalExpense;
-let avgMonthlyIncome = avgMonthlyIncome;
+let score = Math.round(
+  (Math.min(runwayDays, 120) / 120) * 40 +
+  (1 - burnRatio) * 30 +
+  Math.max(0, incomeGrowth) * 3
+);
 
 try {
   const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -476,10 +478,12 @@ Return ONLY valid JSON:
 
     const parsed = JSON.parse(jsonMatch[0]);
 
-    aiSummary = parsed.summary;
-    priority = parsed.priority;
-    riskLevel = parsed.riskLevel;
-    aiInsights = parsed.insights;
+    aiSummary = parsed.summary || summary;
+priority = parsed.priority || priority;
+riskLevel = parsed.riskLevel || riskLevel;
+    aiInsights = Array.isArray(parsed.insights)
+  ? parsed.insights.slice(0, 3)
+  : insights;
 
     aiInsights = aiInsights.map(insight => ({
   ...insight,

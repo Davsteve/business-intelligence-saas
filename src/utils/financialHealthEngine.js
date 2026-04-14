@@ -146,10 +146,13 @@ if (monthlyIncomeArray.length >= 2) {
 }
 
 // 🔥 Income Trend Label
-let incomeTrendLabel = "stable";
-
-if (incomeGrowth > 10) incomeTrendLabel = "growing";
-else if (incomeGrowth < -10) incomeTrendLabel = "declining";
+if (incomeGrowth > 10) {
+  incomeTrendLabel = "growing";
+} else if (incomeGrowth < -5) {
+  incomeTrendLabel = "declining";
+} else {
+  incomeTrendLabel = "stable";
+}
 
 // 🔥 Burn Ratio
 

@@ -152,7 +152,11 @@ if (incomeGrowth > 10) incomeTrendLabel = "growing";
 else if (incomeGrowth < -10) incomeTrendLabel = "declining";
 
 // 🔥 Burn Ratio
-const burnRatio = totalIncome > 0 ? totalExpense / totalIncome : 0;
+const burnRatio =
+  avgMonthlyIncome === 0
+    ? 0
+    : Math.min(avgMonthlyExpenses / avgMonthlyIncome, 5);
+    const burnRatioPercent = Number((burnRatio * 100).toFixed(2));
 
   // 🔹 Expense Concentration
   let topExpensePercent = 0;
@@ -282,7 +286,7 @@ if (runwayMonths < 1 || net < avgMonthlyBurn) {
   incomeTrendLabel,
 
   // Burn & Runway
-  burnRatio: Number(burnRatio.toFixed(2)),
+  burnRatio: burnRatioPercent,
   runwayMonths: Number(runwayMonths.toFixed(2)),
   runwayDays: Number(runwayDays.toFixed(2)),
 

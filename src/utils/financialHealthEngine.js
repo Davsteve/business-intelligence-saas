@@ -178,49 +178,38 @@ const burnRatio = totalIncome > 0 ? totalExpense / totalIncome : 0;
       : 0;
 
   // 🔹 Scaling
-  // 🔥 NEW SCORING MODEL
+  const clamp = (num) =>
+    Math.max(0, Math.min(100, num));
 
-let score = 0;
+  const marginScore = clamp((profitMargin / 40) * 100);
+  const runwayScore = clamp((runwayMonths / 12) * 100);
+  const growthScore = clamp((incomeGrowth + 20) * 2.5);
+  const concentrationScore = clamp(
+    100 - topExpensePercent * 1.5
+  );
 
-// 🔹 Savings Rate
-const savingsRate = totalIncome > 0 ? (net / totalIncome) * 100 : 0;
+  // 🔹 Weights
+  const weights = {
+    margin: 0.25,
+    runway: 0.25,
+    growth: 0.2,
+    concentration: 0.15,
+    stability: 0.15,
+  };
 
-// 🔹 Stability Score (convert variance → 0–10)
-const stabilityScore =
-  monthlyNets.length > 1
-    ? Math.max(0, 10 - Math.sqrt(variance) / 1000)
-    : 5;
+  const finalScore =
+    marginScore * weights.margin +
+    runwayScore * weights.runway +
+    growthScore * weights.growth +
+    concentrationScore * weights.concentration;
 
-// 🔹 1. RUNWAY (25 points)
-if (runwayMonths >= 6) score += 25;
-else score += (runwayMonths / 6) * 25;
-
-// 🔹 2. SAVINGS RATE (20 points)
-if (savingsRate >= 30) score += 20;
-else score += (savingsRate / 30) * 20;
-
-// 🔹 3. INCOME GROWTH (15 points)
-if (incomeGrowth >= 20) score += 15;
-else if (incomeGrowth > 0) score += (incomeGrowth / 20) * 15;
-
-// 🔹 4. BURN RATIO (20 points)
-const burnScore = Math.max(0, (1 - burnRatio)) * 20;
-score += burnScore;
-
-// 🔹 5. STABILITY (20 points)
-score += stabilityScore * 2;
-
-// 🔹 FINAL NORMALIZATION
-score = Math.min(Math.max(score, 0), 100);
-score = Math.round(score);
+  const score = Math.round(finalScore);
 
   // 🔹 Risk Classification
-  let riskLevel;
-
-if (runwayDays < 30) riskLevel = "Critical";
-else if (runwayDays < 90) riskLevel = "High";
-else if (score < 60) riskLevel = "Moderate";
-else riskLevel = "Low";
+  let riskLevel = "Low";
+  if (score < 70) riskLevel = "Moderate";
+  if (score < 50) riskLevel = "High";
+  if (score < 30) riskLevel = "Critical";
 
   // 🔹 Status Label Helper
   const getStatus = (metricScore) => {
@@ -232,23 +221,48 @@ else riskLevel = "Low";
 
   // 🔹 Breakdown Object
   const breakdown = [
-  {
-    name: "Runway Strength",
-    value: Math.round((runwayMonths / 6) * 100),
-  },
-  {
-    name: "Savings Rate",
-    value: Math.round(savingsRate),
-  },
-  {
-    name: "Burn Control",
-    value: Math.round((1 - burnRatio) * 100),
-  },
-  {
-    name: "Income Growth",
-    value: Math.round(incomeGrowth),
-  },
-];
+    {
+      name: "Savings Rate",
+      rawValue: Number(profitMargin.toFixed(2)),
+      score: Math.round(marginScore),
+      weight: weights.margin,
+      contribution: Math.round(
+        marginScore * weights.margin
+      ),
+      status: getStatus(marginScore),
+    },
+    {
+      name: "Runway",
+      rawValue: Number(runwayMonths.toFixed(2)),
+      score: Math.round(runwayScore),
+      weight: weights.runway,
+      contribution: Math.round(
+        runwayScore * weights.runway
+      ),
+      status: getStatus(runwayScore),
+    },
+    {
+      name: "Income Growth",
+      rawValue: Number(incomeGrowth.toFixed(2)),
+      score: Math.round(growthScore),
+      weight: weights.growth,
+      contribution: Math.round(
+        growthScore * weights.growth
+      ),
+      status: getStatus(growthScore),
+    },
+    {
+      name: "Expense Concentration",
+      rawValue: Number(topExpensePercent.toFixed(2)),
+      score: Math.round(concentrationScore),
+      weight: weights.concentration,
+      contribution: Math.round(
+        concentrationScore *
+          weights.concentration
+      ),
+      status: getStatus(concentrationScore),
+    },
+  ];
 
   let stability = calculateStability(transactions);
 

@@ -60,23 +60,18 @@ const verifyUser = async (req, res, next) => {
 app.post("/api/ai", verifyUser, async (req, res) => {
   try {
     const {
-  income,
-  burn,
-  growth,
   trend,
   topCategory,
-  topCategoryPercent
+  topCategoryPercent,
+  transactions
 } = req.body;
 
-    // ✅ VALIDATION FIRST
-    
+// ✅ DERIVED METRICS (ADD HERE)
 
-    // ✅ DERIVED METRICS (ADD HERE)
-    const { transactions } = req.body;
 
 const financialData = calculateFinancialHealth(transactions);
 
-const {
+let {
   score,
   riskLevel,
   totalIncome,
@@ -100,6 +95,20 @@ if (
   return res.status(400).json({ error: "Invalid financial data" });
 }
 
+const surplus = totalIncome - avgMonthlyExpenses;
+
+// Prevent negative values
+const safeSurplus = Math.max(0, surplus);
+
+// 50% safety buffer
+const safetyReserve = safeSurplus * 0.5;
+
+// What user can actually use
+const investableAmount = safeSurplus - safetyReserve;
+
+// Realistic reinvestment (not aggressive)
+const reinvestment = investableAmount * 0.6;
+
     // ✅ INSIGHTS (ALWAYS 3)
     const insights = [];
 
@@ -112,8 +121,8 @@ if (
   impact: "high",
   numbers: {
     runwayDays,
-    burn,
-    income
+    burn: avgMonthlyExpenses,
+income: totalIncome
   }
 });
     } else if (runwayDays < 90) {
@@ -124,8 +133,8 @@ if (
     impact: "medium",
     numbers: {
       runwayDays,
-      burn,
-      income,
+      burn: avgMonthlyExpenses,
+income: totalIncome,
       suggestedCut: Math.round(burn * 0.15)
     }
   });
@@ -138,8 +147,8 @@ if (
     impact: "low",
     numbers: {
       runwayDays,
-      burn,
-      income,
+      burn: avgMonthlyExpenses,
+income: totalIncome,
       investableAmount: Math.round(net * 0.2)
     }
       });
@@ -153,8 +162,8 @@ if (
   action: `Reduce expenses by ₹${Math.round(burn * 0.2)} to bring burn ratio below 60%.`,
   impact: "high",
   numbers: {
-    burn,
-    income,
+    burn: avgMonthlyExpenses,
+income: totalIncome,
     burnRatio
   }
 });
@@ -165,8 +174,8 @@ if (
     action: `Optimize expenses by cutting approximately ₹${Math.round(burn * 0.1)} to improve financial flexibility.`,
     impact: "medium",
     numbers: {
-      burn,
-      income,
+      burn: avgMonthlyExpenses,
+income: totalIncome,
       burnRatio,
       suggestedCut: Math.round(burn * 0.1)
     }
@@ -179,8 +188,8 @@ if (
     action: `Maintain current discipline. You may consider reallocating ₹${Math.round((income - burn) * 0.2)} towards savings or growth.`,
     impact: "low",
     numbers: {
-      burn,
-      income,
+      burn: avgMonthlyExpenses,
+income: totalIncome,
       burnRatio,
       surplus: income - burn,
       investableAmount: Math.round((income - burn) * 0.2)
@@ -189,27 +198,27 @@ if (
     }
 
     // 3️⃣ GROWTH
-if (growth < 0) {
+if (incomeGrowth < 0) {
   insights.push({
     title: "Declining Income",
     message: `Your income growth is ${growth.toFixed(1)}%, indicating a downward trend.`,
     action: `Increase revenue streams or pricing to reverse the decline within the next month.`,
     impact: "high",
     numbers: {
-      growth,
-      income
+      incomeGrowth,
+      income: totalIncome
     }
   });
 
-} else if (growth < 10) {
+} else if (incomeGrowth < 10) {
   insights.push({
     title: "Slow Growth",
     message: `Your income is growing at ${growth.toFixed(1)}%, which is positive but relatively slow for sustainable expansion.`,
     action: `Aim to increase growth to at least 10–15% by adding new income streams or improving conversion efficiency.`,
     impact: "medium",
     numbers: {
-      growth,
-      income,
+      incomeGrowth,
+      income: totalIncome,
       targetGrowth: 12,
       gapToTarget: +(12 - growth).toFixed(1)
     }
@@ -219,12 +228,12 @@ if (growth < 0) {
   insights.push({
     title: "Strong Growth",
     message: `Your income is growing at a healthy ${growth.toFixed(1)}%, indicating strong upward momentum.`,
-    action: `Capitalize on this by reinvesting approximately ₹${Math.round(income * 0.2)} into scaling operations or marketing.`,
+    action: `Capitalize on this by reinvesting approximately ₹${Math.round(totalIncome * 0.2)} into scaling operations or marketing.`,
     impact: "low",
     numbers: {
-      growth,
-      income,
-      reinvestment: Math.round(income * 0.2)
+      incomeGrowth,
+      income: totalIncome,
+      reinvestment: Math.round(totalIncome * 0.2)
     }
   });
 }
@@ -319,8 +328,8 @@ if (runwayDays < 15) {
 
 const summary = generateSummary({
   net,
-  income,
-  burn,
+  income: totalIncome,
+  burn: avgMonthlyExpenses,
   runwayDays,
   burnRatio,
   trend,
@@ -467,8 +476,8 @@ Return ONLY valid JSON:
     surplus: Math.round(safeSurplus),
     investableAmount: Math.round(investableAmount),
     reinvestment: Math.round(reinvestment),
-    income: Math.round(income),
-    burn: Math.round(burn)
+    income: Math.round(totalIncome),
+burn: Math.round(avgMonthlyExpenses)
   }
 }));
 
@@ -488,19 +497,7 @@ Return ONLY valid JSON:
 // SMART CAPITAL ALLOCATION
 // ------------------------
 
-const surplus = income - burn;
 
-// Prevent negative values
-const safeSurplus = Math.max(0, surplus);
-
-// 50% safety buffer
-const safetyReserve = safeSurplus * 0.5;
-
-// What user can actually use
-const investableAmount = safeSurplus - safetyReserve;
-
-// Realistic reinvestment (not aggressive)
-const reinvestment = investableAmount * 0.6;
 
 // ✅ FINAL RESPONSE (ONLY ONE)
 return res.json({
@@ -513,8 +510,8 @@ return res.json({
     surplus: Math.round(safeSurplus),
     investableAmount: Math.round(investableAmount),
     reinvestment: Math.round(reinvestment),
-    income: Math.round(income),
-    burn: Math.round(burn)
+    income: Math.round(totalIncome),
+burn: Math.round(avgMonthlyExpenses)
   }
 });
 

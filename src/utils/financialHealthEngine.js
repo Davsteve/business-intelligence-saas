@@ -54,6 +54,7 @@ return "Highly unstable income";
   const monthlyMap = {};
   const expenseMap = {};
   const monthlyExpenses = {};
+  const monthlyIncome = {};
 
   // 🔹 Aggregate Transactions
   transactions.forEach((t) => {
@@ -72,9 +73,13 @@ return "Highly unstable income";
     }
 
     if (t.categories?.type === "income") {
-      totalIncome += t.amount;
-      monthlyMap[key].income += t.amount;
-    } else {
+  totalIncome += t.amount;
+  monthlyMap[key].income += t.amount;
+
+  // 🔥 ADD THIS
+  if (!monthlyIncome[key]) monthlyIncome[key] = 0;
+  monthlyIncome[key] += t.amount;
+} else {
       totalExpense += t.amount;
       monthlyMap[key].expense += t.amount;
 
@@ -95,6 +100,10 @@ return "Highly unstable income";
   const monthlyNets = sortedMonths.map(
     (m) => m.income - m.expense
   );
+
+  const monthlyIncomeArray = sortedMonths.map(
+  (m) => m.income
+);
 
   const net = totalIncome - totalExpense;
 
@@ -126,15 +135,24 @@ const runwayDays = runwayMonths * 30;
 
   // 🔹 Income Growth (last 2 sorted months)
   let incomeGrowth = 0;
-  if (monthlyNets.length >= 2) {
-    const prev = monthlyNets[monthlyNets.length - 2];
-    const current = monthlyNets[monthlyNets.length - 1];
 
-    if (prev !== 0) {
-      incomeGrowth =
-        ((current - prev) / Math.abs(prev)) * 100;
-    }
+if (monthlyIncomeArray.length >= 2) {
+  const prev = monthlyIncomeArray[monthlyIncomeArray.length - 2];
+  const current = monthlyIncomeArray[monthlyIncomeArray.length - 1];
+
+  if (prev !== 0) {
+    incomeGrowth = ((current - prev) / prev) * 100;
   }
+}
+
+// 🔥 Income Trend Label
+let incomeTrendLabel = "stable";
+
+if (incomeGrowth > 10) incomeTrendLabel = "growing";
+else if (incomeGrowth < -10) incomeTrendLabel = "declining";
+
+// 🔥 Burn Ratio
+const burnRatio = totalIncome > 0 ? totalExpense / totalIncome : 0;
 
   // 🔹 Expense Concentration
   let topExpensePercent = 0;
@@ -160,38 +178,49 @@ const runwayDays = runwayMonths * 30;
       : 0;
 
   // 🔹 Scaling
-  const clamp = (num) =>
-    Math.max(0, Math.min(100, num));
+  // 🔥 NEW SCORING MODEL
 
-  const marginScore = clamp((profitMargin / 40) * 100);
-  const runwayScore = clamp((runwayMonths / 12) * 100);
-  const growthScore = clamp((incomeGrowth + 20) * 2.5);
-  const concentrationScore = clamp(
-    100 - topExpensePercent * 1.5
-  );
+let score = 0;
 
-  // 🔹 Weights
-  const weights = {
-    margin: 0.25,
-    runway: 0.25,
-    growth: 0.2,
-    concentration: 0.15,
-    stability: 0.15,
-  };
+// 🔹 Savings Rate
+const savingsRate = totalIncome > 0 ? (net / totalIncome) * 100 : 0;
 
-  const finalScore =
-    marginScore * weights.margin +
-    runwayScore * weights.runway +
-    growthScore * weights.growth +
-    concentrationScore * weights.concentration;
+// 🔹 Stability Score (convert variance → 0–10)
+const stabilityScore =
+  monthlyNets.length > 1
+    ? Math.max(0, 10 - Math.sqrt(variance) / 1000)
+    : 5;
 
-  const score = Math.round(finalScore);
+// 🔹 1. RUNWAY (25 points)
+if (runwayMonths >= 6) score += 25;
+else score += (runwayMonths / 6) * 25;
+
+// 🔹 2. SAVINGS RATE (20 points)
+if (savingsRate >= 30) score += 20;
+else score += (savingsRate / 30) * 20;
+
+// 🔹 3. INCOME GROWTH (15 points)
+if (incomeGrowth >= 20) score += 15;
+else if (incomeGrowth > 0) score += (incomeGrowth / 20) * 15;
+
+// 🔹 4. BURN RATIO (20 points)
+const burnScore = Math.max(0, (1 - burnRatio)) * 20;
+score += burnScore;
+
+// 🔹 5. STABILITY (20 points)
+score += stabilityScore * 2;
+
+// 🔹 FINAL NORMALIZATION
+score = Math.min(Math.max(score, 0), 100);
+score = Math.round(score);
 
   // 🔹 Risk Classification
-  let riskLevel = "Low";
-  if (score < 70) riskLevel = "Moderate";
-  if (score < 50) riskLevel = "High";
-  if (score < 30) riskLevel = "Critical";
+  let riskLevel;
+
+if (runwayDays < 30) riskLevel = "Critical";
+else if (runwayDays < 90) riskLevel = "High";
+else if (score < 60) riskLevel = "Moderate";
+else riskLevel = "Low";
 
   // 🔹 Status Label Helper
   const getStatus = (metricScore) => {
@@ -256,17 +285,36 @@ if (runwayMonths < 1 || net < avgMonthlyBurn) {
   return {
   score,
   riskLevel,
-  profitMargin: Number(profitMargin.toFixed(2)),
-  runwayMonths: Number(runwayMonths.toFixed(2)),
-  runwayDays: Number(runwayDays.toFixed(2)),
-  avgMonthlyBurn: Number(avgMonthlyBurn.toFixed(2)),
-  incomeGrowth: Number(incomeGrowth.toFixed(2)),
-  topExpensePercent: Number(topExpensePercent.toFixed(2)),
-  stability,
-  breakdown,
 
-  // 🔥 ADD THESE 2 LINES
+  // Core
   net,
   totalIncome,
+  totalExpense,
+
+  // Monthly
+  avgMonthlyIncome: Number(
+    (totalIncome / (sortedMonths.length || 1)).toFixed(2)
+  ),
+  avgMonthlyExpenses: Number(
+    (totalExpense / (sortedMonths.length || 1)).toFixed(2)
+  ),
+
+  // Growth & Trend
+  incomeGrowth: Number(incomeGrowth.toFixed(2)),
+  incomeTrendLabel,
+
+  // Burn & Runway
+  burnRatio: Number(burnRatio.toFixed(2)),
+  runwayMonths: Number(runwayMonths.toFixed(2)),
+  runwayDays: Number(runwayDays.toFixed(2)),
+
+  // Stability
+  stability,
+
+  // Debug (important for next phase)
+  monthlyIncomeArray,
+  monthlyNets,
+
+  breakdown
 };
 } 

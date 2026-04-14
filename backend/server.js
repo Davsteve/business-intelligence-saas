@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import rateLimit from "express-rate-limit";
 import { createClient } from "@supabase/supabase-js";
 import fetch from "node-fetch";
+import { calculateFinancialHealth } from "./utils/financialHealthEngine.js";
 
 dotenv.config();
 
@@ -59,7 +60,6 @@ const verifyUser = async (req, res, next) => {
 app.post("/api/ai", verifyUser, async (req, res) => {
   try {
     const {
-  net,
   income,
   burn,
   growth,
@@ -78,16 +78,24 @@ app.post("/api/ai", verifyUser, async (req, res) => {
     }
 
     // ✅ DERIVED METRICS (ADD HERE)
-const runwayMonths = Number(req.body.runwayMonths || 0);
-const runwayDays = Number(req.body.runwayDays || 0);
-    const burnRatio = income > 0 ? burn / income : 0;
+    const { transactions } = req.body;
 
-    // ✅ RISK LEVEL (DEFINE EARLY)
-    const riskLevel =
-  runwayDays <= 15 ? "HIGH" :
-  burnRatio > 0.7 ? "HIGH" :
-  runwayDays < 90 ? "MODERATE" :
-  "LOW";
+const financialData = calculateFinancialHealth(transactions);
+
+const {
+  score,
+  riskLevel,
+  totalIncome,
+  totalExpense,
+  net,
+  avgMonthlyIncome,
+  avgMonthlyExpenses,
+  incomeGrowth,
+  incomeTrendLabel,
+  burnRatio,
+  runwayDays,
+  stability
+} = financialData;
 
     // ✅ INSIGHTS (ALWAYS 3)
     const insights = [];
@@ -371,13 +379,25 @@ Make the user feel:
           content: `
 Here is the user's financial data:
 
-- Balance: ₹${net}
-- Monthly Income: ₹${income}
-- Monthly Expenses: ₹${burn}
-- Financial Buffer: ${runwayDays} days
-- Expense Ratio: ${Math.round(burnRatio * 100)}%
-- Income Growth: ${(growth || 0).toFixed(1)}%
-- Income Trend: ${trend}
+Here is the user's financial data:
+
+- Financial Score: ${score}/100
+- Risk Level: ${riskLevel}
+
+- Total Income: ₹${totalIncome}
+- Total Expenses: ₹${totalExpense}
+- Net Savings: ₹${net}
+
+- Avg Monthly Income: ₹${avgMonthlyIncome}
+- Avg Monthly Expenses: ₹${avgMonthlyExpenses}
+
+- Income Growth: ${incomeGrowth}%
+- Income Trend: ${incomeTrendLabel}
+
+- Burn Ratio: ${(burnRatio * 100).toFixed(1)}%
+- Runway: ${runwayDays} days
+
+- Stability: ${stability}
 - Top Expense Category: ${topCategory} (${(topCategoryPercent || 0).toFixed(1)}%)
 
 Priority Context:

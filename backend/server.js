@@ -161,7 +161,7 @@ income: totalIncome,
     if (burnRatio > 0.7) {
       insights.push({
   title: "High Burn Rate",
-  message: `You are spending ₹${avgMonthlyExpenses} against an income of ₹${income}, resulting in a ${Math.round(burnRatio * 100)}% burn ratio.`,
+  message: `You are spending ₹${avgMonthlyExpenses} against an income of ₹${totalIncome}, resulting in a ${Math.round(burnRatio * 100)}% burn ratio.`,
   action: `Reduce expenses by ₹${Math.round(avgMonthlyExpenses * 0.2)} to bring burn ratio below 60%.`,
   impact: "high",
   numbers: {
@@ -187,7 +187,7 @@ income: totalIncome,
 } else {
   insights.push({
     title: "Efficient Spending",
-    message: `Your burn ratio is a healthy ${Math.round(burnRatio * 100)}%, with expenses well aligned to your income of ₹${income}.`,
+    message: `Your burn ratio is a healthy ${Math.round(burnRatio * 100)}%, with expenses well aligned to your income of ₹${totalIncome}.`,
     action: `Maintain current discipline. You may consider reallocating ₹${Math.round((totalIncome - avgMonthlyExpenses) * 0.2)} towards savings or growth.`,
     impact: "low",
     numbers: {

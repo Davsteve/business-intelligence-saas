@@ -71,20 +71,23 @@ app.post("/api/ai", verifyUser, async (req, res) => {
 
 const financialData = calculateFinancialHealth(transactions);
 
+console.log("financialData:", financialData);
+
+if (!financialData) {
+  console.error("financialData is undefined");
+  return res.status(500).json({ error: "Financial calculation failed" });
+}
+
 let {
-  score,
-  riskLevel,
-  totalIncome,
-  totalExpense,
-  net,
-  avgMonthlyIncome,
-  avgMonthlyExpenses,
-  incomeGrowth,
-  incomeTrendLabel,
-  burnRatio,
-  runwayDays,
-  stability
-} = financialData;
+  totalIncome = 0,
+  avgMonthlyExpenses = 0,
+  incomeGrowth = 0,
+  net = 0,
+  burnRatio = 0,
+  runwayDays = 0,
+  stability = "unknown",
+  incomeTrendLabel = "unknown"
+} = financialData || {};
 
 if (
   !Number.isFinite(net) ||

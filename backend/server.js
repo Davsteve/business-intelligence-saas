@@ -332,8 +332,6 @@ const summary = generateSummary({
 let aiSummary = summary;
 let aiInsights = insights;
 
-console.log("Incoming body:", req.body);
-
 try {
   const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",

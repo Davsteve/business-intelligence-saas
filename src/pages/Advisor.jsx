@@ -243,17 +243,7 @@ const getAIAdvice = async () => {
         Authorization: `Bearer ${token}`
       },
       body: JSON.stringify({
-  net: Number(net),
-  income: Number(totalIncome),
-  burn: Number(avgMonthlyBurn || 0),
-  runwayMonths: Number(runwayMonths),
-  runwayDays: Number(runwayDays),
-  burnRatio: totalIncome > 0 ? avgMonthlyBurn / totalIncome : 0,
-  growth: Number(incomeGrowth),
-  trend,
-  topCategory,
-  topCategoryPercent: Number(topCategoryPercent),
-  stability
+  transactions
 })
     });
 

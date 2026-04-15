@@ -119,9 +119,9 @@ if (
 const surplus = latestMonthNet;
 const safeSurplus = Math.max(0, surplus);
 
-const safetyReserve = safeSurplus * 0.5;
-const investableAmount = safeSurplus - safetyReserve;
-const reinvestment = investableAmount * 0.6;
+// ✅ SIMPLE ALLOCATION MODEL (NO EMERGENCY FUND)
+const investableAmount = safeSurplus * 0.8;
+const funMoney = safeSurplus * 0.2;
 
     // ✅ INSIGHTS (ALWAYS 3)
     const insights = [];
@@ -242,12 +242,12 @@ if (incomeGrowth < 0) {
   insights.push({
     title: "Strong Growth",
     message: `Your income is growing at a healthy ${incomeGrowth.toFixed(1)}%, indicating strong upward momentum.`,
-    action: `Capitalize on this by reinvesting approximately ₹${Math.round(latestMonthIncome * 0.2)} into scaling operations or marketing.`,
+    action: `You have room to allocate about ₹${Math.round(funMoney)} as fun money while still investing the majority. Maintain this balance.`,
     impact: "low",
     numbers: {
       incomeGrowth,
       income: latestMonthIncome,
-      reinvestment: Math.round(latestMonthIncome * 0.2)
+      funMoney: Math.round(funMoney),
     }
   });
 }
@@ -500,7 +500,7 @@ riskLevel = parsed.riskLevel || riskLevel;
     // 🔥 FORCE CONSISTENCY
     surplus: Math.round(safeSurplus),
     investableAmount: Math.round(investableAmount),
-    reinvestment: Math.round(reinvestment),
+    funMoney: Math.round(funMoney),
     income: Math.round(latestMonthIncome),
 burn: Math.round(latestMonthExpense),
 monthlySavings: Math.round(latestMonthNet),
@@ -535,7 +535,7 @@ return res.json({
   numbers: {
   surplus: Math.round(safeSurplus),
   investableAmount: Math.round(investableAmount),
-  reinvestment: Math.round(reinvestment),
+  funMoney: Math.round(funMoney),
   income: Math.round(latestMonthIncome),
   burn: Math.round(latestMonthExpense),
   savings: Math.round(latestMonthNet)

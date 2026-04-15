@@ -14,24 +14,17 @@ export default function Advisor() {
   const [loadingAI, setLoadingAI] = useState(false);
   const normalizedInsights = aiData?.insights?.length
   ? [
-      // ✅ Insight 1 → Positive
       {
         ...aiData.insights[0],
         title: "Current Financial Position",
       },
-
-      // ⚠️ Insight 2 → Risk
       {
         ...aiData.insights[1],
         title: "Improve Financial Safety Buffer",
-        impact: "high",
       },
-
-      // 🚀 Insight 3 → Growth
       {
         ...aiData.insights[2],
         title: "Growth Opportunity",
-        impact: "medium",
       },
     ]
   : [];
@@ -455,20 +448,20 @@ const getAIAdvice = async () => {
         <p><b>Action:</b> {item.action}</p>
         <p>
   <b>Priority:</b>{" "}
-  <span style={{
-    color:
-      item.impact === "high"
-        ? "#ff4d4d"   // red
-        : item.impact === "medium"
-        ? "#facc15"   // 🔥 proper yellow
-        : "#22c55e"   // green
-  }}>
-    {item.impact === "high"
-      ? "High"
+<span style={{
+  color:
+    item.impact === "high"
+      ? "#ff4d4d"
       : item.impact === "medium"
-      ? "Moderate"
-      : "Low"}
-  </span>
+      ? "#facc15"
+      : "#22c55e"
+}}>
+  {item.impact === "high"
+    ? "High"
+    : item.impact === "medium"
+    ? "Moderate"
+    : "Low"}
+</span>
 </p>
         <div style={{ marginTop: "6px" }}>
   <b>Numbers:</b>
@@ -502,8 +495,8 @@ const getAIAdvice = async () => {
   <div>📉 Gap to Target: {item.numbers?.gapToTarget?.toFixed(1)}%</div>
 )}
 
-  {item.numbers?.reinvestment !== undefined && (
-  <div>🚀 Reinvestment: {formatCurrency(item.numbers.reinvestment)}</div>
+  {item.numbers?.funMoney !== undefined && (
+  <div>🎉 Fun Money: {formatCurrency(item.numbers.funMoney)}</div>
 )}
 </div>
       </div>

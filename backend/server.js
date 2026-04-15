@@ -221,7 +221,7 @@ const funMoney = safeSurplus * 0.2;
 if (incomeGrowth < 0) {
   insights.push({
     title: "Declining Income",
-    message: `Your income dropped by ${Math.abs(incomeGrowth).toFixed(1)}% compared to last month, indicating a downward trend.`,
+    message: `Your income dropped by ${Math.abs(incomeGrowth).toFixed(1)}%. Combined with a runway of ${runwayDays} days, this puts pressure on your financial stability.`,
     action: `Increase revenue streams or pricing to reverse the decline within the next month.`,
     impact: "high",
     numbers: {
@@ -263,12 +263,12 @@ insights.forEach((insight) => {
   }
 
   // If burn is very high → force high
-  if (safeBurnRatio > 0.75 && insight.title.includes("Burn")) {
+  if (safeBurnRatio > 0.75 && insight.title.toLowerCase().includes("burn")) {
     insight.impact = "high";
   }
 
   // If income is declining → force high
-  if (incomeGrowth < 0 && insight.title.includes("Income")) {
+  if (incomeGrowth < 0 && insight.title.toLowerCase().includes("income")) {
     insight.impact = "high";
   }
 });
@@ -278,13 +278,15 @@ insights.forEach((insight) => {
     let priority = "";
 
 if (runwayDays < 15) {
-  priority = `URGENT: You have less than ${runwayDays} days of runway. Reduce burn immediately and secure additional income or capital within the next 7–10 days.`;
+  priority = `URGENT: Less than ${runwayDays} days of runway. Cut expenses immediately and secure income.`;
+} else if (incomeGrowth < 0) {
+  priority = `HIGH: Income is declining. Focus on increasing income sources urgently.`;
 } else if (safeBurnRatio > 0.7) {
-  priority = `HIGH: Your burn ratio is ${Math.round(safeBurnRatio * 100)}%. Cut at least 20–30% of non-essential expenses to stabilize cash flow.`;
+  priority = `HIGH: Spending is too high. Reduce non-essential expenses by 20–30%.`;
 } else if (runwayDays < 90) {
-  priority = `MODERATE: Strengthen your runway to at least 90 days by improving savings and optimizing expenses.`;
+  priority = `MODERATE: Improve your runway to at least 90 days.`;
 } else {
-  priority = `STABLE: Maintain current discipline and explore growth opportunities.`;
+  priority = `LOW: You're financially stable. Maintain discipline and grow.`;
 }
 
     // ✅ SUMMARY
@@ -518,7 +520,16 @@ Return ONLY valid JSON:
 priority = parsed.priority || priority;
 riskLevel = parsed.riskLevel || riskLevel;
 
-    aiInsights = parsed.insights || insights;
+    // ✅ Keep backend structure, only enhance text
+if (Array.isArray(parsed.insights)) {
+  aiInsights = insights.map((baseInsight, i) => ({
+    ...baseInsight,
+    title: parsed.insights[i]?.title || baseInsight.title,
+    message: parsed.insights[i]?.message || baseInsight.message,
+    action: parsed.insights[i]?.action || baseInsight.action,
+    // 🔒 NEVER override impact or numbers
+  }));
+}
 
   } catch (err) {
     console.error("AI JSON parse failed:", err);

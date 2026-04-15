@@ -12,6 +12,21 @@ export default function Advisor() {
   const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;  
   const [aiData, setAiData] = useState(null);
   const [loadingAI, setLoadingAI] = useState(false);
+  const getPriority = (impact) => {
+  if (!impact) {
+    return { text: "Unknown", color: "#64748b" };
+  }
+
+  if (impact.toLowerCase() === "high") {
+    return { text: "High", color: "#ef4444" }; // red
+  }
+
+  if (impact.toLowerCase() === "medium") {
+    return { text: "Moderate", color: "#facc15" }; // yellow
+  }
+
+  return { text: "Low", color: "#22c55e" }; // green
+};
   const normalizedInsights = aiData?.insights?.length
   ? [
       {
@@ -60,9 +75,13 @@ const runwayDisplay =
     ? "Unlimited"
     : `${Math.round(runwayDays)} days`;
   const getImpactColor = (impact) => {
-  if (impact === "high") return "#ef4444";   // red
-  if (impact === "medium") return "#f59e0b"; // yellow
-  return "#22c55e"; // green
+  if (!impact) return "#64748b"; // fallback
+
+  if (impact.toLowerCase() === "high") return "#ef4444";   // red
+  if (impact.toLowerCase() === "medium") return "#f59e0b"; // yellow
+  if (impact.toLowerCase() === "low") return "#22c55e";    // green
+
+  return "#64748b";
 };
 
   useEffect(() => {
@@ -448,20 +467,15 @@ const getAIAdvice = async () => {
         <p><b>Action:</b> {item.action}</p>
         <p>
   <b>Priority:</b>{" "}
-<span style={{
-  color:
-    item.impact === "high"
-      ? "#ff4d4d"
-      : item.impact === "medium"
-      ? "#facc15"
-      : "#22c55e"
-}}>
-  {item.impact === "high"
-    ? "High"
-    : item.impact === "medium"
-    ? "Moderate"
-    : "Low"}
-</span>
+{(() => {
+  const priority = getPriority(item.impact);
+
+  return (
+    <span style={{ color: priority.color }}>
+      {priority.text}
+    </span>
+  );
+})()}
 </p>
         <div style={{ marginTop: "6px" }}>
   <b>Numbers:</b>

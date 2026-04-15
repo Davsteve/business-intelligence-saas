@@ -492,20 +492,55 @@ riskLevel = parsed.riskLevel || riskLevel;
   ? parsed.insights.slice(0, 3)
   : insights;
 
-    aiInsights = aiInsights.map(insight => ({
-  ...insight,
-  numbers: {
-    ...insight.numbers,
+    aiInsights = aiInsights.map((insight, index) => {
+  let forcedImpact = insight.impact;
 
-    // 🔥 FORCE CONSISTENCY
-    surplus: Math.round(safeSurplus),
-    investableAmount: Math.round(investableAmount),
-    funMoney: Math.round(funMoney),
-    income: Math.round(latestMonthIncome),
-burn: Math.round(latestMonthExpense),
-monthlySavings: Math.round(latestMonthNet),
+  // 🚨 HARD RULES (override AI stupidity)
+  if (index === 1 && incomeGrowth < 0) {
+    forcedImpact = "high";
   }
-}));
+
+  if (burnRatio > 0.7) {
+    forcedImpact = "high";
+  }
+
+  if (runwayDays < 30) {
+    forcedImpact = "high";
+  }
+
+  return {
+    ...insight,
+    impact: forcedImpact,
+
+    numbers: (() => {
+      if (index === 0) {
+        return {
+          income: Math.round(latestMonthIncome),
+          surplus: Math.round(safeSurplus),
+          funMoney: Math.round(funMoney),
+        };
+      }
+
+      if (index === 1) {
+        return {
+          income: Math.round(latestMonthIncome),
+          burn: Math.round(latestMonthExpense),
+          burnRatio,
+        };
+      }
+
+      if (index === 2) {
+        return {
+          incomeGrowth,
+          income: Math.round(latestMonthIncome),
+          burnRatio,
+        };
+      }
+
+      return {};
+    })()
+  };
+});
 
   } catch (err) {
     console.error("AI JSON parse failed:", err);

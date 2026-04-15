@@ -58,6 +58,15 @@ const verifyUser = async (req, res, next) => {
 
 // 🚀 MAIN ENDPOINT
 app.post("/api/ai", verifyUser, async (req, res) => {
+  const getImpactLevel = ({ runwayDays, burnRatio, incomeGrowth }) => {
+  if (runwayDays < 30 || burnRatio > 70 || incomeGrowth < -10) {
+    return "high";
+  }
+  if (runwayDays < 90 || burnRatio > 50 || incomeGrowth < 5) {
+    return "medium";
+  }
+  return "low";
+};
   try {
     const {
   trend,
@@ -136,17 +145,16 @@ const funMoney = safeSurplus * 0.2;
     title: "Low Cash Buffer",
     message: `You only have ${runwayDays} days of runway, which is critically low.`,
     action: `Increase runway to at least 90 days by reducing expenses or increasing income immediately.`,
-    impact: "low",
+    impact: getImpactLevel({
+  runwayDays,
+  burnRatio: safeBurnRatio * 100,
+  incomeGrowth
+}),
     numbers: {
   income: Math.round(latestMonthIncome),
-  expenses: Math.round(latestMonthExpense),
-  savings: Math.round(latestMonthNet),
   runwayDays: Math.round(runwayDays),
-  burnRatio: +(safeBurnRatio * 100).toFixed(1),
-  incomeGrowth: +incomeGrowth.toFixed(1),
+  burnRatio: Number((safeBurnRatio * 100).toFixed(1)),
   suggestedCut: Math.round(latestMonthExpense * 0.2),
-  investableAmount: Math.round(investableAmount),
-  funMoney: Math.round(funMoney)
 }
   });
 
@@ -155,17 +163,16 @@ const funMoney = safeSurplus * 0.2;
     title: "Moderate Cash Buffer",
     message: `You currently have ${runwayDays} days of runway. This provides some stability but could be improved.`,
     action: `Aim to increase runway to at least 90 days by reducing expenses by around ₹${Math.round(latestMonthExpense * 0.15)}.`,
-    impact: "medium",
+    impact: getImpactLevel({
+  runwayDays,
+  burnRatio: safeBurnRatio * 100,
+  incomeGrowth
+}),
     numbers: {
   income: Math.round(latestMonthIncome),
-  expenses: Math.round(latestMonthExpense),
-  savings: Math.round(latestMonthNet),
   runwayDays: Math.round(runwayDays),
-  burnRatio: +(safeBurnRatio * 100).toFixed(1),
-  incomeGrowth: +incomeGrowth.toFixed(1),
+  burnRatio: Number((safeBurnRatio * 100).toFixed(1)),
   suggestedCut: Math.round(latestMonthExpense * 0.2),
-  investableAmount: Math.round(investableAmount),
-  funMoney: Math.round(funMoney)
 }
   });
 
@@ -174,15 +181,14 @@ const funMoney = safeSurplus * 0.2;
     title: "Strong Cash Position",
     message: `Your runway stands at ${runwayDays} days, indicating a strong financial buffer.`,
     action: `You can safely allocate part of your surplus towards investments or growth.`,
-    impact: "high",
+    impact: getImpactLevel({
+  runwayDays,
+  burnRatio: safeBurnRatio * 100,
+  incomeGrowth
+}),
     numbers: {
   income: Math.round(latestMonthIncome),
-  expenses: Math.round(latestMonthExpense),
-  savings: Math.round(latestMonthNet),
   runwayDays: Math.round(runwayDays),
-  burnRatio: +(safeBurnRatio * 100).toFixed(1),
-  incomeGrowth: +incomeGrowth.toFixed(1),
-  suggestedCut: Math.round(latestMonthExpense * 0.2),
   investableAmount: Math.round(investableAmount),
   funMoney: Math.round(funMoney)
 }
@@ -195,17 +201,17 @@ const funMoney = safeSurplus * 0.2;
   title: "High Burn Rate",
   message: `You are spending ₹${latestMonthExpense} against an income of ₹${latestMonthIncome}, resulting in a ${Math.round(safeBurnRatio * 100)}% burn ratio.`,
   action: `Reduce expenses by ₹${Math.round(latestMonthExpense * 0.2)} to bring burn ratio below 60%.`,
-  impact: "high",
+  impact: getImpactLevel({
+  runwayDays,
+  burnRatio: safeBurnRatio * 100,
+  incomeGrowth
+}),
   numbers: {
   income: Math.round(latestMonthIncome),
   expenses: Math.round(latestMonthExpense),
-  savings: Math.round(latestMonthNet),
   runwayDays: Math.round(runwayDays),
-  burnRatio: +(safeBurnRatio * 100).toFixed(1),
-  incomeGrowth: +incomeGrowth.toFixed(1),
+  burnRatio: Number((safeBurnRatio * 100).toFixed(1)),
   suggestedCut: Math.round(latestMonthExpense * 0.2),
-  investableAmount: Math.round(investableAmount),
-  funMoney: Math.round(funMoney)
 }
 });
     } else if (safeBurnRatio > 0.5) {
@@ -213,17 +219,17 @@ const funMoney = safeSurplus * 0.2;
     title: "Moderate Burn",
     message: `Your burn ratio is ${Math.round(safeBurnRatio * 100)}%, with expenses of ₹${latestMonthExpense} against income of ₹${latestMonthIncome}. This is manageable but leaves limited margin for error.`,
     action: `Optimize expenses by cutting approximately ₹${Math.round(latestMonthExpense * 0.1)} to improve financial flexibility.`,
-    impact: "medium",
+    impact: getImpactLevel({
+  runwayDays,
+  burnRatio: safeBurnRatio * 100,
+  incomeGrowth
+}),
     numbers: {
   income: Math.round(latestMonthIncome),
   expenses: Math.round(latestMonthExpense),
-  savings: Math.round(latestMonthNet),
   runwayDays: Math.round(runwayDays),
-  burnRatio: +(safeBurnRatio * 100).toFixed(1),
-  incomeGrowth: +incomeGrowth.toFixed(1),
+  burnRatio: Number((safeBurnRatio * 100).toFixed(1)),
   suggestedCut: Math.round(latestMonthExpense * 0.2),
-  investableAmount: Math.round(investableAmount),
-  funMoney: Math.round(funMoney)
 }
   });
 
@@ -232,13 +238,17 @@ const funMoney = safeSurplus * 0.2;
     title: "Efficient spending",
     message: `Your burn ratio is a healthy ${Math.round(safeBurnRatio * 100)}%, with expenses well aligned to your income of ₹${latestMonthIncome}.`,
     action: `You can safely increase savings or investments by ₹${Math.round(safeSurplus * 0.2)} without affecting stability.`,
-    impact: "low",
+    impact: getImpactLevel({
+  runwayDays,
+  burnRatio: safeBurnRatio * 100,
+  incomeGrowth
+}),
     numbers: {
   income: Math.round(latestMonthIncome),
   expenses: Math.round(latestMonthExpense),
   savings: Math.round(latestMonthNet),
   runwayDays: Math.round(runwayDays),
-  burnRatio: +(safeBurnRatio * 100).toFixed(1),
+  burnRatio: Number((safeBurnRatio * 100).toFixed(1)),
   incomeGrowth: +incomeGrowth.toFixed(1),
   suggestedCut: Math.round(latestMonthExpense * 0.2),
   investableAmount: Math.round(investableAmount),
@@ -253,17 +263,17 @@ if (incomeGrowth < 0) {
     title: "Declining Income",
     message: `Your income dropped by ${Math.abs(incomeGrowth).toFixed(1)}%. Combined with a runway of ${runwayDays} days, this puts pressure on your financial stability.`,
     action: `Increase revenue streams or pricing to reverse the decline within the next month.`,
-    impact: "high",
+    impact: getImpactLevel({
+  runwayDays,
+  burnRatio: safeBurnRatio * 100,
+  incomeGrowth
+}),
     numbers: {
   income: Math.round(latestMonthIncome),
   expenses: Math.round(latestMonthExpense),
   savings: Math.round(latestMonthNet),
   runwayDays: Math.round(runwayDays),
-  burnRatio: +(safeBurnRatio * 100).toFixed(1),
-  incomeGrowth: +incomeGrowth.toFixed(1),
   suggestedCut: Math.round(latestMonthExpense * 0.2),
-  investableAmount: Math.round(investableAmount),
-  funMoney: Math.round(funMoney)
 }
   });
 
@@ -272,17 +282,18 @@ if (incomeGrowth < 0) {
     title: "Slow Growth",
     message: `Your income is growing at ${incomeGrowth.toFixed(1)}%, which is positive but relatively slow for sustainable expansion.`,
     action: `Aim to increase growth to at least 10–15% by adding new income streams or improving conversion efficiency.`,
-    impact: "medium",
+    impact: getImpactLevel({
+  runwayDays,
+  burnRatio: safeBurnRatio * 100,
+  incomeGrowth
+}),
     numbers: {
   income: Math.round(latestMonthIncome),
   expenses: Math.round(latestMonthExpense),
   savings: Math.round(latestMonthNet),
   runwayDays: Math.round(runwayDays),
-  burnRatio: +(safeBurnRatio * 100).toFixed(1),
-  incomeGrowth: +incomeGrowth.toFixed(1),
   suggestedCut: Math.round(latestMonthExpense * 0.2),
   investableAmount: Math.round(investableAmount),
-  funMoney: Math.round(funMoney)
 }
   });
 
@@ -291,36 +302,19 @@ if (incomeGrowth < 0) {
     title: "Strong Growth",
     message: `Your income is growing at a healthy ${incomeGrowth.toFixed(1)}%, indicating strong upward momentum.`,
     action: `You have room to allocate about ₹${Math.round(funMoney)} as fun money while still investing the majority. Maintain this balance.`,
-    impact: "low",
+    impact: getImpactLevel({
+  runwayDays,
+  burnRatio: safeBurnRatio * 100,
+  incomeGrowth
+}),
     numbers: {
   income: Math.round(latestMonthIncome),
   expenses: Math.round(latestMonthExpense),
   savings: Math.round(latestMonthNet),
-  runwayDays: Math.round(runwayDays),
-  burnRatio: +(safeBurnRatio * 100).toFixed(1),
-  incomeGrowth: +incomeGrowth.toFixed(1),
-  suggestedCut: Math.round(latestMonthExpense * 0.2),
   investableAmount: Math.round(investableAmount),
   funMoney: Math.round(funMoney)
 }
   });
-  // ✅ FINAL IMPACT SANITY CHECK (ONLY IF NEEDED)
-insights.forEach((insight) => {
-  // If runway is critical → always high
-  if (runwayDays < 15 && insight.title.includes("Cash")) {
-    insight.impact = "high";
-  }
-
-  // If burn is very high → force high
-  if (safeBurnRatio > 0.75 && insight.title.toLowerCase().includes("burn")) {
-    insight.impact = "high";
-  }
-
-  // If income is declining → force high
-  if (incomeGrowth < 0 && insight.title.toLowerCase().includes("income")) {
-    insight.impact = "high";
-  }
-});
 }
 
     // ✅ PRIORITY
@@ -572,12 +566,11 @@ riskLevel = parsed.riskLevel || riskLevel;
     // ✅ Keep backend structure, only enhance text
 if (Array.isArray(parsed.insights)) {
   aiInsights = insights.map((baseInsight, i) => ({
-    ...baseInsight,
-    title: parsed.insights[i]?.title || baseInsight.title,
-    message: parsed.insights[i]?.message || baseInsight.message,
-    action: parsed.insights[i]?.action || baseInsight.action,
-    // 🔒 NEVER override impact or numbers
-  }));
+  ...baseInsight,
+  title: parsed.insights?.[i]?.title || baseInsight.title,
+  message: parsed.insights?.[i]?.message || baseInsight.message,
+  action: parsed.insights?.[i]?.action || baseInsight.action
+}));
 }
 
   } catch (err) {

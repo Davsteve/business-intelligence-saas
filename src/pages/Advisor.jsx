@@ -11,6 +11,7 @@ export default function Advisor() {
   const [aiAdvice, setAiAdvice] = useState("");
   const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;  
   const [aiData, setAiData] = useState(null);
+  const risk = aiData?.riskLevel?.toLowerCase?.() || "moderate";
   const [loadingAI, setLoadingAI] = useState(false);
   const getPriority = (impact) => {
   if (!impact) {
@@ -269,7 +270,7 @@ const getAIAdvice = async () => {
       throw new Error(result.error || "Failed to fetch AI advice");
     }
 
-    return result.data || result;
+    return result;
   };
 
   const handleGenerateAdvice = async () => {
@@ -395,13 +396,6 @@ const getAIAdvice = async () => {
     border: "1px solid rgba(255,255,255,0.05)",
     lineHeight: "1.6"
   }}>
-    {aiData && (
-  <div style={{
-    padding: "16px",
-    borderRadius: "9px",
-    background: "#020617",
-    border: "1px solid rgba(255,255,255,0.08)"
-  }}>
 
     {/* SUMMARY */}
     <div style={{
@@ -410,15 +404,9 @@ const getAIAdvice = async () => {
       borderRadius: "8px",
       marginBottom: "12px"
     }}>
-      <div style={{
-  padding: "12px",
-  background: "#020617",
-  borderRadius: "8px",
-  marginBottom: "12px"
-}}>
+
   💡 {aiData.summary}
 </div>
-    </div>
 
     <div style={{
   padding: "12px",
@@ -427,30 +415,22 @@ const getAIAdvice = async () => {
   marginBottom: "12px",
   borderLeft: "4px solid #ef4444"
 }}>
-  <div style={{
-  padding: "12px",
-  background: "#1e293b",
-  borderRadius: "8px",
-  marginBottom: "12px",
-  borderLeft: "4px solid #ef4444"
-}}>
-  🎯 <strong>Focus Area:</strong> {aiData.priority}
+  🎯 <strong>Priority:</strong> {aiData.priority}
 </div>
-</div> 
 
     {/* RISK LEVEL */}
     <h3>
   Financial Risk:{" "}
   <span style={{
-    color:
-      aiData.riskLevel === "low"
-        ? "#00ff9d"
-        : aiData.riskLevel === "moderate"
-        ? "#ffaa00"
-        : "#ff4d4d"
-  }}>
-    {aiData.riskLevel.toUpperCase()}
-  </span>
+  color:
+    risk === "low"
+      ? "#00ff9d"
+      : risk === "moderate"
+      ? "#ffaa00"
+      : "#ff4d4d"
+}}>
+  {risk.toUpperCase()}
+</span>
 </h3>
 
     {/* INSIGHTS */}
@@ -481,46 +461,49 @@ const getAIAdvice = async () => {
 })()}
 </p>
         <div style={{ marginTop: "6px" }}>
-  <b>Numbers:</b>
-
-  {item.numbers?.burn !== undefined && (
-    <div>💸 Monthly Expenses: {formatCurrency(item.numbers.burn)}</div>
-  )}
+  <b>Key Numbers:</b>
 
   {item.numbers?.income !== undefined && (
-    <div>💰 Monthly Income: {formatCurrency(item.numbers.income)}</div>
+    <div>💰 Income: {formatCurrency(item.numbers.income)}</div>
+  )}
 
+  {item.numbers?.expenses !== undefined && (
+    <div>💸 Expenses: {formatCurrency(item.numbers.expenses)}</div>
   )}
 
   {item.numbers?.runwayDays !== undefined && (
-    <div>⏳ Financial Buffer: {item.numbers.runwayDays} days</div>
+    <div>⏳ Runway: {item.numbers.runwayDays} days</div>
   )}
 
   {item.numbers?.burnRatio !== undefined && (
-    <div>📊 Expense Ratio: {(item.numbers.burnRatio * 100).toFixed(1)}%</div>
+    <div>
+  📊 Expense Ratio: {Number(item.numbers.burnRatio).toFixed(1)}%
+</div>
+  )}
+
+  {item.numbers?.incomeGrowth !== undefined && (
+    <div>📉 Growth: {item.numbers.incomeGrowth}%</div>
+  )}
+
+  {item.numbers?.suggestedCut !== undefined && (
+    <div>✂️ Suggested Cut: {formatCurrency(item.numbers.suggestedCut)}</div>
   )}
 
   {item.numbers?.investableAmount !== undefined && (
-  <div>📈 Available to Invest: {formatCurrency(item.numbers.investableAmount)}</div>
-)}
-
-  {item.numbers?.surplus !== undefined && (
-  <div>💼 Net Savings: {formatCurrency(item.numbers.surplus)}</div>
-)}
-
-  {item.numbers?.gapToTarget !== undefined && (
-  <div>📉 Gap to Target: {item.numbers?.gapToTarget?.toFixed(1)}%</div>
-)}
+    <div>📈 Investable: {formatCurrency(item.numbers.investableAmount)}</div>
+  )}
 
   {item.numbers?.funMoney !== undefined && (
-  <div>🎉 Fun Money: {formatCurrency(item.numbers.funMoney)}</div>
-)}
+    <div>🎉 Fun Money: {formatCurrency(item.numbers.funMoney)}</div>
+  )}
+
+  {item.numbers?.savings !== undefined && (
+    <div>💼 Savings: {formatCurrency(item.numbers.savings)}</div>
+  )}
 </div>
       </div>
     ))}
 
-  </div>
-)}
   </div>
 ) : (
   <div style={{ opacity: 0.6 }}>

@@ -255,7 +255,10 @@ const getAIAdvice = async () => {
         Authorization: `Bearer ${token}`
       },
       body: JSON.stringify({
-  transactions
+  transactions,
+  trend,
+  topCategory,
+  topCategoryPercent
 })
     });
 

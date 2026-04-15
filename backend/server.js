@@ -12,15 +12,9 @@ const app = express();
 
 // ✅ CORS
 app.use(cors({
-  origin: [
-    "https://clariflow-eight.vercel.app",
-    "http://localhost:5173"
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: true,
   credentials: true
 }));
-
-app.options("*", cors());
 
 // ✅ JSON parser
 app.use(express.json());

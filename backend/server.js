@@ -196,7 +196,7 @@ const funMoney = safeSurplus * 0.2;
     impact: "medium",
     numbers: {
   burn: latestMonthExpense,
-  runwaydays: runwayDays,
+  runwayDays: runwayDays,
   burnRatio: safeBurnRatio,
   suggestedCut: Math.round(latestMonthExpense * 0.1)
 }
@@ -206,7 +206,7 @@ const funMoney = safeSurplus * 0.2;
   insights.push({
     title: "Efficient spending",
     message: `Your burn ratio is a healthy ${Math.round(safeBurnRatio * 100)}%, with expenses well aligned to your income of ₹${latestMonthIncome}.`,
-    action: `You can safely increase savings or investments by ₹${Math.round(netSavings * 0.2)} without affecting stability.`,
+    action: `You can safely increase savings or investments by ₹${Math.round(safeSurplus * 0.2)} without affecting stability.`,
     impact: "low",
     numbers: {
   burn: latestMonthExpense,

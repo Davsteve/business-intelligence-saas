@@ -132,46 +132,47 @@ const funMoney = safeSurplus * 0.2;
 
     // 1️⃣ CASH BUFFER
     if (runwayDays < 30) {
-      insights.push({
-  title: "Low Cash Buffer",
-  message: `You only have ${runwayDays} days of runway, which is critically low.`,
-  action: `Increase runway to at least 90 days by reducing burn or increasing income.`,
-  impact: "high",
-  numbers: {
-  runwayDays,
-  income: latestMonthIncome, 
-  burn: latestMonthExpense,
-  suggestedCut: runwayDays < 90 ? Math.round(latestMonthExpense * 0.15) : undefined
-}
-});
-    } else if (runwayDays < 90) {
+  insights.push({
+    title: "Low Cash Buffer",
+    message: `You only have ${runwayDays} days of runway, which is critically low.`,
+    action: `Increase runway to at least 90 days by reducing expenses or increasing income immediately.`,
+    impact: "high",
+    numbers: {
+      runwayDays,
+      income: latestMonthIncome,
+      burn: latestMonthExpense,
+      suggestedCut: Math.round(latestMonthExpense * 0.2)
+    }
+  });
+
+} else if (runwayDays < 60) {
   insights.push({
     title: "Moderate Cash Buffer",
-    message: `Based on your historical income and expense, You currently have ${runwayDays} days of runway. While this provides some stability, it may not be sufficient to handle unexpected financial shocks.`,
-    action: `Increase your runway to at least 120 days by reducing expenses by approximately ₹${Math.round(latestMonthExpense * 0.15)} or improving income streams.`,
+    message: `You currently have ${runwayDays} days of runway. This provides some stability but could be improved.`,
+    action: `Aim to increase runway to at least 90 days by reducing expenses by around ₹${Math.round(latestMonthExpense * 0.15)}.`,
     impact: "medium",
     numbers: {
-  runwayDays,
-  income: latestMonthIncome, 
-  burn: latestMonthExpense,
-  suggestedCut: runwayDays < 90 ? Math.round(latestMonthExpense * 0.15) : undefined
-}
+      runwayDays,
+      income: latestMonthIncome,
+      burn: latestMonthExpense,
+      suggestedCut: Math.round(latestMonthExpense * 0.15)
+    }
   });
 
 } else {
   insights.push({
     title: "Strong Cash Position",
-    message: `Your runway stands at ${runwayDays} days, indicating a strong financial buffer and low short-term liquidity risk.`,
-    action: `Consider allocating ₹${Math.round(net * 0.2)} towards investments or growth initiatives while maintaining a safety reserve.`,
+    message: `Your runway stands at ${runwayDays} days, indicating a strong financial buffer.`,
+    action: `You can safely allocate part of your surplus towards investments or growth.`,
     impact: "low",
     numbers: {
-  runwayDays,
-  income: latestMonthIncome, 
-  burn: latestMonthExpense,
-  suggestedCut: runwayDays < 90 ? Math.round(latestMonthExpense * 0.15) : undefined
-}
-      });
+      runwayDays,
+      income: latestMonthIncome,
+      burn: latestMonthExpense,
+      investableAmount: Math.round(safeSurplus * 0.8) 
     }
+  });
+}
 
     // 2️⃣ BURN
     if (safeBurnRatio > 0.7) {
@@ -203,14 +204,15 @@ const funMoney = safeSurplus * 0.2;
 
 } else {
   insights.push({
-    title: "Efficient Spending",
+    title: "Efficient spending",
     message: `Your burn ratio is a healthy ${Math.round(safeBurnRatio * 100)}%, with expenses well aligned to your income of ₹${latestMonthIncome}.`,
-    action: `Maintain current discipline. You may consider reallocating ₹${Math.round((latestMonthIncome - latestMonthExpense) * 0.2)} towards savings or growth.`,
+    action: `You can safely increase savings or investments by ₹${Math.round(netSavings * 0.2)} without affecting stability.`,
     impact: "low",
     numbers: {
   burn: latestMonthExpense,
   burnRatio: safeBurnRatio,
-  surplus: latestMonthNet
+  surplus: latestMonthNet,
+  investableAmount: Math.round(safeSurplus * 0.8)
 }
       });
     }
@@ -219,7 +221,7 @@ const funMoney = safeSurplus * 0.2;
 if (incomeGrowth < 0) {
   insights.push({
     title: "Declining Income",
-    message: `Your income growth is ${incomeGrowth.toFixed(1)}%, indicating a downward trend.`,
+    message: `Your income dropped by ${Math.abs(incomeGrowth).toFixed(1)}% compared to last month, indicating a downward trend.`,
     action: `Increase revenue streams or pricing to reverse the decline within the next month.`,
     impact: "high",
     numbers: {
@@ -374,6 +376,13 @@ burn: latestMonthExpense,
     // 🧠 AI ENHANCEMENT (SAFE)
 let aiSummary = summary;
 let aiInsights = insights;
+const impactScore = {
+  high: 3,
+  medium: 2,
+  low: 1
+};
+
+insights.sort((a, b) => impactScore[b.impact] - impactScore[a.impact]);
 let score = Math.round(
   (Math.min(runwayDays, 120) / 120) * 40 +
   (1 - safeBurnRatio) * 30 +
@@ -509,7 +518,7 @@ Return ONLY valid JSON:
 priority = parsed.priority || priority;
 riskLevel = parsed.riskLevel || riskLevel;
 
-    aiInsights = insights;
+    aiInsights = parsed.insights || insights;
 
   } catch (err) {
     console.error("AI JSON parse failed:", err);

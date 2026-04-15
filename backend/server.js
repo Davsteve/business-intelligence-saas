@@ -136,13 +136,18 @@ const funMoney = safeSurplus * 0.2;
     title: "Low Cash Buffer",
     message: `You only have ${runwayDays} days of runway, which is critically low.`,
     action: `Increase runway to at least 90 days by reducing expenses or increasing income immediately.`,
-    impact: "high",
+    impact: "low",
     numbers: {
-      runwayDays,
-      income: latestMonthIncome,
-      burn: latestMonthExpense,
-      suggestedCut: Math.round(latestMonthExpense * 0.2)
-    }
+  income: Math.round(latestMonthIncome),
+  expenses: Math.round(latestMonthExpense),
+  savings: Math.round(latestMonthNet),
+  runwayDays: Math.round(runwayDays),
+  burnRatio: +(safeBurnRatio * 100).toFixed(1),
+  incomeGrowth: +incomeGrowth.toFixed(1),
+  suggestedCut: Math.round(latestMonthExpense * 0.2),
+  investableAmount: Math.round(investableAmount),
+  funMoney: Math.round(funMoney)
+}
   });
 
 } else if (runwayDays < 60) {
@@ -152,11 +157,16 @@ const funMoney = safeSurplus * 0.2;
     action: `Aim to increase runway to at least 90 days by reducing expenses by around ₹${Math.round(latestMonthExpense * 0.15)}.`,
     impact: "medium",
     numbers: {
-      runwayDays,
-      income: latestMonthIncome,
-      burn: latestMonthExpense,
-      suggestedCut: Math.round(latestMonthExpense * 0.15)
-    }
+  income: Math.round(latestMonthIncome),
+  expenses: Math.round(latestMonthExpense),
+  savings: Math.round(latestMonthNet),
+  runwayDays: Math.round(runwayDays),
+  burnRatio: +(safeBurnRatio * 100).toFixed(1),
+  incomeGrowth: +incomeGrowth.toFixed(1),
+  suggestedCut: Math.round(latestMonthExpense * 0.2),
+  investableAmount: Math.round(investableAmount),
+  funMoney: Math.round(funMoney)
+}
   });
 
 } else {
@@ -164,13 +174,18 @@ const funMoney = safeSurplus * 0.2;
     title: "Strong Cash Position",
     message: `Your runway stands at ${runwayDays} days, indicating a strong financial buffer.`,
     action: `You can safely allocate part of your surplus towards investments or growth.`,
-    impact: "low",
+    impact: "high",
     numbers: {
-      runwayDays,
-      income: latestMonthIncome,
-      burn: latestMonthExpense,
-      investableAmount: Math.round(safeSurplus * 0.8) 
-    }
+  income: Math.round(latestMonthIncome),
+  expenses: Math.round(latestMonthExpense),
+  savings: Math.round(latestMonthNet),
+  runwayDays: Math.round(runwayDays),
+  burnRatio: +(safeBurnRatio * 100).toFixed(1),
+  incomeGrowth: +incomeGrowth.toFixed(1),
+  suggestedCut: Math.round(latestMonthExpense * 0.2),
+  investableAmount: Math.round(investableAmount),
+  funMoney: Math.round(funMoney)
+}
   });
 }
 
@@ -182,10 +197,15 @@ const funMoney = safeSurplus * 0.2;
   action: `Reduce expenses by ₹${Math.round(latestMonthExpense * 0.2)} to bring burn ratio below 60%.`,
   impact: "high",
   numbers: {
-  burn: latestMonthExpense,
-  burnRatio: safeBurnRatio,
-  runwayDays: runwayDays,
-  suggestedCut: Math.round(latestMonthExpense * 0.2)
+  income: Math.round(latestMonthIncome),
+  expenses: Math.round(latestMonthExpense),
+  savings: Math.round(latestMonthNet),
+  runwayDays: Math.round(runwayDays),
+  burnRatio: +(safeBurnRatio * 100).toFixed(1),
+  incomeGrowth: +incomeGrowth.toFixed(1),
+  suggestedCut: Math.round(latestMonthExpense * 0.2),
+  investableAmount: Math.round(investableAmount),
+  funMoney: Math.round(funMoney)
 }
 });
     } else if (safeBurnRatio > 0.5) {
@@ -195,10 +215,15 @@ const funMoney = safeSurplus * 0.2;
     action: `Optimize expenses by cutting approximately ₹${Math.round(latestMonthExpense * 0.1)} to improve financial flexibility.`,
     impact: "medium",
     numbers: {
-  burn: latestMonthExpense,
-  runwayDays: runwayDays,
-  burnRatio: safeBurnRatio,
-  suggestedCut: Math.round(latestMonthExpense * 0.1)
+  income: Math.round(latestMonthIncome),
+  expenses: Math.round(latestMonthExpense),
+  savings: Math.round(latestMonthNet),
+  runwayDays: Math.round(runwayDays),
+  burnRatio: +(safeBurnRatio * 100).toFixed(1),
+  incomeGrowth: +incomeGrowth.toFixed(1),
+  suggestedCut: Math.round(latestMonthExpense * 0.2),
+  investableAmount: Math.round(investableAmount),
+  funMoney: Math.round(funMoney)
 }
   });
 
@@ -209,10 +234,15 @@ const funMoney = safeSurplus * 0.2;
     action: `You can safely increase savings or investments by ₹${Math.round(safeSurplus * 0.2)} without affecting stability.`,
     impact: "low",
     numbers: {
-  burn: latestMonthExpense,
-  burnRatio: safeBurnRatio,
-  surplus: latestMonthNet,
-  investableAmount: Math.round(safeSurplus * 0.8)
+  income: Math.round(latestMonthIncome),
+  expenses: Math.round(latestMonthExpense),
+  savings: Math.round(latestMonthNet),
+  runwayDays: Math.round(runwayDays),
+  burnRatio: +(safeBurnRatio * 100).toFixed(1),
+  incomeGrowth: +incomeGrowth.toFixed(1),
+  suggestedCut: Math.round(latestMonthExpense * 0.2),
+  investableAmount: Math.round(investableAmount),
+  funMoney: Math.round(funMoney)
 }
       });
     }
@@ -225,9 +255,16 @@ if (incomeGrowth < 0) {
     action: `Increase revenue streams or pricing to reverse the decline within the next month.`,
     impact: "high",
     numbers: {
-      incomeGrowth,
-      income: latestMonthIncome
-    }
+  income: Math.round(latestMonthIncome),
+  expenses: Math.round(latestMonthExpense),
+  savings: Math.round(latestMonthNet),
+  runwayDays: Math.round(runwayDays),
+  burnRatio: +(safeBurnRatio * 100).toFixed(1),
+  incomeGrowth: +incomeGrowth.toFixed(1),
+  suggestedCut: Math.round(latestMonthExpense * 0.2),
+  investableAmount: Math.round(investableAmount),
+  funMoney: Math.round(funMoney)
+}
   });
 
 } else if (incomeGrowth < 10) {
@@ -237,10 +274,16 @@ if (incomeGrowth < 0) {
     action: `Aim to increase growth to at least 10–15% by adding new income streams or improving conversion efficiency.`,
     impact: "medium",
     numbers: {
-      incomeGrowth,
-      income: latestMonthIncome,
-      gapToTarget: +(12 - incomeGrowth).toFixed(1)
-    }
+  income: Math.round(latestMonthIncome),
+  expenses: Math.round(latestMonthExpense),
+  savings: Math.round(latestMonthNet),
+  runwayDays: Math.round(runwayDays),
+  burnRatio: +(safeBurnRatio * 100).toFixed(1),
+  incomeGrowth: +incomeGrowth.toFixed(1),
+  suggestedCut: Math.round(latestMonthExpense * 0.2),
+  investableAmount: Math.round(investableAmount),
+  funMoney: Math.round(funMoney)
+}
   });
 
 } else {
@@ -250,10 +293,16 @@ if (incomeGrowth < 0) {
     action: `You have room to allocate about ₹${Math.round(funMoney)} as fun money while still investing the majority. Maintain this balance.`,
     impact: "low",
     numbers: {
-      incomeGrowth,
-      income: latestMonthIncome,
-      funMoney: Math.round(funMoney),
-    }
+  income: Math.round(latestMonthIncome),
+  expenses: Math.round(latestMonthExpense),
+  savings: Math.round(latestMonthNet),
+  runwayDays: Math.round(runwayDays),
+  burnRatio: +(safeBurnRatio * 100).toFixed(1),
+  incomeGrowth: +incomeGrowth.toFixed(1),
+  suggestedCut: Math.round(latestMonthExpense * 0.2),
+  investableAmount: Math.round(investableAmount),
+  funMoney: Math.round(funMoney)
+}
   });
   // ✅ FINAL IMPACT SANITY CHECK (ONLY IF NEEDED)
 insights.forEach((insight) => {

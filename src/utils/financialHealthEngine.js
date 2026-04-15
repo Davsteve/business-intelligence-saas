@@ -168,7 +168,6 @@ const burnRatio =
   avgMonthlyIncome === 0
     ? 0
     : Math.min(avgMonthlyExpenses / avgMonthlyIncome, 5);
-    const burnRatioPercent = Number((burnRatio * 100).toFixed(2));
 
   // 🔹 Expense Concentration
   let topExpensePercent = 0;
@@ -269,7 +268,7 @@ else riskLevel = "Low";
   let stability = calculateStability(transactions);
 
 // 🔥 CONTEXT-AWARE OVERRIDE
-if (runwayMonths < 1 || net < avgMonthlyBurn) {
+if (runwayMonths < 1 && net < avgMonthlyBurn) {
   stability = "Financially unstable 🔴";
 }
 
@@ -298,7 +297,7 @@ if (runwayMonths < 1 || net < avgMonthlyBurn) {
   incomeTrendLabel,
 
   // Burn & Runway
-  burnRatio: burnRatioPercent,
+  burnRatio: Number(burnRatio.toFixed(4)),
   runwayMonths: Number(runwayMonths.toFixed(2)),
   runwayDays: Number(runwayDays.toFixed(2)),
 

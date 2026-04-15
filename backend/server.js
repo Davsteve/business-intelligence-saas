@@ -93,11 +93,15 @@ let {
   avgMonthlyExpenses = 0,
   incomeGrowth = 0,
   net = 0,
-  burnRatio = 0,
   runwayDays = 0,
   stability = "unknown",
   incomeTrendLabel = "unknown"
 } = financialData || {};
+
+const safeBurnRatio =
+  latestMonthIncome > 0
+    ? latestMonthExpense / latestMonthIncome
+    : 0;
 
 let riskLevel = "MODERATE";
 
@@ -134,10 +138,11 @@ const funMoney = safeSurplus * 0.2;
   action: `Increase runway to at least 90 days by reducing burn or increasing income.`,
   impact: "high",
   numbers: {
-    runwayDays,
-    income: latestMonthIncome,
-burn: latestMonthExpense
-  }
+  runwayDays,
+  income: latestMonthIncome, 
+  burn: latestMonthExpense,
+  suggestedCut: runwayDays < 90 ? Math.round(latestMonthExpense * 0.15) : undefined
+}
 });
     } else if (runwayDays < 90) {
   insights.push({
@@ -146,11 +151,11 @@ burn: latestMonthExpense
     action: `Increase your runway to at least 120 days by reducing expenses by approximately ₹${Math.round(latestMonthExpense * 0.15)} or improving income streams.`,
     impact: "medium",
     numbers: {
-      runwayDays,
-      income: latestMonthIncome,
-burn: latestMonthExpense,
-      suggestedCut: Math.round(latestMonthExpense * 0.15)
-    }
+  runwayDays,
+  income: latestMonthIncome, 
+  burn: latestMonthExpense,
+  suggestedCut: runwayDays < 90 ? Math.round(latestMonthExpense * 0.15) : undefined
+}
   });
 
 } else {
@@ -160,54 +165,53 @@ burn: latestMonthExpense,
     action: `Consider allocating ₹${Math.round(net * 0.2)} towards investments or growth initiatives while maintaining a safety reserve.`,
     impact: "low",
     numbers: {
-      runwayDays,
-      income: latestMonthIncome,
-burn: latestMonthExpense,
-      investableAmount: Math.round(net * 0.2)
-    }
+  runwayDays,
+  income: latestMonthIncome, 
+  burn: latestMonthExpense,
+  suggestedCut: runwayDays < 90 ? Math.round(latestMonthExpense * 0.15) : undefined
+}
       });
     }
 
     // 2️⃣ BURN
-    if (burnRatio > 0.7) {
+    if (safeBurnRatio > 0.7) {
       insights.push({
   title: "High Burn Rate",
-  message: `You are spending ₹${latestMonthExpense} against an income of ₹${latestMonthIncome}, resulting in a ${Math.round(burnRatio * 100)}% burn ratio.`,
+  message: `You are spending ₹${latestMonthExpense} against an income of ₹${latestMonthIncome}, resulting in a ${Math.round(safeBurnRatio * 100)}% burn ratio.`,
   action: `Reduce expenses by ₹${Math.round(latestMonthExpense * 0.2)} to bring burn ratio below 60%.`,
   impact: "high",
   numbers: {
-    income: latestMonthIncome,
-burn: latestMonthExpense,
-    burnRatio
-  }
+  burn: latestMonthExpense,
+  burnRatio: safeBurnRatio,
+  runwayDays: runwayDays,
+  suggestedCut: Math.round(latestMonthExpense * 0.2)
+}
 });
-    } else if (burnRatio > 0.5) {
+    } else if (safeBurnRatio > 0.5) {
   insights.push({
     title: "Moderate Burn",
-    message: `Your burn ratio is ${Math.round(burnRatio * 100)}%, with expenses of ₹${latestMonthExpense} against income of ₹${latestMonthIncome}. This is manageable but leaves limited margin for error.`,
+    message: `Your burn ratio is ${Math.round(safeBurnRatio * 100)}%, with expenses of ₹${latestMonthExpense} against income of ₹${latestMonthIncome}. This is manageable but leaves limited margin for error.`,
     action: `Optimize expenses by cutting approximately ₹${Math.round(latestMonthExpense * 0.1)} to improve financial flexibility.`,
     impact: "medium",
     numbers: {
-      income: latestMonthIncome,
-burn: latestMonthExpense,
-      burnRatio,
-      suggestedCut: Math.round(latestMonthExpense * 0.1)
-    }
+  burn: latestMonthExpense,
+  runwaydays: runwayDays,
+  burnRatio: safeBurnRatio,
+  suggestedCut: Math.round(latestMonthExpense * 0.1)
+}
   });
 
 } else {
   insights.push({
     title: "Efficient Spending",
-    message: `Your burn ratio is a healthy ${Math.round(burnRatio * 100)}%, with expenses well aligned to your income of ₹${latestMonthIncome}.`,
+    message: `Your burn ratio is a healthy ${Math.round(safeBurnRatio * 100)}%, with expenses well aligned to your income of ₹${latestMonthIncome}.`,
     action: `Maintain current discipline. You may consider reallocating ₹${Math.round((latestMonthIncome - latestMonthExpense) * 0.2)} towards savings or growth.`,
     impact: "low",
     numbers: {
-      income: latestMonthIncome,
-burn: latestMonthExpense,
-      burnRatio,
-      surplus: latestMonthNet,
-      investableAmount: Math.round(latestMonthNet * 0.2)
-    }
+  burn: latestMonthExpense,
+  burnRatio: safeBurnRatio,
+  surplus: latestMonthNet
+}
       });
     }
 
@@ -233,7 +237,6 @@ if (incomeGrowth < 0) {
     numbers: {
       incomeGrowth,
       income: latestMonthIncome,
-      targetGrowth: 12,
       gapToTarget: +(12 - incomeGrowth).toFixed(1)
     }
   });
@@ -250,6 +253,23 @@ if (incomeGrowth < 0) {
       funMoney: Math.round(funMoney),
     }
   });
+  // ✅ FINAL IMPACT SANITY CHECK (ONLY IF NEEDED)
+insights.forEach((insight) => {
+  // If runway is critical → always high
+  if (runwayDays < 15 && insight.title.includes("Cash")) {
+    insight.impact = "high";
+  }
+
+  // If burn is very high → force high
+  if (safeBurnRatio > 0.75 && insight.title.includes("Burn")) {
+    insight.impact = "high";
+  }
+
+  // If income is declining → force high
+  if (incomeGrowth < 0 && insight.title.includes("Income")) {
+    insight.impact = "high";
+  }
+});
 }
 
     // ✅ PRIORITY
@@ -257,8 +277,8 @@ if (incomeGrowth < 0) {
 
 if (runwayDays < 15) {
   priority = `URGENT: You have less than ${runwayDays} days of runway. Reduce burn immediately and secure additional income or capital within the next 7–10 days.`;
-} else if (burnRatio > 0.7) {
-  priority = `HIGH: Your burn ratio is ${Math.round(burnRatio * 100)}%. Cut at least 20–30% of non-essential expenses to stabilize cash flow.`;
+} else if (safeBurnRatio > 0.7) {
+  priority = `HIGH: Your burn ratio is ${Math.round(safeBurnRatio * 100)}%. Cut at least 20–30% of non-essential expenses to stabilize cash flow.`;
 } else if (runwayDays < 90) {
   priority = `MODERATE: Strengthen your runway to at least 90 days by improving savings and optimizing expenses.`;
 } else {
@@ -271,7 +291,7 @@ if (runwayDays < 15) {
   income,
   burn,
   runwayDays,
-  burnRatio,
+  safeBurnRatio,
   trend,
   riskLevel
 }) => {
@@ -290,9 +310,9 @@ if (runwayDays < 15) {
   }
 
   // 💸 CONDITION (numbers-driven)
-  if (burnRatio > 0.8) {
+  if (safeBurnRatio > 0.8) {
     condition = "Expenses are consuming a significant portion of your income";
-  } else if (burnRatio > 0.5) {
+  } else if (safeBurnRatio > 0.5) {
     condition = "Spending levels are moderately high relative to income";
   } else {
     condition = "Spending is well-controlled relative to income";
@@ -345,7 +365,7 @@ const summary = generateSummary({
   income: latestMonthIncome,
 burn: latestMonthExpense,
   runwayDays,
-  burnRatio,
+  safeBurnRatio,
   trend,
   riskLevel
 });
@@ -356,7 +376,7 @@ let aiSummary = summary;
 let aiInsights = insights;
 let score = Math.round(
   (Math.min(runwayDays, 120) / 120) * 40 +
-  (1 - burnRatio) * 30 +
+  (1 - safeBurnRatio) * 30 +
   Math.max(0, incomeGrowth) * 3
 );
 
@@ -429,7 +449,7 @@ Here is the user's financial data:
 - Income Growth: ${incomeGrowth}%
 - Income Trend: ${incomeTrendLabel}
 
-- Burn Ratio: ${(burnRatio * 100).toFixed(1)}%
+- Burn Ratio: ${(safeBurnRatio * 100).toFixed(1)}%
 - Runway: ${runwayDays} days
 
 - Stability: ${stability}
@@ -488,59 +508,8 @@ Return ONLY valid JSON:
     aiSummary = parsed.summary || summary;
 priority = parsed.priority || priority;
 riskLevel = parsed.riskLevel || riskLevel;
-    aiInsights = Array.isArray(parsed.insights)
-  ? parsed.insights.slice(0, 3)
-  : insights;
 
-    aiInsights = aiInsights.map((insight, index) => {
-  let forcedImpact = insight.impact;
-
-  // 🚨 HARD RULES (override AI stupidity)
-  if (index === 1 && incomeGrowth < 0) {
-    forcedImpact = "high";
-  }
-
-  if (burnRatio > 0.7) {
-    forcedImpact = "high";
-  }
-
-  if (runwayDays < 30) {
-    forcedImpact = "high";
-  }
-
-  return {
-    ...insight,
-    impact: forcedImpact,
-
-    numbers: (() => {
-      if (index === 0) {
-        return {
-          income: Math.round(latestMonthIncome),
-          surplus: Math.round(safeSurplus),
-          funMoney: Math.round(funMoney),
-        };
-      }
-
-      if (index === 1) {
-        return {
-          income: Math.round(latestMonthIncome),
-          burn: Math.round(latestMonthExpense),
-          burnRatio,
-        };
-      }
-
-      if (index === 2) {
-        return {
-          incomeGrowth,
-          income: Math.round(latestMonthIncome),
-          burnRatio,
-        };
-      }
-
-      return {};
-    })()
-  };
-});
+    aiInsights = insights;
 
   } catch (err) {
     console.error("AI JSON parse failed:", err);

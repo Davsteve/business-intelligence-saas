@@ -377,7 +377,8 @@ STEP 2: Prioritize correctly
 - DO NOT suggest investing when runway is low
 
 STEP 3: Give clear actions
-- A forward-looking opportunity (skills, income diversification, or cost optimization), NOT the main risk
+- One PRIMARY action (most important)
+- 2–3 SECONDARY actions (supporting steps)
 
 ---
 
@@ -447,7 +448,7 @@ You MUST generate EXACTLY 3 insights mapped to:
 
 1. Current Financial Position (overall situation)
 2. Financial Risk / Safety (runway, burn, risk)
-3. Growth Opportunity (improvement or upside)
+3. Third → a forward-looking opportunity (skills, income diversification, or cost optimization), NOT the main risk
 
 STRICT:
 - Do NOT invent personal details

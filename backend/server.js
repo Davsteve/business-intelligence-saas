@@ -539,6 +539,26 @@ if (Array.isArray(parsed.insights)) {
     growth: ai.find(i => i.type === "growth") || ai[2],
   };
 
+  // 📊 IMPACT SIMULATION ENGINE
+
+const expenseReduction = latestMonthExpense * 0.2;
+
+const newExpenses = latestMonthExpense - expenseReduction;
+
+const newRunway =
+  latestMonthNet > 0 && newExpenses > 0
+    ? latestMonthNet / (newExpenses / 30)
+    : runwayDays;
+
+const incomeBoost = latestMonthIncome * 0.3;
+
+const improvedIncome = latestMonthIncome + incomeBoost;
+
+const improvedBurnRatio =
+  improvedIncome > 0
+    ? newExpenses / improvedIncome
+    : safeBurnRatio;
+
   // 🔮 PREDICTIVE INTELLIGENCE LAYER
 
 const projectedRunwayWarning =
@@ -589,7 +609,23 @@ const burnRiskProjection =
 
   return baseMsg;
 })(),
-  action: matchedAI?.action || baseInsight.action,
+  action: (() => {
+  let baseAction = matchedAI?.action || baseInsight.action;
+
+  if (baseInsight.title.toLowerCase().includes("buffer")){
+    baseAction += ` Cutting ₹${Math.round(expenseReduction)} could extend your runway to ~${Math.round(newRunway)} days.`;
+  }
+
+  if (baseInsight.title.toLowerCase().includes("income")) {
+    baseAction += ` Increasing income by ₹${Math.round(incomeBoost)} could significantly improve your financial stability.`;
+  }
+
+  if (baseInsight.title.toLowerCase().includes("spending")) {
+    baseAction += ` Reducing expenses improves your burn ratio to ${(improvedBurnRatio * 100).toFixed(1)}%.`;
+  }
+
+  return baseAction;
+})(),
 
   // ✅ SMART PRIORITY LOGIC (NEW)
   impact:

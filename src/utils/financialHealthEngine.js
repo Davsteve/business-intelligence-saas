@@ -126,12 +126,9 @@ const avgMonthlyBurn =
     : 0;
 
 // 🔥 Correct runway
-const runwayMonths =
-  avgMonthlyNet > 0
-    ? Infinity
-    : avgMonthlyBurn > 0
-    ? Math.max(0, net) / avgMonthlyBurn
-    : 0;
+const runwayMonths = avgMonthlyBurn > 0
+  ? Math.max(0, net) / avgMonthlyBurn
+  : 0;
 
 const runwayDays = runwayMonths * 30;
 
@@ -300,25 +297,32 @@ if (runwayMonths < 1 && net < avgMonthlyBurn) {
   totalExpense,
 
   // Monthly
-  avgMonthlyIncome,
-  avgMonthlyExpenses,
-  avgMonthlyBurn,
+  avgMonthlyIncome: Number(
+    (totalIncome / (sortedMonths.length || 1)).toFixed(2)
+  ),
+  avgMonthlyExpenses: Number(
+    (totalExpense / (sortedMonths.length || 1)).toFixed(2)
+  ),
+  avgMonthlyBurn: Number(
+  (totalExpense / (sortedMonths.length || 1)).toFixed(2)
+),
 
-  // Structured Metrics (VERY IMPORTANT)
-  metrics: {
-    incomeGrowth,
-    incomeTrendLabel,
-    burnRatio,
-    runwayMonths,
-    runwayDays,
-    stability
-  },
+  // Growth & Trend
+  incomeGrowth: Number(incomeGrowth.toFixed(2)),
+  incomeTrendLabel,
 
-  // Debug (optional)
+  // Burn & Runway
+  burnRatio: Number(burnRatio.toFixed(4)),
+  runwayMonths: Number(runwayMonths.toFixed(2)),
+  runwayDays: Number(runwayDays.toFixed(2)),
+
+  // Stability
+  stability,
+
+  // Debug (important for next phase)
   monthlyIncomeArray,
   monthlyNets,
 
-  // UI Scores
   breakdown
 };
 } 

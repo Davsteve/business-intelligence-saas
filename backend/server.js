@@ -300,6 +300,11 @@ if (primaryIssue === "income_decline") {
   summary = `Your financial position is stable with a runway of ${Math.round(runwayDays)} days. Your income and spending are relatively balanced, giving you a solid base to grow from.`;
 }
 
+const impactScore = {
+  high: 3,
+  medium: 2,
+  low: 1
+};
 
 insights.sort((a, b) => impactScore[b.impact] - impactScore[a.impact]);
 let score = Math.round(

@@ -56,6 +56,101 @@ const verifyUser = async (req, res, next) => {
   }
 };
 
+function generateSmartInsights(metrics) {
+  const {
+    incomeTrend,
+    expenseRatio,
+    runway,
+    savings,
+    burnRate
+  } = metrics;
+
+  const insights = [];
+
+  // 🧠 1. Financial Position (CORE HEALTH)
+  if (runway < 30) {
+    insights.push({
+      title: "Financial Survival Risk",
+      message: "Your financial runway is critically low, meaning you may run out of funds soon if no changes are made.",
+      impact: "CRITICAL",
+      reasoning: "Runway below 30 days signals immediate survival risk.",
+      action: "Cut all non-essential expenses immediately and secure short-term income sources."
+    });
+  } else if (runway < 60) {
+    insights.push({
+      title: "Limited Financial Buffer",
+      message: "Your runway is limited, which puts you at moderate risk if income drops further.",
+      impact: "HIGH",
+      reasoning: "Runway between 30–60 days offers limited protection.",
+      action: "Increase savings rate and reduce discretionary spending."
+    });
+  } else {
+    insights.push({
+      title: "Stable Financial Position",
+      message: "You have a reasonable financial buffer, giving you some stability.",
+      impact: "MEDIUM",
+      reasoning: "Runway above 60 days provides flexibility.",
+      action: "Maintain discipline and look for growth opportunities."
+    });
+  }
+
+  // 📉 2. Income Risk
+  if (incomeTrend < -20) {
+    insights.push({
+      title: "Income Decline Risk",
+      message: "Your income is dropping significantly, which is the biggest threat to your financial stability.",
+      impact: "CRITICAL",
+      reasoning: "A decline greater than 20% is a major instability signal.",
+      action: "Prioritize stabilizing income through new or alternative sources immediately."
+    });
+  } else if (incomeTrend < 0) {
+    insights.push({
+      title: "Income Instability",
+      message: "Your income shows a declining trend, which may affect your future stability.",
+      impact: "HIGH",
+      reasoning: "Even small declines can compound over time.",
+      action: "Identify ways to stabilize or diversify income."
+    });
+  } else {
+    insights.push({
+      title: "Income Growth Opportunity",
+      message: "Your income is growing, creating an opportunity to strengthen your financial position.",
+      impact: "MEDIUM",
+      reasoning: "Positive trends allow wealth building.",
+      action: "Increase savings and invest surplus wisely."
+    });
+  }
+
+  // 💸 3. Spending Behavior
+  if (expenseRatio > 60) {
+    insights.push({
+      title: "High Spending Pressure",
+      message: "A large portion of your income is being spent, limiting your ability to save.",
+      impact: "HIGH",
+      reasoning: "Expense ratio above 60% restricts financial growth.",
+      action: "Reduce discretionary expenses and optimize major cost areas."
+    });
+  } else if (expenseRatio > 40) {
+    insights.push({
+      title: "Moderate Spending",
+      message: "Your spending is under control but still leaves room for improvement.",
+      impact: "MEDIUM",
+      reasoning: "Moderate ratios can be optimized.",
+      action: "Track and trim non-essential expenses."
+    });
+  } else {
+    insights.push({
+      title: "Efficient Spending",
+      message: "Your spending is well managed relative to your income.",
+      impact: "LOW",
+      reasoning: "Low expense ratio supports savings.",
+      action: "Maintain current discipline."
+    });
+  }
+
+  return insights;
+}
+
 // 🚀 MAIN ENDPOINT
 app.post("/api/ai", verifyUser, async (req, res) => {
   const getImpactLevel = ({ runwayDays, burnRatio, incomeGrowth }) => {
@@ -153,74 +248,15 @@ const investableAmount = safeSurplus * 0.8;
 const funMoney = safeSurplus * 0.2;
 
     // ✅ INSIGHTS (ALWAYS 3)
-    const insights = [];
+    const metrics = {
+  incomeTrend: incomeGrowth,
+  expenseRatio: safeBurnRatio * 100,
+  runway: runwayDays,
+  savings: latestMonthNet,
+  burnRate: safeBurnRatio
+};
 
-    // 1️⃣ CASH POSITION (ALWAYS EXISTS)
-insights.push({
-  title: "Cash Position",
-  message:
-    primaryIssue === "low_runway"
-      ? `Your runway is ${runwayDays} days, which is risky.`
-      : `Your runway is ${runwayDays} days, giving you financial stability.`,
-  action:
-    primaryIssue === "low_runway"
-      ? "Increase runway to at least 90 days by reducing expenses or increasing income."
-      : "Maintain this buffer while improving other financial areas.",
-  impact: getImpactLevel({
-    runwayDays,
-    burnRatio: safeBurnRatio * 100,
-    incomeGrowth
-  }),
-  numbers: {
-    runwayDays: Math.round(runwayDays),
-    income: Math.round(latestMonthIncome),
-  }
-});
-
-    // 2️⃣ SPENDING BEHAVIOR (ALWAYS EXISTS)
-insights.push({
-  title: "Spending Behavior",
-  message:
-    primaryIssue === "high_burn"
-      ? `You are spending ₹${latestMonthExpense} out of ₹${latestMonthIncome}, which is high.`
-      : "Your spending is currently under control.",
-  action:
-    primaryIssue === "high_burn"
-      ? `Reduce expenses by ₹${Math.round(latestMonthExpense * 0.2)} to improve stability.`
-      : "Maintain your current expense discipline.",
-  impact: getImpactLevel({
-    runwayDays,
-    burnRatio: safeBurnRatio * 100,
-    incomeGrowth
-  }),
-  numbers: {
-    expenses: Math.round(latestMonthExpense),
-    burnRatio: Number((safeBurnRatio * 100).toFixed(1)),
-    suggestedCut: Math.round(latestMonthExpense * 0.2),
-  }
-});
-
-    // 3️⃣ INCOME TREND (ALWAYS EXISTS)
-insights.push({
-  title: "Income Trend",
-  message:
-    primaryIssue === "income_decline"
-      ? `Your income has dropped by ${Math.abs(incomeGrowth).toFixed(1)}%.`
-      : "Your income trend is stable or improving.",
-  action:
-    primaryIssue === "income_decline"
-      ? "Focus on increasing income through new sources or opportunities."
-      : "Continue growing your income streams.",
-  impact: getImpactLevel({
-    runwayDays,
-    burnRatio: safeBurnRatio * 100,
-    incomeGrowth
-  }),
-  numbers: {
-    income: Math.round(latestMonthIncome),
-    incomeGrowth: +incomeGrowth.toFixed(1),
-  }
-});
+const insights = generateSmartInsights(metrics);
 
     // ✅ PRIORITY
     let priority = "";
@@ -507,11 +543,11 @@ if (Array.isArray(parsed.insights)) {
   aiInsights = insights.map((baseInsight) => {
     let matchedAI;
 
-    if (baseInsight.title === "Cash Position") {
+    if (baseInsight.title.toLowerCase().includes("financial")) {
       matchedAI = aiMap.current;
-    } else if (baseInsight.title === "Spending Behavior") {
+    } else if (baseInsight.title.toLowerCase().includes("spending")) {
       matchedAI = aiMap.risk;
-    } else if (baseInsight.title === "Income Trend") {
+    } else if (baseInsight.title.toLowerCase().includes("income")) {
       matchedAI = aiMap.growth;
     }
 

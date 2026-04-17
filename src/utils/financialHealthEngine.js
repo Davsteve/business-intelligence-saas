@@ -5,13 +5,12 @@ export function calculateFinancialHealth(transactions) {
   if (!transactions || transactions.length === 0) {
   return {
     score: 0,
-    breakdown: {
-      profit: 0,
-      runway: 0,
-      growth: 0,
-      concentration: 0,
-      stability: 0,
-    },
+    breakdown: [
+  { name: "Runway Strength", value: 0 },
+  { name: "Savings Rate", value: 0 },
+  { name: "Burn Control", value: 0 },
+  { name: "Income Growth", value: 0 },
+],
     net: 0,
     totalIncome: 0,
   };
@@ -20,19 +19,19 @@ export function calculateFinancialHealth(transactions) {
 function calculateStability(transactions) {
 
   
-  const monthlyIncome = {};
+  const stabilityMonthlyIncome = {};
 
   transactions.forEach((txn) => {
     if (txn.categories?.type !== "income") return;
 
-    const date = new Date(txn.date);
+    const date = new Date(txn.created_at);
     const key = `${date.getFullYear()}-${date.getMonth()}`;
 
-    if (!monthlyIncome[key]) monthlyIncome[key] = 0;
-    monthlyIncome[key] += txn.amount;
+    if (!stabilityMonthlyIncome[key]) stabilityMonthlyIncome[key] = 0;
+stabilityMonthlyIncome[key] += txn.amount;
   });
 
-  const values = Object.values(monthlyIncome);
+  const values = Object.values(stabilityMonthlyIncome);
 
   if (values.length < 2) return "Moderately stable income";
 
@@ -127,9 +126,12 @@ const avgMonthlyBurn =
     : 0;
 
 // 🔥 Correct runway
-const runwayMonths = avgMonthlyBurn > 0
-  ? Math.max(0, net) / avgMonthlyBurn
-  : 0;
+const runwayMonths =
+  avgMonthlyNet > 0
+    ? Infinity
+    : avgMonthlyBurn > 0
+    ? Math.max(0, net) / avgMonthlyBurn
+    : 0;
 
 const runwayDays = runwayMonths * 30;
 
@@ -246,23 +248,39 @@ else riskLevel = "Low";
   };
 
   // 🔹 Breakdown Object
-  const breakdown = [
-  {
-    name: "Runway Strength",
-    value: Math.round((runwayMonths / 6) * 100),
-  },
-  {
-    name: "Savings Rate",
-    value: Math.round(savingsRate),
-  },
-  {
-    name: "Burn Control",
-    value: Math.round((1 - burnRatio) * 100),
-  },
-  {
-    name: "Income Growth",
-    value: Math.round(incomeGrowth),
-  },
+  const clamp = (val) => Math.max(0, Math.min(100, val));
+
+const runwayScore =
+  runwayMonths === Infinity ? 100 :
+  runwayMonths > 6 ? 90 :
+  runwayMonths > 3 ? 70 :
+  runwayMonths > 1 ? 50 :
+  30;
+
+const savingsScore =
+  savingsRate > 50 ? 95 :
+  savingsRate > 30 ? 80 :
+  savingsRate > 20 ? 60 :
+  40;
+
+const burnControlScore =
+  burnRatio < 0.3 ? 90 :
+  burnRatio < 0.5 ? 70 :
+  burnRatio < 0.7 ? 50 :
+  30;
+
+const growthScore =
+  incomeGrowth > 15 ? 90 :
+  incomeGrowth > 5 ? 75 :
+  incomeGrowth > -5 ? 60 :
+  incomeGrowth > -20 ? 40 :
+  20;
+
+const breakdown = [
+  { name: "Runway Strength", value: clamp(runwayScore) },
+  { name: "Savings Rate", value: clamp(savingsScore) },
+  { name: "Burn Control", value: clamp(burnControlScore) },
+  { name: "Income Growth", value: clamp(growthScore) },
 ];
 
   let stability = calculateStability(transactions);
@@ -282,32 +300,25 @@ if (runwayMonths < 1 && net < avgMonthlyBurn) {
   totalExpense,
 
   // Monthly
-  avgMonthlyIncome: Number(
-    (totalIncome / (sortedMonths.length || 1)).toFixed(2)
-  ),
-  avgMonthlyExpenses: Number(
-    (totalExpense / (sortedMonths.length || 1)).toFixed(2)
-  ),
-  avgMonthlyBurn: Number(
-  (totalExpense / (sortedMonths.length || 1)).toFixed(2)
-),
+  avgMonthlyIncome,
+  avgMonthlyExpenses,
+  avgMonthlyBurn,
 
-  // Growth & Trend
-  incomeGrowth: Number(incomeGrowth.toFixed(2)),
-  incomeTrendLabel,
+  // Structured Metrics (VERY IMPORTANT)
+  metrics: {
+    incomeGrowth,
+    incomeTrendLabel,
+    burnRatio,
+    runwayMonths,
+    runwayDays,
+    stability
+  },
 
-  // Burn & Runway
-  burnRatio: Number(burnRatio.toFixed(4)),
-  runwayMonths: Number(runwayMonths.toFixed(2)),
-  runwayDays: Number(runwayDays.toFixed(2)),
-
-  // Stability
-  stability,
-
-  // Debug (important for next phase)
+  // Debug (optional)
   monthlyIncomeArray,
   monthlyNets,
 
+  // UI Scores
   breakdown
 };
 } 

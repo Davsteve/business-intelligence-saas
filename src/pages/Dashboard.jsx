@@ -78,16 +78,9 @@ const insight = generateInsight();
 
 const {
   score = 0,
-  breakdown = {},
+  breakdown = [],
   riskLevel = "Low"
 } = financials || {};
-  const mappedBreakdown = {
-  profitMargin: breakdown?.profit || 0,
-  runway: breakdown?.runway || 0,
-  incomeGrowth: breakdown?.growth || 0,
-  expenseConcentration: breakdown?.concentration || 0,
-  stability: breakdown?.stability || 0,
-};
 const getAIAdvice = async ({
   netBalance,
   burn,
@@ -294,7 +287,7 @@ toast.success("Done successfully");
   const advice = await getAIAdvice({
     netBalance,
     burn: totalExpense,
-    runway,
+    runway: cashFlow?.runway || 0,
     trend: cashFlow.trend,
     volatility: cashFlow.volatilityLevel,
     topExpense
@@ -434,36 +427,35 @@ const volatilityColor = (() => {
   {showBreakdown ? "Hide Breakdown ▲" : "View Breakdown ▼"}
 </Button>
 
-          {showBreakdown && breakdown && Object.keys(breakdown).length > 0 && (
+          {showBreakdown && breakdown.length > 0 && (
   <div style={{ marginTop: "20px" }}>
-    {Object.entries(breakdown).map(([key, value], index) => (
-                <div key={index} style={styles.breakdownCard}>
-                  <div style={styles.breakdownRow}>
-                    <span>{value.name}</span>
-<span>{value.value} / 100</span>
-                  </div>
+    {breakdown.map((item, index) => (
+      <div key={index} style={styles.breakdownCard}>
+        
+        <div style={styles.breakdownRow}>
+          <span>{item.name}</span>
+          <span>{item.value} / 100</span>
+        </div>
 
-                  <div style={styles.innerProgress}>
-                    <div
-                      style={{
-                        width: `${value.value}%`,
-                        height: "100%",
-                        background:
-  value.score >= 75
-    ? "#22c55e"   // green
-    : value.score >= 50
-    ? "#f59e0b"   // yellow
-    : "#ef4444",  // red
-                      }}
-                    />
-                  </div>
+        <div style={styles.innerProgress}>
+          <div
+            style={{
+              width: `${item.value}%`,
+              height: "100%",
+              background:
+                item.value >= 75
+                  ? "#22c55e"
+                  : item.value >= 50
+                  ? "#f59e0b"
+                  : "#ef4444",
+            }}
+          />
+        </div>
 
-                  <div style={styles.breakdownMeta}>
-</div>
-                </div>
-              ))}
-            </div>
-          )}
+      </div>
+    ))}
+  </div>
+)}
         </Card>
       )}
 

@@ -554,22 +554,41 @@ if (Array.isArray(parsed.insights)) {
     return {
   ...baseInsight,
 
-  // ✅ KEEP AI ENHANCEMENT
   title: matchedAI?.title || baseInsight.title,
   message: matchedAI?.message || baseInsight.message,
   action: matchedAI?.action || baseInsight.action,
 
-  // ✅ ADD THIS (CRITICAL FIX)
-  impact: baseInsight.impact, // force backend truth
+  // ✅ SMART PRIORITY LOGIC (NEW)
+  impact:
+    (
+      (primaryIssue === "income_decline" &&
+        baseInsight.title.toLowerCase().includes("income")) ||
 
-  // ✅ OPTIONAL (future-ready)
+      (primaryIssue === "low_runway" &&
+        baseInsight.title.toLowerCase().includes("buffer")) ||
+
+      (primaryIssue === "high_burn" &&
+        baseInsight.title.toLowerCase().includes("spending"))
+    )
+      ? "CRITICAL"
+      : baseInsight.impact,
+
   priority:
-    baseInsight.impact === "CRITICAL"
+    (
+      (primaryIssue === "income_decline" &&
+        baseInsight.title.toLowerCase().includes("income")) ||
+
+      (primaryIssue === "low_runway" &&
+        baseInsight.title.toLowerCase().includes("buffer")) ||
+
+      (primaryIssue === "high_burn" &&
+        baseInsight.title.toLowerCase().includes("spending"))
+    )
       ? "High"
       : baseInsight.impact === "HIGH"
-      ? "High"
-      : baseInsight.impact === "MEDIUM"
       ? "Medium"
+      : baseInsight.impact === "MEDIUM"
+      ? "Low"
       : "Low"
 };
   });

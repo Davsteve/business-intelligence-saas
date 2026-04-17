@@ -266,6 +266,7 @@ const funMoney = safeSurplus * 0.2;
 };
 
 const insights = generateSmartInsights(metrics);
+let aiInsights = insights;
 
     // ✅ PRIORITY
     let priority = "";
@@ -462,7 +463,7 @@ Return ONLY valid JSON:
 
     const parsed = JSON.parse(jsonMatch[0]);
 
-    aiSummary = parsed.summary || summary;
+    summary = parsed.summary || summary;
 priority = parsed.priority || priority;
 riskLevel = parsed.riskLevel || riskLevel;
 

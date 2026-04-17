@@ -499,8 +499,6 @@ if (Array.isArray(parsed.insights)) {
   aiInsights = insights.map((baseInsight) => {
     let matchedAI = null;
 
-    // 🧠 Match by meaning, not index
-    const ai = parsed.insights;
 
 // 🧠 Strict mapping (NO searching, NO guessing)
 const aiMap = {

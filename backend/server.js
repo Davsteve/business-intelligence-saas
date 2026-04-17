@@ -496,62 +496,24 @@ riskLevel = parsed.riskLevel || riskLevel;
 if (Array.isArray(parsed.insights)) {
   const ai = parsed.insights;
 
-  aiInsights = insights.map((baseInsight) => {
-    let matchedAI = null;
-
-
-// 🧠 Strict mapping (NO searching, NO guessing)
-const aiMap = {
-  current: ai.find(i => i.type === "current") || ai[0],
-  risk: ai.find(i => i.type === "risk") || ai[1],
-  growth: ai.find(i => i.type === "growth") || ai[2],
-};
-
-const ai = parsed.insights;
-
-// ✅ SINGLE CLEAN MAP (ONLY ONE)
-aiInsights = insights.map((baseInsight) => {
-  let matchedAI;
-
-  if (baseInsight.title === "Cash Position") {
-    matchedAI = aiMap.current;
-  }
-
-  if (baseInsight.title === "Spending Behavior") {
-    matchedAI = aiMap.risk;
-  }
-
-  if (baseInsight.title === "Income Trend") {
-    matchedAI = aiMap.growth;
-  }
-
-  return {
-    ...baseInsight,
-    title: matchedAI?.title || baseInsight.title,
-    message: matchedAI?.message || baseInsight.message,
-    action: matchedAI?.action || baseInsight.action
+  // ✅ Create map ONCE (outside loop)
+  const aiMap = {
+    current: ai.find(i => i.type === "current") || ai[0],
+    risk: ai.find(i => i.type === "risk") || ai[1],
+    growth: ai.find(i => i.type === "growth") || ai[2],
   };
-});
 
-// ✅ DUPLICATE PROTECTION (KEEP THIS)
+  // ✅ Clean mapping (NO nesting, NO duplication)
+  aiInsights = insights.map((baseInsight) => {
+    let matchedAI;
 
-const seenMessages = new Set();
-
-aiInsights = aiInsights.map(insight => {
-  const key = insight.message?.toLowerCase();
-
-  if (seenMessages.has(key)) {
-    // 🚨 FORCE fallback to base insight
-    return {
-      ...insight,
-      message: "Focus on diversifying your financial approach to improve stability.",
-      action: "Explore alternative strategies to strengthen your financial position."
-    };
-  }
-
-  seenMessages.add(key);
-  return insight;
-});
+    if (baseInsight.title === "Cash Position") {
+      matchedAI = aiMap.current;
+    } else if (baseInsight.title === "Spending Behavior") {
+      matchedAI = aiMap.risk;
+    } else if (baseInsight.title === "Income Trend") {
+      matchedAI = aiMap.growth;
+    }
 
     return {
       ...baseInsight,
@@ -559,6 +521,24 @@ aiInsights = aiInsights.map(insight => {
       message: matchedAI?.message || baseInsight.message,
       action: matchedAI?.action || baseInsight.action
     };
+  });
+
+  // ✅ HARD DUPLICATE PROTECTION
+  const seen = new Set();
+
+  aiInsights = aiInsights.map((insight) => {
+    const key = insight.message?.toLowerCase();
+
+    if (seen.has(key)) {
+      return {
+        ...insight,
+        message: "Your financial pattern suggests a need for strategic adjustment.",
+        action: "Re-evaluate both income and expenses to improve balance."
+      };
+    }
+
+    seen.add(key);
+    return insight;
   });
 }
 

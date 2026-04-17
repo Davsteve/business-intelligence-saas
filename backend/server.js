@@ -623,6 +623,8 @@ priority:
 // NEXT BEST ACTION ENGINE
 // ------------------------
 
+const incomeBoost = Math.round(avgMonthlyIncome * 0.3);
+
 let nextBestAction = {};
 
 if (primaryIssue === "income_decline") {

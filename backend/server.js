@@ -539,6 +539,23 @@ if (Array.isArray(parsed.insights)) {
     growth: ai.find(i => i.type === "growth") || ai[2],
   };
 
+  // 🔮 PREDICTIVE INTELLIGENCE LAYER
+
+const projectedRunwayWarning =
+  runwayDays < 60
+    ? `At your current spending rate, you may run out of funds in approximately ${Math.round(runwayDays)} days.`
+    : null;
+
+const incomeRiskProjection =
+  incomeGrowth < 0
+    ? `If your income continues declining at the current rate (${incomeGrowth.toFixed(1)}%), your financial stability will weaken significantly over the next few weeks.`
+    : null;
+
+const burnRiskProjection =
+  safeBurnRatio > 0.7
+    ? `Your expenses are consuming a large portion of your income. If this continues, your savings buffer will shrink rapidly.`
+    : null;
+
   // ✅ Clean mapping (NO nesting, NO duplication)
   aiInsights = insights.map((baseInsight) => {
     let matchedAI;
@@ -555,7 +572,23 @@ if (Array.isArray(parsed.insights)) {
   ...baseInsight,
 
   title: matchedAI?.title || baseInsight.title,
-  message: matchedAI?.message || baseInsight.message,
+  message: (() => {
+  let baseMsg = matchedAI?.message || baseInsight.message;
+
+  if (baseInsight.title.toLowerCase().includes("position") && projectedRunwayWarning) {
+    baseMsg += " " + projectedRunwayWarning;
+  }
+
+  if (baseInsight.title.toLowerCase().includes("safety") && incomeRiskProjection) {
+    baseMsg += " " + incomeRiskProjection;
+  }
+
+  if (baseInsight.title.toLowerCase().includes("spending") && burnRiskProjection) {
+    baseMsg += " " + burnRiskProjection;
+  }
+
+  return baseMsg;
+})(),
   action: matchedAI?.action || baseInsight.action,
 
   // ✅ SMART PRIORITY LOGIC (NEW)

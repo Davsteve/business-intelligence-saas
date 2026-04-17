@@ -70,7 +70,8 @@ function generateSmartInsights(metrics) {
   // 🧠 1. Financial Position (CORE HEALTH)
   if (runway < 30) {
     insights.push({
-      title: "Financial Survival Risk",
+  type: "current", // ✅ ADD THIS
+  title: "Financial Survival Risk",
       message: "Your financial runway is critically low, meaning you may run out of funds soon if no changes are made.",
       impact: "CRITICAL",
       reasoning: "Runway below 30 days signals immediate survival risk.",
@@ -78,6 +79,7 @@ function generateSmartInsights(metrics) {
     });
   } else if (runway < 60) {
     insights.push({
+  type: "current", // ✅ ADD THIS
       title: "Limited Financial Buffer",
       message: "Your runway is limited, which puts you at moderate risk if income drops further.",
       impact: "HIGH",
@@ -86,6 +88,7 @@ function generateSmartInsights(metrics) {
     });
   } else {
     insights.push({
+  type: "current", // ✅ ADD THIS
       title: "Stable Financial Position",
       message: "You have a reasonable financial buffer, giving you some stability.",
       impact: "MEDIUM",
@@ -97,7 +100,8 @@ function generateSmartInsights(metrics) {
   // 📉 2. Income Risk
   if (incomeTrend < -20) {
     insights.push({
-      title: "Income Decline Risk",
+  type: "risk", // ✅ ADD THIS
+  title: "Income Decline Risk",
       message: "Your income is dropping significantly, and if this continues, your financial runway could shrink rapidly in the coming weeks.",
       impact: "CRITICAL",
       reasoning: "A decline greater than 20% is a major instability signal.",
@@ -105,6 +109,7 @@ function generateSmartInsights(metrics) {
     });
   } else if (incomeTrend < 0) {
     insights.push({
+  type: "risk", // ✅ ADD THIS
       title: "Income Instability",
       message: "Your income shows a declining trend, which may affect your future stability.",
       impact: "HIGH",
@@ -113,6 +118,7 @@ function generateSmartInsights(metrics) {
     });
   } else {
     insights.push({
+  type: "risk", // ✅ ADD THIS
       title: "Income Growth Opportunity",
       message: "Your income is growing, creating an opportunity to strengthen your financial position.",
       impact: "MEDIUM",
@@ -124,7 +130,8 @@ function generateSmartInsights(metrics) {
   // 💸 3. Spending Behavior
   if (expenseRatio > 60) {
     insights.push({
-      title: "High Spending Pressure",
+  type: "growth", // ✅ ADD THIS
+  title: "High Spending Pressure",
       message: "A large portion of your income is being spent, limiting your ability to save.",
       impact: "HIGH",
       reasoning: "Expense ratio above 60% restricts financial growth.",
@@ -132,6 +139,7 @@ function generateSmartInsights(metrics) {
     });
   } else if (expenseRatio > 40) {
     insights.push({
+  type: "growth", // ✅ ADD THIS
       title: "Moderate Spending",
       message: "Your spending is under control but still leaves room for improvement.",
       impact: "MEDIUM",
@@ -140,6 +148,7 @@ function generateSmartInsights(metrics) {
     });
   } else {
     insights.push({
+  type: "growth", // ✅ ADD THIS
       title: "Efficient Spending",
       message: "Your spending is well managed relative to your income.",
       impact: "LOW",
@@ -578,15 +587,7 @@ const burnRiskProjection =
 
   // ✅ Clean mapping (NO nesting, NO duplication)
   aiInsights = insights.map((baseInsight) => {
-    let matchedAI;
-
-    if (baseInsight.title.toLowerCase().includes("financial")) {
-      matchedAI = aiMap.current;
-    } else if (baseInsight.title.toLowerCase().includes("spending")) {
-      matchedAI = aiMap.risk;
-    } else if (baseInsight.title.toLowerCase().includes("income")) {
-      matchedAI = aiMap.growth;
-    }
+    const matchedAI = aiMap[baseInsight.type];
 
     return {
   ...baseInsight,
@@ -612,15 +613,15 @@ const burnRiskProjection =
   action: (() => {
   let baseAction = matchedAI?.action || baseInsight.action;
 
-  if (baseInsight.title.toLowerCase().includes("buffer")){
+  if (baseInsight.type === "current"){
     baseAction += ` Cutting ₹${Math.round(expenseReduction)} could extend your runway to ~${Math.round(newRunway)} days.`;
   }
 
-  if (baseInsight.title.toLowerCase().includes("income")) {
+  if (baseInsight.type === "risk") {
     baseAction += ` Increasing income by ₹${Math.round(incomeBoost)} could significantly improve your financial stability.`;
   }
 
-  if (baseInsight.title.toLowerCase().includes("spending")) {
+  if (baseInsight.type === "growth") {
     baseAction += ` Reducing expenses improves your burn ratio to ${(improvedBurnRatio * 100).toFixed(1)}%.`;
   }
 

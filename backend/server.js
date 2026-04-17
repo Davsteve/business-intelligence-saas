@@ -283,99 +283,23 @@ if (runwayDays < 15) {
 }
 
     // ✅ SUMMARY
-    const generateSummary = ({
-  net,
-  income,
-  burn,
-  runwayDays,
-  safeBurnRatio,
-  trend,
-  riskLevel
-}) => {
-  let opening = "";
-  let condition = "";
-  let riskStatement = "";
-  let forward = "";
+    // ✅ PRIMARY ISSUE DRIVEN SUMMARY (NEW)
 
-  // 🟢 OPENING (state-based)
-  if (riskLevel === "HIGH") {
-    opening = "Your financial position is currently under pressure.";
-  } else if (riskLevel === "MODERATE") {
-    opening = "Your financial position is stable but requires attention.";
-  } else {
-    opening = "Your financial position appears stable and well-managed.";
-  }
+let summary = "";
 
-  // 💸 CONDITION (numbers-driven)
-  if (safeBurnRatio > 0.8) {
-    condition = "Expenses are consuming a significant portion of your income";
-  } else if (safeBurnRatio > 0.5) {
-    condition = "Spending levels are moderately high relative to income";
-  } else {
-    condition = "Spending is well-controlled relative to income";
-  }
+if (primaryIssue === "income_decline") {
+  summary = `Your income is declining, which is the biggest threat to your financial stability. At your current trajectory, your runway of ${Math.round(runwayDays)} days could shrink quickly if this continues. Immediate action is required to stabilize or increase income sources.`;
 
-  // ⏳ RUNWAY CONTEXT
-  let runwayContext = "";
-  if (runwayDays < 30) {
-    runwayContext = "with limited cash runway remaining";
-  } else if (runwayDays < 90) {
-    runwayContext = "with a moderate financial buffer";
-  } else {
-    runwayContext = "supported by a strong cash runway";
-  }
+} else if (primaryIssue === "low_runway") {
+  summary = `Your financial runway is limited at around ${Math.round(runwayDays)} days. Even with stable income, this leaves little room for unexpected expenses. Strengthening your savings buffer should be your immediate focus.`;
 
-  // 📉 TREND
-  let trendContext = "";
-  if (trend === "volatile") {
-  trendContext = "Income shows high fluctuations with no clear direction";
+} else if (primaryIssue === "high_burn") {
+  summary = `Your spending is consuming a large portion of your income (${(safeBurnRatio * 100).toFixed(1)}%). This limits your ability to build savings and reduces long-term financial security. Expense control is critical right now.`;
+
+} else {
+  summary = `Your financial position is stable with a runway of ${Math.round(runwayDays)} days. Your income and spending are relatively balanced, giving you a solid base to grow from.`;
 }
-  if (trend === "declining") {
-    trendContext = "Income trends indicate a downward trajectory";
-  } else if (trend === "growing") {
-    trendContext = "Income is showing positive growth momentum";
-  } else {
-    trendContext = "Income levels are relatively stable";
-  }
 
-  // ⚠️ RISK STATEMENT
-  if (riskLevel === "HIGH") {
-    riskStatement =
-      "This combination increases the risk of liquidity stress if not addressed.";
-  } else if (riskLevel === "MODERATE") {
-    riskStatement =
-      "While manageable, this situation could weaken financial resilience over time.";
-  } else {
-    riskStatement =
-      "Overall financial risk remains low under current conditions.";
-  }
-
-  // 🔮 FORWARD OUTLOOK
-  forward =
-    "Maintaining disciplined spending and monitoring income trends will be key to sustaining financial stability.";
-
-  return `${opening} ${condition}, ${runwayContext}. ${trendContext}. ${riskStatement} ${forward}`;
-};
-
-const summary = generateSummary({
-  net,
-  income: latestMonthIncome,
-burn: latestMonthExpense,
-  runwayDays,
-  safeBurnRatio,
-  trend,
-  riskLevel
-});
-
-
-    // 🧠 AI ENHANCEMENT (SAFE)
-let aiSummary = summary;
-let aiInsights = insights;
-const impactScore = {
-  high: 3,
-  medium: 2,
-  low: 1
-};
 
 insights.sort((a, b) => impactScore[b.impact] - impactScore[a.impact]);
 let score = Math.round(

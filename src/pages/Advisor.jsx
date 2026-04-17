@@ -405,7 +405,7 @@ const getAIAdvice = async () => {
       marginBottom: "12px"
     }}>
 
-  💡 {aiData.summary}
+  💡 <strong>Main Insight:</strong> {aiData.summary}
 </div>
 
     <div style={{

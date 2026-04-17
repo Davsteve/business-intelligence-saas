@@ -622,7 +622,7 @@ priority:
 
 // ✅ FINAL RESPONSE (ONLY ONE)
 return res.json({
-  summary: aiSummary,
+  summary,
   priority,
   riskLevel,
   insights: aiInsights,

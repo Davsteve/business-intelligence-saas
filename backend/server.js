@@ -159,9 +159,11 @@ const funMoney = safeSurplus * 0.2;
 insights.push({
   title: "Cash Position",
   message:
-    primaryIssue === "low_runway"
-      ? `Your runway is ${runwayDays} days, which is risky.`
-      : `Your runway is ${runwayDays} days, giving you financial stability.`,
+  runwayDays < 30
+    ? `Your runway is ${runwayDays} days, which is critically low.`
+    : runwayDays < 90
+    ? `Your runway is ${runwayDays} days, which is moderate but needs improvement.`
+    : `Your runway is ${runwayDays} days, which gives you strong financial stability.`,
   action:
     primaryIssue === "low_runway"
       ? "Increase runway to at least 90 days by reducing expenses or increasing income."

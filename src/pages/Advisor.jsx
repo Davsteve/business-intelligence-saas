@@ -460,40 +460,51 @@ const getAIAdvice = async () => {
   );
 })()}
 </p>
-        <div>
-  <b>Key Numbers:</b>
+        <b>Key Numbers:</b>
 
-  {Object.entries(item.numbers || {}).map(([key, value]) => {
-    if (value === undefined || value === null) return null;
+{(() => {
+  // 🔥 CONTROL WHAT EACH INSIGHT SHOWS
+  const allowedNumbersByIndex = [
+    ["savings"], // Insight 1 → Current Position
+    ["burnRatio", "expenses", "suggestedCut"], // Insight 2 → Risk
+    ["investableAmount", "funMoney"] // Insight 3 → Growth
+  ];
 
-    const formatLabel = (k) => {
-      switch (k) {
-        case "income": return "💰 Income";
-        case "expenses": return "💸 Expenses";
-        case "runwayDays": return "⏳ Runway";
-        case "burnRatio": return "📊 Expense Ratio";
-        case "incomeGrowth": return "📉 Growth";
-        case "suggestedCut": return "✂️ Suggested Cut";
-        case "investableAmount": return "📈 Investable";
-        case "funMoney": return "🎉 Fun Money";
-        case "savings": return "💼 Savings";
-        default: return k;
-      }
-    };
+  const allowedKeys = allowedNumbersByIndex[i] || [];
 
-    const formatValue = (k, v) => {
-      if (k === "runwayDays") return `${v} days`;
-      if (k === "burnRatio" || k === "incomeGrowth") return `${v}%`;
-      return `₹ ${v}`;
-    };
+  return Object.entries(item.numbers || {})
+    .filter(([key]) => allowedKeys.includes(key))
+    .map(([key, value]) => {
+      if (value === undefined || value === null) return null;
 
-    return (
-      <div key={key}>
-        {formatLabel(key)}: {formatValue(key, value)}
-      </div>
-    );
-  })}
-</div>
+      const formatLabel = (k) => {
+        switch (k) {
+          case "income": return "💰 Income";
+          case "expenses": return "💸 Expenses";
+          case "runwayDays": return "⏳ Runway";
+          case "burnRatio": return "📊 Expense Ratio";
+          case "incomeGrowth": return "📉 Growth";
+          case "suggestedCut": return "✂️ Suggested Cut";
+          case "investableAmount": return "📈 Investable";
+          case "funMoney": return "🎉 Fun Money";
+          case "savings": return "💼 Savings";
+          default: return k;
+        }
+      };
+
+      const formatValue = (k, v) => {
+        if (k === "runwayDays") return `${v} days`;
+        if (k === "burnRatio" || k === "incomeGrowth") return `${v}%`;
+        return `₹ ${v}`;
+      };
+
+      return (
+        <div key={key}>
+          {formatLabel(key)}: {formatValue(key, value)}
+        </div>
+      );
+    });
+})()}
       </div>
     ))}
 

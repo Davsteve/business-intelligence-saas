@@ -98,7 +98,7 @@ function generateSmartInsights(metrics) {
   if (incomeTrend < -20) {
     insights.push({
       title: "Income Decline Risk",
-      message: "Your income is dropping significantly, which is the biggest threat to your financial stability.",
+      message: "Your income is dropping significantly, and if this continues, your financial runway could shrink rapidly in the coming weeks.",
       impact: "CRITICAL",
       reasoning: "A decline greater than 20% is a major instability signal.",
       action: "Prioritize stabilizing income through new or alternative sources immediately."
@@ -552,11 +552,26 @@ if (Array.isArray(parsed.insights)) {
     }
 
     return {
-      ...baseInsight,
-      title: matchedAI?.title || baseInsight.title,
-      message: matchedAI?.message || baseInsight.message,
-      action: matchedAI?.action || baseInsight.action
-    };
+  ...baseInsight,
+
+  // ✅ KEEP AI ENHANCEMENT
+  title: matchedAI?.title || baseInsight.title,
+  message: matchedAI?.message || baseInsight.message,
+  action: matchedAI?.action || baseInsight.action,
+
+  // ✅ ADD THIS (CRITICAL FIX)
+  impact: baseInsight.impact, // force backend truth
+
+  // ✅ OPTIONAL (future-ready)
+  priority:
+    baseInsight.impact === "CRITICAL"
+      ? "High"
+      : baseInsight.impact === "HIGH"
+      ? "High"
+      : baseInsight.impact === "MEDIUM"
+      ? "Medium"
+      : "Low"
+};
   });
 
   // ✅ HARD DUPLICATE PROTECTION

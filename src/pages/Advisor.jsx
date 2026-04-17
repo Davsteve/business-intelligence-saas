@@ -451,7 +451,15 @@ const getAIAdvice = async () => {
         <p>
   <b>Priority:</b>{" "}
 {(() => {
-  const priority = getPriority(item.impact);
+  const priority = {
+  text: item.priority || "Low",
+  color:
+    item.priority === "High"
+      ? "#ef4444"
+      : item.priority === "Medium"
+      ? "#facc15"
+      : "#22c55e"
+};
 
   return (
     <span style={{ color: priority.color }}>

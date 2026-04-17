@@ -455,11 +455,26 @@ STRICT:
 - Do NOT assume lifestyle
 - ONLY use given financial data
 
-Each insight must include:
-- title (simple, human-friendly)
-- message (clear explanation, not technical)
-- action (specific and realistic)
-- impact (low | medium | high)
+Each insight MUST include a "type" field:
+
+Allowed types:
+- "current"
+- "risk"
+- "growth"
+
+STRICT:
+- You MUST assign exactly one unique type to each insight
+- No duplicates
+- Do NOT skip any type
+
+Example:
+{
+  "type": "current",
+  "title": "...",
+  "message": "...",
+  "action": "...",
+  "impact": "high"
+}
 
 Also include:
 - summary (short, human-like explanation of situation)
@@ -504,13 +519,36 @@ if (Array.isArray(parsed.insights)) {
     let matchedAI = null;
 
     // 🧠 Match by meaning, not index
-    if (baseInsight.title === "Cash Position") {
-      matchedAI = ai.find(i =>
-        i.title?.toLowerCase().includes("position") ||
-        i.message?.toLowerCase().includes("overall") ||
-        i.message?.toLowerCase().includes("current")
-      );
-    }
+    // ❌ DELETE THIS LOGIC
+
+    const aiMap = {
+  current: ai.find(i => i.type === "current"),
+  risk: ai.find(i => i.type === "risk"),
+  growth: ai.find(i => i.type === "growth")
+};
+
+aiInsights = insights.map((baseInsight) => {
+  let matchedAI = null;
+
+  if (baseInsight.title === "Cash Position") {
+    matchedAI = aiMap.current;
+  }
+
+  if (baseInsight.title === "Spending Behavior") {
+    matchedAI = aiMap.risk;
+  }
+
+  if (baseInsight.title === "Income Trend") {
+    matchedAI = aiMap.growth;
+  }
+
+  return {
+    ...baseInsight,
+    title: matchedAI?.title || baseInsight.title,
+    message: matchedAI?.message || baseInsight.message,
+    action: matchedAI?.action || baseInsight.action
+  };
+});
 
     if (baseInsight.title === "Spending Behavior") {
       matchedAI = ai.find(i =>

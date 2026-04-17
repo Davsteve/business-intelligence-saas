@@ -438,29 +438,27 @@ Financial Data:
 
 Instructions:
 
-You MUST generate EXACTLY 3 insights mapped to:
+You MUST generate EXACTLY 3 insights.
 
-1. Current Financial Position (overall situation)
-2. Financial Risk / Safety (runway, burn, risk)
-3. Growth Opportunity (improvement or upside)
+Each insight MUST focus on a COMPLETELY DIFFERENT dimension:
 
-STRICT:
-- Do NOT invent personal details
-- Do NOT assume lifestyle
-- ONLY use given financial data
+1. CURRENT → Overall financial position (runway, savings, stability)
+2. RISK → The biggest financial danger (ONLY ONE)
+3. GROWTH → Future improvement (NOT current problem)
 
-1. First → something the user is doing well (positive reinforcement)
-2. Second → a problem or risk they should fix
-3. Third → a growth opportunity
+STRICT RULES:
 
-Each insight must include:
-- title (simple, human-friendly)
-- message (clear explanation, not technical)
-- action (specific and realistic)
-- impact (low | medium | high)
+- DO NOT repeat the same metric in multiple insights
+- If income decline is used in RISK → DO NOT mention it again
+- GROWTH insight MUST NOT describe a problem
+- CURRENT insight MUST NOT describe risk
+- Each insight must talk about DIFFERENT data points
+
+Each insight MUST include:
+"type": "current" | "risk" | "growth"
 
 Also include:
-- summary (short, human-like explanation of situation)
+- summary (Brief 3 liner, human-like explanation of situation)
 - riskLevel (LOW | MODERATE | HIGH)
 - priority (1–2 lines, clear and actionable)
 
@@ -502,29 +500,83 @@ if (Array.isArray(parsed.insights)) {
     let matchedAI = null;
 
     // 🧠 Match by meaning, not index
-    if (baseInsight.title === "Cash Position") {
-      matchedAI = ai.find(i =>
-        i.title?.toLowerCase().includes("position") ||
-        i.message?.toLowerCase().includes("overall") ||
-        i.message?.toLowerCase().includes("current")
-      );
-    }
+    const ai = parsed.insights;
 
-    if (baseInsight.title === "Spending Behavior") {
-      matchedAI = ai.find(i =>
-        i.message?.toLowerCase().includes("spend") ||
-        i.message?.toLowerCase().includes("expense") ||
-        i.message?.toLowerCase().includes("burn")
-      );
-    }
+// 🧠 Strict mapping (NO searching, NO guessing)
+const aiMap = {
+  current: ai.find(i => i.type === "current") || ai[0],
+  risk: ai.find(i => i.type === "risk") || ai[1],
+  growth: ai.find(i => i.type === "growth") || ai[2],
+};
 
-    if (baseInsight.title === "Income Trend") {
-      matchedAI = ai.find(i =>
-        i.message?.toLowerCase().includes("income") ||
-        i.message?.toLowerCase().includes("growth") ||
-        i.message?.toLowerCase().includes("decline")
-      );
-    }
+const ai = parsed.insights;
+
+// 🧠 Strict mapping (NO searching, NO nesting)
+const aiMap = {
+  current: ai.find(i => i.type === "current") || ai[0],
+  risk: ai.find(i => i.type === "risk") || ai[1],
+  growth: ai.find(i => i.type === "growth") || ai[2],
+};
+
+// ✅ SINGLE CLEAN MAP (ONLY ONE)
+aiInsights = insights.map((baseInsight) => {
+  let matchedAI;
+
+  if (baseInsight.title === "Cash Position") {
+    matchedAI = aiMap.current;
+  }
+
+  if (baseInsight.title === "Spending Behavior") {
+    matchedAI = aiMap.risk;
+  }
+
+  if (baseInsight.title === "Income Trend") {
+    matchedAI = aiMap.growth;
+  }
+
+  return {
+    ...baseInsight,
+    title: matchedAI?.title || baseInsight.title,
+    message: matchedAI?.message || baseInsight.message,
+    action: matchedAI?.action || baseInsight.action
+  };
+});
+
+// ✅ DUPLICATE PROTECTION (KEEP THIS)
+const seenMessages = new Set();
+
+aiInsights = aiInsights.map(insight => {
+  const key = insight.message?.toLowerCase();
+
+  if (seenMessages.has(key)) {
+    return {
+      ...insight,
+      message: "Focus on strengthening different aspects of your financial health to avoid over-reliance on one area.",
+      action: "Diversify your strategy across income, spending, and savings."
+    };
+  }
+
+  seenMessages.add(key);
+  return insight;
+});
+
+const seenMessages = new Set();
+
+aiInsights = aiInsights.map(insight => {
+  const key = insight.message?.toLowerCase();
+
+  if (seenMessages.has(key)) {
+    // 🚨 FORCE fallback to base insight
+    return {
+      ...insight,
+      message: "Focus on diversifying your financial approach to improve stability.",
+      action: "Explore alternative strategies to strengthen your financial position."
+    };
+  }
+
+  seenMessages.add(key);
+  return insight;
+});
 
     return {
       ...baseInsight,

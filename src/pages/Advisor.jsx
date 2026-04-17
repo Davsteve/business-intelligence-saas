@@ -28,22 +28,8 @@ export default function Advisor() {
 
   return { text: "Low", color: "#22c55e" }; // green
 };
-  const normalizedInsights = aiData?.insights?.length
-  ? [
-      {
-        ...aiData.insights[0],
-        title: "Current Financial Position",
-      },
-      {
-        ...aiData.insights[1],
-        title: "Improve Financial Safety Buffer",
-      },
-      {
-        ...aiData.insights[2],
-        title: "Growth Opportunity",
-      },
-    ]
-  : [];
+  const normalizedInsights = aiData?.insights || [];
+
   const getStabilityIndicator = (stability) => {
   if (!stability) return "";
 
@@ -405,7 +391,9 @@ const getAIAdvice = async () => {
       marginBottom: "12px"
     }}>
 
-  💡 <strong>Main Insight:</strong> {aiData.summary}
+  <p style={{ marginBottom: "10px" }}>
+  💡 {aiData.summary}
+</p>
 </div>
 
     <div style={{
@@ -436,7 +424,12 @@ const getAIAdvice = async () => {
     {/* INSIGHTS */}
     <h3 style={{ marginTop: "16px" }}>Key Insights</h3>
 
-    {normalizedInsights.map((item, i) => (
+    {[...normalizedInsights]
+  .sort((a, b) => {
+    const score = { CRITICAL: 3, HIGH: 2, MEDIUM: 1, LOW: 0 };
+    return (score[b.impact] || 0) - (score[a.impact] || 0);
+  })
+  .map((item, i) => (
       <div key={i} style={{
         marginBottom: "12px",
         padding: "12px",
@@ -447,16 +440,21 @@ const getAIAdvice = async () => {
       }}>
         <strong>{item.title}</strong>
         <p>{item.message}</p>
+        <p style={{ opacity: 0.6, fontSize: "13px" }}>
+  {item.reasoning}
+</p>
         <p><b>Action:</b> {item.action}</p>
         <p>
   <b>Priority:</b>{" "}
 {(() => {
-  const priority = {
+  const level = item.priority?.toLowerCase();
+
+const priority = {
   text: item.priority || "Low",
   color:
-    item.priority === "High"
+    level === "critical" || level === "high"
       ? "#ef4444"
-      : item.priority === "Medium"
+      : level === "medium"
       ? "#facc15"
       : "#22c55e"
 };
@@ -480,7 +478,10 @@ const getAIAdvice = async () => {
 
   const allowedKeys = allowedNumbersByIndex[i] || [];
 
-  return Object.entries(item.numbers || {})
+  return Object.entries({
+  ...(item.numbers || {}),
+  ...(aiData?.numbers || {})
+})
     .filter(([key]) => allowedKeys.includes(key))
     .map(([key, value]) => {
       if (value === undefined || value === null) return null;

@@ -377,8 +377,7 @@ STEP 2: Prioritize correctly
 - DO NOT suggest investing when runway is low
 
 STEP 3: Give clear actions
-- One PRIMARY action (most important)
-- 2–3 SECONDARY actions (supporting steps)
+- A forward-looking opportunity (skills, income diversification, or cost optimization), NOT the main risk
 
 ---
 
@@ -388,6 +387,10 @@ STRICT RULES:
 - Do NOT repeat the same priority multiple times
 - Do NOT contradict yourself
 - Do NOT suggest long-term strategies when short-term survival is at risk
+Each insight MUST focus on a DIFFERENT aspect:
+- Do NOT repeat the same issue
+- Do NOT restate income decline more than once
+- Growth insight MUST NOT describe the main problem
 
 ---
 

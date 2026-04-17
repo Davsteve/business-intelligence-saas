@@ -438,11 +438,16 @@ Financial Data:
 
 Instructions:
 
-Give EXACTLY 3 insights:
+You MUST generate EXACTLY 3 insights mapped to:
 
-1. First → something the user is doing well (positive reinforcement)
-2. Second → a problem or risk they should fix
-3. Third → a growth opportunity
+1. Current Financial Position (overall situation)
+2. Financial Risk / Safety (runway, burn, risk)
+3. Growth Opportunity (improvement or upside)
+
+STRICT:
+- Do NOT invent personal details
+- Do NOT assume lifestyle
+- ONLY use given financial data
 
 Each insight must include:
 - title (simple, human-friendly)
@@ -487,12 +492,43 @@ riskLevel = parsed.riskLevel || riskLevel;
 
     // ✅ Keep backend structure, only enhance text
 if (Array.isArray(parsed.insights)) {
-  aiInsights = insights.map((baseInsight, i) => ({
-  ...baseInsight,
-  title: parsed.insights?.[i]?.title || baseInsight.title,
-  message: parsed.insights?.[i]?.message || baseInsight.message,
-  action: parsed.insights?.[i]?.action || baseInsight.action
-}));
+  const ai = parsed.insights;
+
+  aiInsights = insights.map((baseInsight) => {
+    let matchedAI = null;
+
+    // 🧠 Match by meaning, not index
+    if (baseInsight.title === "Cash Position") {
+      matchedAI = ai.find(i =>
+        i.title?.toLowerCase().includes("position") ||
+        i.message?.toLowerCase().includes("overall") ||
+        i.message?.toLowerCase().includes("current")
+      );
+    }
+
+    if (baseInsight.title === "Spending Behavior") {
+      matchedAI = ai.find(i =>
+        i.message?.toLowerCase().includes("spend") ||
+        i.message?.toLowerCase().includes("expense") ||
+        i.message?.toLowerCase().includes("burn")
+      );
+    }
+
+    if (baseInsight.title === "Income Trend") {
+      matchedAI = ai.find(i =>
+        i.message?.toLowerCase().includes("income") ||
+        i.message?.toLowerCase().includes("growth") ||
+        i.message?.toLowerCase().includes("decline")
+      );
+    }
+
+    return {
+      ...baseInsight,
+      title: matchedAI?.title || baseInsight.title,
+      message: matchedAI?.message || baseInsight.message,
+      action: matchedAI?.action || baseInsight.action
+    };
+  });
 }
 
   } catch (err) {

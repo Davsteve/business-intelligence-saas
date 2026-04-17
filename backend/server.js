@@ -143,7 +143,7 @@ const funMoney = safeSurplus * 0.2;
     if (runwayDays < 30) {
   insights.push({
     title: "Low Cash Buffer",
-    message: `You only have ${runwayDays} days of runway, which is critically low.`,
+    message: `You have ${runwayDays} days of runway, which is considered low and risky.`,
     action: `Increase runway to at least 90 days by reducing expenses or increasing income immediately.`,
     impact: getImpactLevel({
   runwayDays,
@@ -434,6 +434,13 @@ let score = Math.round(
   Math.max(0, incomeGrowth) * 3
 );
 
+let runwayStatus = "unknown";
+
+if (runwayDays <= 0) runwayStatus = "none";
+else if (runwayDays < 30) runwayStatus = "low";
+else if (runwayDays <= 90) runwayStatus = "moderate";
+else runwayStatus = "strong";
+
 try {
   const aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
@@ -453,13 +460,20 @@ Speak like you're explaining money to a normal person, not an expert.
 
 Rules:
 - Explain numbers in simple terms, but DO NOT ignore them.
-Always base your advice strictly on:
-- income
-- expenses
-- savings
-- growth
-- Keep sentences short and clear
-- Sound encouraging, not analytical
+- You MUST strictly follow the provided financial data.
+- DO NOT assume, invent, or exaggerate any values.
+
+CRITICAL CONSISTENCY RULES:
+- If runway > 0 → NEVER say "no runway"
+- If runway < 30 → say "low runway"
+- If runway 30–90 → say "moderate runway"
+- If runway > 90 → say "strong runway"
+
+- If expenses < 50% of income → DO NOT say spending is high
+- If income is decreasing → MUST highlight it as risk
+- If savings > 30% → MUST mention strong savings behavior
+
+- Your statements MUST NOT contradict the numbers provided.
 
 IMPORTANT RULES:
 - If expenses < 50% of income → DO NOT say spending is high
@@ -504,7 +518,12 @@ Here is the user's financial data:
 - Income Trend: ${incomeTrendLabel}
 
 - Burn Ratio: ${(safeBurnRatio * 100).toFixed(1)}%
-- Runway: ${runwayDays} days
+- Runway: ${runwayDays} days (${runwayStatus})
+- Runway Interpretation:
+  - none = no safety buffer
+  - low = risky
+  - moderate = acceptable but needs improvement
+  - strong = safe
 
 - Stability: ${stability}
 - Top Expense Category: ${topCategory} (${(topCategoryPercent || 0).toFixed(1)}%)

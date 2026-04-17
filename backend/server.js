@@ -607,7 +607,7 @@ priority:
     console.error("AI JSON parse failed:", err);
 
     // ✅ CLEAN fallback (NOT raw anymore)
-    aiSummary = summary;
+    summary = summary;
   }
 }
 

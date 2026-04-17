@@ -159,11 +159,9 @@ const funMoney = safeSurplus * 0.2;
 insights.push({
   title: "Cash Position",
   message:
-  runwayDays < 30
-    ? `Your runway is ${runwayDays} days, which is critically low.`
-    : runwayDays < 90
-    ? `Your runway is ${runwayDays} days, which is moderate but needs improvement.`
-    : `Your runway is ${runwayDays} days, which gives you strong financial stability.`,
+    primaryIssue === "low_runway"
+      ? `Your runway is ${runwayDays} days, which is risky.`
+      : `Your runway is ${runwayDays} days, giving you financial stability.`,
   action:
     primaryIssue === "low_runway"
       ? "Increase runway to at least 90 days by reducing expenses or increasing income."
@@ -388,10 +386,6 @@ STRICT RULES:
 - Do NOT repeat the same priority multiple times
 - Do NOT contradict yourself
 - Do NOT suggest long-term strategies when short-term survival is at risk
-Each insight MUST focus on a DIFFERENT aspect:
-- Do NOT repeat the same issue
-- Do NOT restate income decline more than once
-- Growth insight MUST NOT describe the main problem
 
 ---
 
@@ -448,33 +442,22 @@ You MUST generate EXACTLY 3 insights mapped to:
 
 1. Current Financial Position (overall situation)
 2. Financial Risk / Safety (runway, burn, risk)
-3. Third → a forward-looking opportunity (skills, income diversification, or cost optimization), NOT the main risk
+3. Growth Opportunity (improvement or upside)
 
 STRICT:
 - Do NOT invent personal details
 - Do NOT assume lifestyle
 - ONLY use given financial data
 
-Each insight MUST include a "type" field:
+1. First → something the user is doing well (positive reinforcement)
+2. Second → a problem or risk they should fix
+3. Third → a growth opportunity
 
-Allowed types:
-- "current"
-- "risk"
-- "growth"
-
-STRICT:
-- You MUST assign exactly one unique type to each insight
-- No duplicates
-- Do NOT skip any type
-
-Example:
-{
-  "type": "current",
-  "title": "...",
-  "message": "...",
-  "action": "...",
-  "impact": "high"
-}
+Each insight must include:
+- title (simple, human-friendly)
+- message (clear explanation, not technical)
+- action (specific and realistic)
+- impact (low | medium | high)
 
 Also include:
 - summary (short, human-like explanation of situation)
@@ -519,36 +502,13 @@ if (Array.isArray(parsed.insights)) {
     let matchedAI = null;
 
     // 🧠 Match by meaning, not index
-    // ❌ DELETE THIS LOGIC
-
-    const aiMap = {
-  current: ai.find(i => i.type === "current"),
-  risk: ai.find(i => i.type === "risk"),
-  growth: ai.find(i => i.type === "growth")
-};
-
-aiInsights = insights.map((baseInsight) => {
-  let matchedAI = null;
-
-  if (baseInsight.title === "Cash Position") {
-    matchedAI = aiMap.current;
-  }
-
-  if (baseInsight.title === "Spending Behavior") {
-    matchedAI = aiMap.risk;
-  }
-
-  if (baseInsight.title === "Income Trend") {
-    matchedAI = aiMap.growth;
-  }
-
-  return {
-    ...baseInsight,
-    title: matchedAI?.title || baseInsight.title,
-    message: matchedAI?.message || baseInsight.message,
-    action: matchedAI?.action || baseInsight.action
-  };
-});
+    if (baseInsight.title === "Cash Position") {
+      matchedAI = ai.find(i =>
+        i.title?.toLowerCase().includes("position") ||
+        i.message?.toLowerCase().includes("overall") ||
+        i.message?.toLowerCase().includes("current")
+      );
+    }
 
     if (baseInsight.title === "Spending Behavior") {
       matchedAI = ai.find(i =>

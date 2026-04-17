@@ -511,9 +511,7 @@ Be direct, practical, and logical.
         {
           role: "user",
           content: `
-Here is the user's financial data:
-
-Here is the user's financial data:
+Financial Data:
 
 - Financial Score: ${score}/100
 - Risk Level: ${riskLevel}
@@ -527,17 +525,9 @@ Here is the user's financial data:
 
 - Burn Ratio: ${(safeBurnRatio * 100).toFixed(1)}%
 - Runway: ${runwayDays} days (${runwayStatus})
-- Runway Interpretation:
-  - none = no safety buffer
-  - low = risky
-  - moderate = acceptable but needs improvement
-  - strong = safe
 
 - Stability: ${stability}
 - Top Expense Category: ${topCategory} (${(topCategoryPercent || 0).toFixed(1)}%)
-
-Priority Context:
-${priority}
 
 ---
 

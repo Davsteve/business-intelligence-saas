@@ -112,6 +112,22 @@ const safeBurnRatio =
     ? latestMonthExpense / latestMonthIncome
     : 0;
 
+    const primaryIssue =
+  incomeGrowth < 0
+    ? "income_decline"
+    : safeBurnRatio > 0.7
+    ? "high_burn"
+    : runwayDays < 60
+    ? "low_runway"
+    : "stable";
+
+const secondaryIssue =
+  primaryIssue === "income_decline" && safeBurnRatio > 0.5
+    ? "expense_pressure"
+    : runwayDays < 60
+    ? "runway_risk"
+    : "none";
+
 let riskLevel = "MODERATE";
 
 if (runwayDays < 30) {
@@ -139,183 +155,72 @@ const funMoney = safeSurplus * 0.2;
     // ✅ INSIGHTS (ALWAYS 3)
     const insights = [];
 
-    // 1️⃣ CASH BUFFER
-    if (runwayDays < 30) {
-  insights.push({
-    title: "Low Cash Buffer",
-    message: `You have ${runwayDays} days of runway, which is considered low and risky.`,
-    action: `Increase runway to at least 90 days by reducing expenses or increasing income immediately.`,
-    impact: getImpactLevel({
-  runwayDays,
-  burnRatio: safeBurnRatio * 100,
-  incomeGrowth
-}),
-    numbers: {
-  income: Math.round(latestMonthIncome),
-  runwayDays: Math.round(runwayDays),
-  burnRatio: Number((safeBurnRatio * 100).toFixed(1)),
-  suggestedCut: Math.round(latestMonthExpense * 0.2),
-}
-  });
-
-} else if (runwayDays < 60) {
-  insights.push({
-    title: "Moderate Cash Buffer",
-    message: `You currently have ${runwayDays} days of runway. This provides some stability but could be improved.`,
-    action: `Aim to increase runway to at least 90 days by reducing expenses by around ₹${Math.round(latestMonthExpense * 0.15)}.`,
-    impact: getImpactLevel({
-  runwayDays,
-  burnRatio: safeBurnRatio * 100,
-  incomeGrowth
-}),
-    numbers: {
-  income: Math.round(latestMonthIncome),
-  runwayDays: Math.round(runwayDays),
-  burnRatio: Number((safeBurnRatio * 100).toFixed(1)),
-  suggestedCut: Math.round(latestMonthExpense * 0.2),
-}
-  });
-
-} else {
-  insights.push({
-    title: "Strong Cash Position",
-    message: `Your runway stands at ${runwayDays} days, indicating a strong financial buffer.`,
-    action: `You can safely allocate part of your surplus towards investments or growth.`,
-    impact: getImpactLevel({
-  runwayDays,
-  burnRatio: safeBurnRatio * 100,
-  incomeGrowth
-}),
-    numbers: {
-  income: Math.round(latestMonthIncome),
-  runwayDays: Math.round(runwayDays),
-  investableAmount: Math.round(investableAmount),
-  funMoney: Math.round(funMoney)
-}
-  });
-}
-
-    // 2️⃣ BURN
-    if (safeBurnRatio > 0.7) {
-      insights.push({
-  title: "High Burn Rate",
-  message: `You are spending ₹${latestMonthExpense} against an income of ₹${latestMonthIncome}, resulting in a ${Math.round(safeBurnRatio * 100)}% burn ratio.`,
-  action: `Reduce expenses by ₹${Math.round(latestMonthExpense * 0.2)} to bring burn ratio below 60%.`,
+    // 1️⃣ CASH POSITION (ALWAYS EXISTS)
+insights.push({
+  title: "Cash Position",
+  message:
+    primaryIssue === "low_runway"
+      ? `Your runway is ${runwayDays} days, which is risky.`
+      : `Your runway is ${runwayDays} days, giving you financial stability.`,
+  action:
+    primaryIssue === "low_runway"
+      ? "Increase runway to at least 90 days by reducing expenses or increasing income."
+      : "Maintain this buffer while improving other financial areas.",
   impact: getImpactLevel({
-  runwayDays,
-  burnRatio: safeBurnRatio * 100,
-  incomeGrowth
-}),
+    runwayDays,
+    burnRatio: safeBurnRatio * 100,
+    incomeGrowth
+  }),
   numbers: {
-  income: Math.round(latestMonthIncome),
-  expenses: Math.round(latestMonthExpense),
-  runwayDays: Math.round(runwayDays),
-  burnRatio: Number((safeBurnRatio * 100).toFixed(1)),
-  suggestedCut: Math.round(latestMonthExpense * 0.2),
-}
+    runwayDays: Math.round(runwayDays),
+    income: Math.round(latestMonthIncome),
+  }
 });
-    } else if (safeBurnRatio > 0.5) {
-  insights.push({
-    title: "Moderate Burn",
-    message: `Your burn ratio is ${Math.round(safeBurnRatio * 100)}%, with expenses of ₹${latestMonthExpense} against income of ₹${latestMonthIncome}. This is manageable but leaves limited margin for error.`,
-    action: `Optimize expenses by cutting approximately ₹${Math.round(latestMonthExpense * 0.1)} to improve financial flexibility.`,
-    impact: getImpactLevel({
-  runwayDays,
-  burnRatio: safeBurnRatio * 100,
-  incomeGrowth
-}),
-    numbers: {
-  income: Math.round(latestMonthIncome),
-  expenses: Math.round(latestMonthExpense),
-  runwayDays: Math.round(runwayDays),
-  burnRatio: Number((safeBurnRatio * 100).toFixed(1)),
-  suggestedCut: Math.round(latestMonthExpense * 0.2),
-}
-  });
 
-} else {
-  insights.push({
-    title: "Efficient spending",
-    message: `Your burn ratio is a healthy ${Math.round(safeBurnRatio * 100)}%, with expenses well aligned to your income of ₹${latestMonthIncome}.`,
-    action: `You can safely increase savings or investments by ₹${Math.round(safeSurplus * 0.2)} without affecting stability.`,
-    impact: getImpactLevel({
-  runwayDays,
-  burnRatio: safeBurnRatio * 100,
-  incomeGrowth
-}),
-    numbers: {
-  income: Math.round(latestMonthIncome),
-  expenses: Math.round(latestMonthExpense),
-  savings: Math.round(latestMonthNet),
-  runwayDays: Math.round(runwayDays),
-  burnRatio: Number((safeBurnRatio * 100).toFixed(1)),
-  incomeGrowth: +incomeGrowth.toFixed(1),
-  suggestedCut: Math.round(latestMonthExpense * 0.2),
-  investableAmount: Math.round(investableAmount),
-  funMoney: Math.round(funMoney)
-}
-      });
-    }
+    // 2️⃣ SPENDING BEHAVIOR (ALWAYS EXISTS)
+insights.push({
+  title: "Spending Behavior",
+  message:
+    primaryIssue === "high_burn"
+      ? `You are spending ₹${latestMonthExpense} out of ₹${latestMonthIncome}, which is high.`
+      : "Your spending is currently under control.",
+  action:
+    primaryIssue === "high_burn"
+      ? `Reduce expenses by ₹${Math.round(latestMonthExpense * 0.2)} to improve stability.`
+      : "Maintain your current expense discipline.",
+  impact: getImpactLevel({
+    runwayDays,
+    burnRatio: safeBurnRatio * 100,
+    incomeGrowth
+  }),
+  numbers: {
+    expenses: Math.round(latestMonthExpense),
+    burnRatio: Number((safeBurnRatio * 100).toFixed(1)),
+    suggestedCut: Math.round(latestMonthExpense * 0.2),
+  }
+});
 
-    // 3️⃣ GROWTH
-if (incomeGrowth < 0) {
-  insights.push({
-    title: "Declining Income",
-    message: `Your income dropped by ${Math.abs(incomeGrowth).toFixed(1)}%. Combined with a runway of ${runwayDays} days, this puts pressure on your financial stability.`,
-    action: `Increase revenue streams or pricing to reverse the decline within the next month.`,
-    impact: getImpactLevel({
-  runwayDays,
-  burnRatio: safeBurnRatio * 100,
-  incomeGrowth
-}),
-    numbers: {
-  income: Math.round(latestMonthIncome),
-  expenses: Math.round(latestMonthExpense),
-  savings: Math.round(latestMonthNet),
-  runwayDays: Math.round(runwayDays),
-  suggestedCut: Math.round(latestMonthExpense * 0.2),
-}
-  });
-
-} else if (incomeGrowth < 10) {
-  insights.push({
-    title: "Slow Growth",
-    message: `Your income is growing at ${incomeGrowth.toFixed(1)}%, which is positive but relatively slow for sustainable expansion.`,
-    action: `Aim to increase growth to at least 10–15% by adding new income streams or improving conversion efficiency.`,
-    impact: getImpactLevel({
-  runwayDays,
-  burnRatio: safeBurnRatio * 100,
-  incomeGrowth
-}),
-    numbers: {
-  income: Math.round(latestMonthIncome),
-  expenses: Math.round(latestMonthExpense),
-  savings: Math.round(latestMonthNet),
-  runwayDays: Math.round(runwayDays),
-  suggestedCut: Math.round(latestMonthExpense * 0.2),
-  investableAmount: Math.round(investableAmount),
-}
-  });
-
-} else {
-  insights.push({
-    title: "Strong Growth",
-    message: `Your income is growing at a healthy ${incomeGrowth.toFixed(1)}%, indicating strong upward momentum.`,
-    action: `You have room to allocate about ₹${Math.round(funMoney)} as fun money while still investing the majority. Maintain this balance.`,
-    impact: getImpactLevel({
-  runwayDays,
-  burnRatio: safeBurnRatio * 100,
-  incomeGrowth
-}),
-    numbers: {
-  income: Math.round(latestMonthIncome),
-  expenses: Math.round(latestMonthExpense),
-  savings: Math.round(latestMonthNet),
-  investableAmount: Math.round(investableAmount),
-  funMoney: Math.round(funMoney)
-}
-  });
-}
+    // 3️⃣ INCOME TREND (ALWAYS EXISTS)
+insights.push({
+  title: "Income Trend",
+  message:
+    primaryIssue === "income_decline"
+      ? `Your income has dropped by ${Math.abs(incomeGrowth).toFixed(1)}%.`
+      : "Your income trend is stable or improving.",
+  action:
+    primaryIssue === "income_decline"
+      ? "Focus on increasing income through new sources or opportunities."
+      : "Continue growing your income streams.",
+  impact: getImpactLevel({
+    runwayDays,
+    burnRatio: safeBurnRatio * 100,
+    incomeGrowth
+  }),
+  numbers: {
+    income: Math.round(latestMonthIncome),
+    incomeGrowth: +incomeGrowth.toFixed(1),
+  }
+});
 
     // ✅ PRIORITY
     let priority = "";

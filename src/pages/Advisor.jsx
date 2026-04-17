@@ -460,46 +460,39 @@ const getAIAdvice = async () => {
   );
 })()}
 </p>
-        <div style={{ marginTop: "6px" }}>
+        <div>
   <b>Key Numbers:</b>
 
-  {item.numbers?.income !== undefined && (
-    <div>💰 Income: {formatCurrency(item.numbers.income)}</div>
-  )}
+  {Object.entries(item.numbers || {}).map(([key, value]) => {
+    if (value === undefined || value === null) return null;
 
-  {item.numbers?.expenses !== undefined && (
-    <div>💸 Expenses: {formatCurrency(item.numbers.expenses)}</div>
-  )}
+    const formatLabel = (k) => {
+      switch (k) {
+        case "income": return "💰 Income";
+        case "expenses": return "💸 Expenses";
+        case "runwayDays": return "⏳ Runway";
+        case "burnRatio": return "📊 Expense Ratio";
+        case "incomeGrowth": return "📉 Growth";
+        case "suggestedCut": return "✂️ Suggested Cut";
+        case "investableAmount": return "📈 Investable";
+        case "funMoney": return "🎉 Fun Money";
+        case "savings": return "💼 Savings";
+        default: return k;
+      }
+    };
 
-  {item.numbers?.runwayDays !== undefined && (
-    <div>⏳ Runway: {item.numbers.runwayDays} days</div>
-  )}
+    const formatValue = (k, v) => {
+      if (k === "runwayDays") return `${v} days`;
+      if (k === "burnRatio" || k === "incomeGrowth") return `${v}%`;
+      return `₹ ${v}`;
+    };
 
-  {item.numbers?.burnRatio !== undefined && (
-    <div>
-  📊 Expense Ratio: {Number(item.numbers.burnRatio).toFixed(1)}%
-</div>
-  )}
-
-  {item.numbers?.incomeGrowth !== undefined && (
-    <div>📉 Growth: {item.numbers.incomeGrowth}%</div>
-  )}
-
-  {item.numbers?.suggestedCut !== undefined && (
-    <div>✂️ Suggested Cut: {formatCurrency(item.numbers.suggestedCut)}</div>
-  )}
-
-  {item.numbers?.investableAmount !== undefined && (
-    <div>📈 Investable: {formatCurrency(item.numbers.investableAmount)}</div>
-  )}
-
-  {item.numbers?.funMoney !== undefined && (
-    <div>🎉 Fun Money: {formatCurrency(item.numbers.funMoney)}</div>
-  )}
-
-  {item.numbers?.savings !== undefined && (
-    <div>💼 Savings: {formatCurrency(item.numbers.savings)}</div>
-  )}
+    return (
+      <div key={key}>
+        {formatLabel(key)}: {formatValue(key, value)}
+      </div>
+    );
+  })}
 </div>
       </div>
     ))}

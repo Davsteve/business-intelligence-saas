@@ -619,7 +619,41 @@ priority:
 // SMART CAPITAL ALLOCATION
 // ------------------------
 
+// ------------------------
+// NEXT BEST ACTION ENGINE
+// ------------------------
 
+let nextBestAction = {};
+
+if (primaryIssue === "income_decline") {
+  nextBestAction = {
+    title: "Increase Income Immediately",
+    action: `You need to increase your income by at least ₹${Math.round(incomeBoost)} within the next 2–4 weeks.`,
+    reason: "Your income decline is the biggest risk to your financial stability.",
+    urgency: "high"
+  };
+} else if (primaryIssue === "low_runway") {
+  nextBestAction = {
+    title: "Extend Your Runway",
+    action: `Reduce expenses by ₹${Math.round(expenseReduction)} to extend your runway beyond 60 days.`,
+    reason: "Your current runway is too short to handle unexpected situations.",
+    urgency: "high"
+  };
+} else if (primaryIssue === "high_burn") {
+  nextBestAction = {
+    title: "Control Spending",
+    action: "Cut down non-essential expenses by at least 20%.",
+    reason: "Your spending is limiting your ability to save and grow.",
+    urgency: "medium"
+  };
+} else {
+  nextBestAction = {
+    title: "Optimize Growth",
+    action: `You can safely invest ₹${Math.round(investableAmount)} this month.`,
+    reason: "Your finances are stable enough to focus on growth.",
+    urgency: "low"
+  };
+}
 
 // ✅ FINAL RESPONSE (ONLY ONE)
 return res.json({
@@ -627,6 +661,7 @@ return res.json({
   priority,
   riskLevel,
   insights: aiInsights,
+  nextBestAction, // 👈 ADD THIS
   avgMonthlyBurn: avgMonthlyExpenses,
   numbers: {
   surplus: Math.round(safeSurplus),

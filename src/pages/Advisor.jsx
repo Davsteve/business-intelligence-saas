@@ -270,6 +270,7 @@ const getAIAdvice = async () => {
   summary: result.summary || "No summary available",
   riskLevel: result.riskLevel || "medium",
   insights: result.insights || [],
+  nextBestAction: result.nextBestAction || null, // 👈 ADD THIS
 });
 
     } catch (err) {
@@ -382,6 +383,32 @@ const getAIAdvice = async () => {
     border: "1px solid rgba(255,255,255,0.05)",
     lineHeight: "1.6"
   }}>
+
+    {/* NEXT BEST ACTION */}
+<div style={{
+  padding: "16px",
+  borderRadius: "10px",
+  background: "#020617",
+  border: "1px solid rgba(255,255,255,0.1)",
+  marginBottom: "16px",
+  borderLeft: "4px solid #ef4444"
+}}>
+  <h3 style={{ marginBottom: "8px" }}>
+    🚀 What You Should Do Next
+  </h3>
+
+  <p>
+    <strong>{aiData.nextBestAction?.title}</strong>
+  </p>
+
+  <p>
+    {aiData.nextBestAction?.action}
+  </p>
+
+  <p style={{ opacity: 0.6 }}>
+    {aiData.nextBestAction?.reason}
+  </p>
+</div>
 
     {/* SUMMARY */}
     <div style={{

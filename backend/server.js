@@ -509,13 +509,6 @@ const aiMap = {
 
 const ai = parsed.insights;
 
-// 🧠 Strict mapping (NO searching, NO nesting)
-const aiMap = {
-  current: ai.find(i => i.type === "current") || ai[0],
-  risk: ai.find(i => i.type === "risk") || ai[1],
-  growth: ai.find(i => i.type === "growth") || ai[2],
-};
-
 // ✅ SINGLE CLEAN MAP (ONLY ONE)
 aiInsights = insights.map((baseInsight) => {
   let matchedAI;

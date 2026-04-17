@@ -534,22 +534,6 @@ aiInsights = insights.map((baseInsight) => {
 });
 
 // ✅ DUPLICATE PROTECTION (KEEP THIS)
-const seenMessages = new Set();
-
-aiInsights = aiInsights.map(insight => {
-  const key = insight.message?.toLowerCase();
-
-  if (seenMessages.has(key)) {
-    return {
-      ...insight,
-      message: "Focus on strengthening different aspects of your financial health to avoid over-reliance on one area.",
-      action: "Diversify your strategy across income, spending, and savings."
-    };
-  }
-
-  seenMessages.add(key);
-  return insight;
-});
 
 const seenMessages = new Set();
 

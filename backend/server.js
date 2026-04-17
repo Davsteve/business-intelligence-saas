@@ -596,20 +596,21 @@ const burnRiskProjection =
   message: (() => {
   let baseMsg = matchedAI?.message || baseInsight.message;
 
-  if (baseInsight.title.toLowerCase().includes("position") && projectedRunwayWarning) {
+  if (baseInsight.type === "current" && projectedRunwayWarning) {
     baseMsg += " " + projectedRunwayWarning;
   }
 
-  if (baseInsight.title.toLowerCase().includes("safety") && incomeRiskProjection) {
+  if (baseInsight.type === "risk" && incomeRiskProjection) {
     baseMsg += " " + incomeRiskProjection;
   }
 
-  if (baseInsight.title.toLowerCase().includes("spending") && burnRiskProjection) {
+  if (baseInsight.type === "growth" && burnRiskProjection) {
     baseMsg += " " + burnRiskProjection;
   }
 
   return baseMsg;
 })(),
+
   action: (() => {
   let baseAction = matchedAI?.action || baseInsight.action;
 
@@ -630,36 +631,26 @@ const burnRiskProjection =
 
   // ✅ SMART PRIORITY LOGIC (NEW)
   impact:
-    (
-      (primaryIssue === "income_decline" &&
-        baseInsight.title.toLowerCase().includes("income")) ||
+  (
+    (primaryIssue === "income_decline" && baseInsight.type === "risk") ||
+    (primaryIssue === "low_runway" && baseInsight.type === "current") ||
+    (primaryIssue === "high_burn" && baseInsight.type === "growth")
+  )
+    ? "CRITICAL"
+    : baseInsight.impact,
 
-      (primaryIssue === "low_runway" &&
-        baseInsight.title.toLowerCase().includes("buffer")) ||
-
-      (primaryIssue === "high_burn" &&
-        baseInsight.title.toLowerCase().includes("spending"))
-    )
-      ? "CRITICAL"
-      : baseInsight.impact,
-
-  priority:
-    (
-      (primaryIssue === "income_decline" &&
-        baseInsight.title.toLowerCase().includes("income")) ||
-
-      (primaryIssue === "low_runway" &&
-        baseInsight.title.toLowerCase().includes("buffer")) ||
-
-      (primaryIssue === "high_burn" &&
-        baseInsight.title.toLowerCase().includes("spending"))
-    )
-      ? "High"
-      : baseInsight.impact === "HIGH"
-      ? "Medium"
-      : baseInsight.impact === "MEDIUM"
-      ? "Low"
-      : "Low"
+priority:
+  (
+    (primaryIssue === "income_decline" && baseInsight.type === "risk") ||
+    (primaryIssue === "low_runway" && baseInsight.type === "current") ||
+    (primaryIssue === "high_burn" && baseInsight.type === "growth")
+  )
+    ? "High"
+    : baseInsight.impact === "HIGH"
+    ? "Medium"
+    : baseInsight.impact === "MEDIUM"
+    ? "Low"
+    : "Low"
 };
   });
 

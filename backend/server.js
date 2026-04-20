@@ -630,16 +630,42 @@ const incomeBoost = Math.round(avgMonthlyIncome * 0.3);
 let nextBestAction = {};
 
 if (primaryIssue === "income_decline") {
+
+  const dynamicSteps = [];
+
+  // 1️⃣ Expense-based insight
+  if (topCategoryPercent > 25) {
+    dynamicSteps.push(
+      `Reduce spending in ${topCategory} — it accounts for ${Math.round(topCategoryPercent)}% of your expenses`
+    );
+  }
+
+  // 2️⃣ Trend-based insight
+  if (trend && trend.includes("declining")) {
+    dynamicSteps.push(
+      "Your income trend is declining — stabilize income immediately"
+    );
+  }
+
+  // 3️⃣ Runway-based urgency
+  if (runwayDays < 60) {
+    dynamicSteps.push(
+      `Your runway is only ${Math.round(runwayDays)} days — increase cash reserves urgently`
+    );
+  }
+
+  // 4️⃣ Always include execution step
+  dynamicSteps.push(
+    "Create at least 1 fast-paying income stream within 7–14 days"
+  );
+
+  // ✅ FINAL OBJECT (ONLY HERE)
   nextBestAction = {
-  title: "Increase Income Immediately",
-  action: `You need to increase your income by at least ₹${Math.round(incomeBoost)} within the next 2–4 weeks.`,
-  reason: "Your income decline is the biggest risk to your financial stability.",
-  steps: [
-    "Identify 1–2 quick income sources (freelancing, reselling, part-time work)",
-    "Use your existing skills to generate fast-paying opportunities",
-    "Focus on income that generates cash within 7–14 days"
-  ]
-};
+    title: "Increase Income Immediately",
+    action: `You need to increase your income by at least ₹${Math.round(incomeBoost)} within the next 2–4 weeks.`,
+    reason: "Your income decline is the biggest risk to your financial stability.",
+    steps: dynamicSteps
+  };
 } else if (primaryIssue === "low_runway") {
   nextBestAction = {
     title: "Extend Your Runway",

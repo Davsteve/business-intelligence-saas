@@ -14,70 +14,110 @@ export default function Advisor() {
   const type = item.type;
 
   // -------------------------
-  // 🧱 CORE BASELINE (ALWAYS SHOW)
-  // -------------------------
-  result.push(`💰 Income: ₹${numbers.income}`);
-  result.push(`💸 Expenses: ₹${numbers.expenses}`);
-  result.push(`💼 Savings: ₹${numbers.savings}`);
-
-  // -------------------------
-  // ⏳ SURVIVAL / RUNWAY
-  // -------------------------
-  if (numbers.runwayDays) {
-    result.push(`⏳ Runway: ${numbers.runwayDays} days`);
-  }
-
-  // -------------------------
-  // 📊 EFFICIENCY
-  // -------------------------
-  if (numbers.burnRatio) {
-    result.push(`📊 Burn Rate: ${numbers.burnRatio}%`);
-  }
-
-  // -------------------------
-  // ✂️ COST CUT IMPACT
-  // -------------------------
-  if (
-    item.action?.toLowerCase().includes("cut") ||
-    type === "current"
-  ) {
-    result.push(`✂️ Possible Cut: ₹${numbers.suggestedCut}`);
-  }
-
-  // -------------------------
-  // 📈 GROWTH POTENTIAL
-  // -------------------------
-  if (type === "growth") {
-    result.push(`📈 Investable: ₹${numbers.investableAmount}`);
-  }
-
-  // -------------------------
-  // 🎯 LIFESTYLE FLEXIBILITY
-  // -------------------------
-  if (numbers.funMoney > 0) {
-    result.push(`🎯 Free Spend: ₹${numbers.funMoney}`);
-  }
-
-  // -------------------------
-  // 🧠 CONTEXT-SPECIFIC BOOST
+  // 🧠 INTERPRETATION HELPERS
   // -------------------------
 
-  // Buffer / safety
+  const getBurnStatus = (burn) => {
+    if (burn > 70) return "⚠️ High spending risk";
+    if (burn > 50) return "⚠️ Moderate spending";
+    return "✅ Healthy spending";
+  };
+
+  const getRunwayStatus = (days) => {
+    if (days < 30) return "🚨 Critical survival risk";
+    if (days < 60) return "⚠️ Low buffer";
+    return "✅ Safe runway";
+  };
+
+  const getSavingsStatus = (savings) => {
+    if (savings <= 0) return "🚨 No savings buffer";
+    if (savings < numbers.expenses) return "⚠️ Weak savings";
+    return "✅ Good savings buffer";
+  };
+
+  // -------------------------
+  // 🎯 CONTEXT-BASED DISPLAY
+  // -------------------------
+
+  // 🟥 RISK / SURVIVAL INSIGHTS
   if (title.includes("buffer") || title.includes("runway")) {
-    result.push(`⚠️ Critical Zone Below: 60 days`);
-  }
-
-  // Spending-focused insight
-  if (title.includes("spending")) {
     result.push(
-      `💡 You spend ${numbers.burnRatio}% of your income monthly`
+      `⏳ Runway: ${numbers.runwayDays} days → ${getRunwayStatus(numbers.runwayDays)}`
     );
+
+    result.push(
+      `💼 Savings: ₹${numbers.savings} → ${getSavingsStatus(numbers.savings)}`
+    );
+
+    result.push(
+      `📊 Burn Rate: ${numbers.burnRatio}% → ${getBurnStatus(numbers.burnRatio)}`
+    );
+
+    if (numbers.suggestedCut) {
+      result.push(
+        `✂️ Suggested Cut: ₹${numbers.suggestedCut} → Extends survival`
+      );
+    }
+
+    if (numbers.funMoney > 0) {
+      result.push(
+        `🎯 Free Spend: ₹${numbers.funMoney} → Can be reduced if needed`
+      );
+    }
   }
 
-  // Income-focused insight
-  if (title.includes("income")) {
+  // 🟩 EFFICIENCY / SPENDING INSIGHTS
+  else if (title.includes("spending")) {
     result.push(
-      `📉 Risk if income drops: runway collapses fast`
+      `💸 Expenses: ₹${numbers.expenses} (${numbers.burnRatio}% of income)`
+    );
+
+    result.push(
+      `📊 Burn Rate: ${numbers.burnRatio}% → ${getBurnStatus(numbers.burnRatio)}`
+    );
+
+    result.push(
+      `formatCurrency(numbers.income)`
+    );
+
+    if (numbers.investableAmount > 0) {
+      result.push(
+        `📈 Investable: ₹${numbers.investableAmount} → Growth potential`
+      );
+    }
+
+    if (numbers.funMoney > 0) {
+      result.push(
+        `🎯 Free Spend: ₹${numbers.funMoney} → Lifestyle flexibility`
+      );
+    }
+  }
+
+  // 🟨 INCOME / GROWTH INSIGHTS
+  else if (title.includes("income")) {
+    result.push(`💰 Income: formatCurrency(numbers.income)`);
+
+    result.push(
+      `📊 Burn Rate: ${numbers.burnRatio}% → ${getBurnStatus(numbers.burnRatio)}`
+    );
+
+    result.push(
+      `⏳ Runway: ${numbers.runwayDays} days → ${getRunwayStatus(numbers.runwayDays)}`
+    );
+
+    if (numbers.investableAmount > 0) {
+      result.push(
+        `📈 Investable: ₹${numbers.investableAmount} → Can grow wealth`
+      );
+    }
+  }
+
+  // 🟦 DEFAULT (fallback)
+  else {
+    result.push(`💰 Income: formatCurrency(numbers.income)`);
+    result.push(`💸 Expenses: ₹${numbers.expenses}`);
+    result.push(
+      `📊 Burn Rate: ${numbers.burnRatio}% → ${getBurnStatus(numbers.burnRatio)}`
     );
   }
 

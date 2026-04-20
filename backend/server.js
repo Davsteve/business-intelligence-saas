@@ -623,7 +623,7 @@ priority:
 // NEXT BEST ACTION ENGINE
 // ------------------------
 
-const avgMonthlyIncome = financials.avgMonthlyIncome;
+const avgMonthlyIncome = financialData.avgMonthlyIncome;
 
 const incomeBoost = Math.round(avgMonthlyIncome * 0.3);
 

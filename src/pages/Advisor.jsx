@@ -28,7 +28,9 @@ export default function Advisor() {
 
   return { text: "Low", color: "#22c55e" }; // green
 };
-  const normalizedInsights = aiData?.insights || [];
+  const normalizedInsights = Array.from(
+  new Map((aiData?.insights || []).map(i => [i.title, i])).values()
+);
 
   const getStabilityIndicator = (stability) => {
   if (!stability) return "";
@@ -408,6 +410,15 @@ const getAIAdvice = async () => {
   <p style={{ opacity: 0.6 }}>
     {aiData.nextBestAction?.reason}
   </p>
+  {aiData.nextBestAction?.steps && (
+  <ul style={{ marginTop: "10px", paddingLeft: "18px" }}>
+    {aiData.nextBestAction.steps.map((step, i) => (
+      <li key={i} style={{ marginBottom: "6px" }}>
+        {step}
+      </li>
+    ))}
+  </ul>
+)}
 </div>
 
     {/* SUMMARY */}

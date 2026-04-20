@@ -631,11 +631,15 @@ let nextBestAction = {};
 
 if (primaryIssue === "income_decline") {
   nextBestAction = {
-    title: "Increase Income Immediately",
-    action: `You need to increase your income by at least ₹${Math.round(incomeBoost)} within the next 2–4 weeks.`,
-    reason: "Your income decline is the biggest risk to your financial stability.",
-    urgency: "high"
-  };
+  title: "Increase Income Immediately",
+  action: `You need to increase your income by at least ₹${Math.round(incomeBoost)} within the next 2–4 weeks.`,
+  reason: "Your income decline is the biggest risk to your financial stability.",
+  steps: [
+    "Identify 1–2 quick income sources (freelancing, reselling, part-time work)",
+    "Use your existing skills to generate fast-paying opportunities",
+    "Focus on income that generates cash within 7–14 days"
+  ]
+};
 } else if (primaryIssue === "low_runway") {
   nextBestAction = {
     title: "Extend Your Runway",

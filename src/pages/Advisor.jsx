@@ -33,11 +33,14 @@ export default function Advisor() {
   if (!numbers.expenses || numbers.expenses === 0) return "";
 
   const months = savings / numbers.expenses;
+  const targetMonths = 3;
 
   if (savings <= 0) return "🚨 No buffer";
   if (months < 1) return "🚨 Critical buffer (<1 month)";
-  if (months < 3) return "⚠️ Weak buffer (Target: 3–6 months)";
-  return "✅ Healthy buffer (3+ months)";
+  if (months < targetMonths)
+    return `⚠️ Weak buffer (Target: ${targetMonths} months)`;
+
+  return `✅ Healthy buffer (${targetMonths}+ months)`;
 };
 
   // -------------------------
@@ -53,16 +56,21 @@ export default function Advisor() {
     result.push(
       `💼 Savings: ${formatCurrency(numbers.savings)} → ${getSavingsStatus(numbers.savings)}`
     );
+    if (numbers.targetSavings) {
+  result.push(
+    `🎯 Target Savings: ${formatCurrency(numbers.targetSavings)}`
+  );
+}
 
     result.push(
       `📊 Burn Rate: ${numbers.burnRatio}% → ${getBurnStatus(numbers.burnRatio)}`
     );
 
-    if (numbers.suggestedCut) {
-      result.push(
-        `✂️ Suggested Cut: ₹${numbers.suggestedCut} → Can extend runway significantly`
-      );
-    }
+    if (numbers.suggestedCut && numbers.newRunway) {
+  result.push(
+    `✂️ Cutting ₹${numbers.suggestedCut} → Runway becomes ~${numbers.newRunway} days`
+  );
+}
 
     if (numbers.funMoney > 0) {
   result.push(
@@ -72,26 +80,20 @@ export default function Advisor() {
 
 // 🎯 TARGET: SAFETY BUFFER (90 DAYS)
 if (numbers.runwayDays < 90 && numbers.expenses > 0) {
-  const targetSavings = numbers.expenses * 3; // 3 months buffer
-  const gap = targetSavings - numbers.savings;
-
-  if (gap > 0) {
-    result.push(
-      `🎯 You need ${formatCurrency(gap)} more savings to reach a safe 90-day buffer`
-    );
-  }
+  if (numbers.savingsGap > 0) {
+  result.push(
+    `🎯 You need ${formatCurrency(numbers.savingsGap)} more savings to reach a safe buffer`
+  );
+}
 }
 
 // 🚀 TARGET: REQUIRED INCOME
 if (numbers.avgMonthlyBurn > 0) {
-  const requiredIncome = numbers.avgMonthlyBurn * 1.3;
-  const incomeGap = requiredIncome - numbers.income;
-
-  if (incomeGap > 0) {
-    result.push(
-      `🚀 Increase income by ${formatCurrency(incomeGap)} to stabilize finances`
-    );
-  }
+  if (numbers.incomeGap > 0) {
+  result.push(
+    `🚀 Increase income by ${formatCurrency(numbers.incomeGap)} to stabilize finances`
+  );
+}
 }
   }
 
@@ -125,6 +127,12 @@ if (numbers.avgMonthlyBurn > 0) {
   // 🟨 INCOME / GROWTH INSIGHTS
   else if (title.includes("income")) {
     result.push(`💰 Income: ${formatCurrency(numbers.income)}`);
+
+    if (numbers.targetIncome) {
+  result.push(
+    `🎯 Target Income: ${formatCurrency(numbers.targetIncome)}`
+  );
+}
 
 
     result.push(

@@ -18,22 +18,23 @@ export default function Advisor() {
   // -------------------------
 
   const getBurnStatus = (burn) => {
-    if (burn > 70) return "⚠️ High spending risk";
-    if (burn > 50) return "⚠️ Moderate spending";
-    return "✅ Healthy spending";
-  };
+  if (burn > 70) return "⚠️ High spending (Target: <50%)";
+  if (burn > 50) return "⚠️ Moderate spending (Target: <50%)";
+  return "✅ Healthy spending";
+};
 
   const getRunwayStatus = (days) => {
-    if (days < 30) return "🚨 Critical survival risk";
-    if (days < 60) return "⚠️ Low buffer";
-    return "✅ Safe runway";
-  };
+  if (days < 30) return "🚨 Critical (Target: 90+ days)";
+  if (days < 60) return "⚠️ Low buffer (Target: 90+ days)";
+  return "✅ Safe (Target: 90+ days)";
+};
 
   const getSavingsStatus = (savings) => {
-    if (savings <= 0) return "🚨 No savings buffer";
-    if (savings < numbers.expenses) return "⚠️ Weak savings";
-    return "✅ Good savings buffer";
-  };
+  if (savings <= 0) return "🚨 No buffer (Target: 3–6 months expenses)";
+  if (savings < numbers.expenses)
+    return "⚠️ Weak buffer (Target: 3–6 months expenses)";
+  return "✅ Healthy buffer";
+};
 
   // -------------------------
   // 🎯 CONTEXT-BASED DISPLAY
@@ -55,15 +56,15 @@ export default function Advisor() {
 
     if (numbers.suggestedCut) {
       result.push(
-        `✂️ Suggested Cut: ₹${numbers.suggestedCut} → Extends survival`
+        `✂️ Suggested Cut: ₹${numbers.suggestedCut} → Can extend runway significantly`
       );
     }
 
     if (numbers.funMoney > 0) {
-      result.push(
-        `🎯 Free Spend: ₹${numbers.funMoney} → Can be reduced if needed`
-      );
-    }
+  result.push(
+    `🎯 Free Spend: ₹${numbers.funMoney} → Lifestyle flexibility`
+  );
+}
   }
 
   // 🟩 EFFICIENCY / SPENDING INSIGHTS
@@ -77,7 +78,7 @@ export default function Advisor() {
     );
 
     result.push(
-      `formatCurrency(numbers.income)`
+      `💰 Income: ${formatCurrency(numbers.income)}`
     );
 
     if (numbers.investableAmount > 0) {
@@ -87,15 +88,15 @@ export default function Advisor() {
     }
 
     if (numbers.funMoney > 0) {
-      result.push(
-        `🎯 Free Spend: ₹${numbers.funMoney} → Lifestyle flexibility`
-      );
-    }
+  result.push(
+    `🎯 Free Spend: ₹${numbers.funMoney} → Lifestyle flexibility`
+  );
+}
   }
 
   // 🟨 INCOME / GROWTH INSIGHTS
   else if (title.includes("income")) {
-    result.push(`💰 Income: formatCurrency(numbers.income)`);
+    result.push(`💰 Income: ${formatCurrency(numbers.income)}`);
 
     result.push(
       `📊 Burn Rate: ${numbers.burnRatio}% → ${getBurnStatus(numbers.burnRatio)}`
@@ -114,7 +115,7 @@ export default function Advisor() {
 
   // 🟦 DEFAULT (fallback)
   else {
-    result.push(`💰 Income: formatCurrency(numbers.income)`);
+    result.push(`💰 Income: ${formatCurrency(numbers.income)}`);
     result.push(`💸 Expenses: ₹${numbers.expenses}`);
     result.push(
       `📊 Burn Rate: ${numbers.burnRatio}% → ${getBurnStatus(numbers.burnRatio)}`

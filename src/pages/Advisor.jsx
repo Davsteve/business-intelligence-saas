@@ -529,7 +529,6 @@ const priority = {
   );
 })()}
 </p>
-        <b>Key Numbers:</b>
 
 <b>Key Numbers:</b>
 

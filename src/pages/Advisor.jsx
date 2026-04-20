@@ -7,7 +7,7 @@ import { formatCurrency } from "../utils/formatcurrency";
 
 export default function Advisor() {
   const getKeyNumbers = (item, numbers) => {
-  if (!numbers) return [];
+  if (!numbers || typeof numbers !== "object") return [];
 
   const result = [];
   const title = item.title?.toLowerCase() || "";
@@ -20,7 +20,7 @@ export default function Advisor() {
   const getBurnStatus = (burn) => {
   if (burn > 70) return "⚠️ High spending (Target: <50%)";
   if (burn > 50) return "⚠️ Moderate spending (Target: <50%)";
-  return "✅ Healthy spending";
+  return "✅ Healthy spending (well below 50%)";
 };
 
   const getRunwayStatus = (days) => {
@@ -30,10 +30,14 @@ export default function Advisor() {
 };
 
   const getSavingsStatus = (savings) => {
-  if (savings <= 0) return "🚨 No buffer (Target: 3–6 months expenses)";
-  if (savings < numbers.expenses)
-    return "⚠️ Weak buffer (Target: 3–6 months expenses)";
-  return "✅ Healthy buffer";
+  if (!numbers.expenses || numbers.expenses === 0) return "";
+
+  const months = savings / numbers.expenses;
+
+  if (savings <= 0) return "🚨 No buffer";
+  if (months < 1) return "🚨 Critical buffer (<1 month)";
+  if (months < 3) return "⚠️ Weak buffer (Target: 3–6 months)";
+  return "✅ Healthy buffer (3+ months)";
 };
 
   // -------------------------
@@ -47,7 +51,7 @@ export default function Advisor() {
     );
 
     result.push(
-      `💼 Savings: ₹${numbers.savings} → ${getSavingsStatus(numbers.savings)}`
+      `💼 Savings: formatCurrency(numbers.savings) → ${getSavingsStatus(numbers.savings)}`
     );
 
     result.push(
@@ -70,7 +74,7 @@ export default function Advisor() {
   // 🟩 EFFICIENCY / SPENDING INSIGHTS
   else if (title.includes("spending")) {
     result.push(
-      `💸 Expenses: ₹${numbers.expenses} (${numbers.burnRatio}% of income)`
+      `💸 Expenses: formatCurrency(numbers.income) (${numbers.burnRatio}% of income)`
     );
 
     result.push(
@@ -83,7 +87,7 @@ export default function Advisor() {
 
     if (numbers.investableAmount > 0) {
       result.push(
-        `📈 Investable: ₹${numbers.investableAmount} → Growth potential`
+        `📈 Investable: formatCurrency(numbers.investableAmount) → Growth potential`
       );
     }
 
@@ -98,6 +102,7 @@ export default function Advisor() {
   else if (title.includes("income")) {
     result.push(`💰 Income: ${formatCurrency(numbers.income)}`);
 
+
     result.push(
       `📊 Burn Rate: ${numbers.burnRatio}% → ${getBurnStatus(numbers.burnRatio)}`
     );
@@ -108,19 +113,50 @@ export default function Advisor() {
 
     if (numbers.investableAmount > 0) {
       result.push(
-        `📈 Investable: ₹${numbers.investableAmount} → Can grow wealth`
+        `📈 Investable: formatCurrency(numbers.investableAmount) → Can grow wealth`
       );
+      if (numbers.incomeGrowth !== undefined) {
+  result.push(
+    `📈 Income Growth: ${numbers.incomeGrowth.toFixed(1)}% ${
+      numbers.incomeGrowth < 0 ? "📉 Declining" : "📈 Growing"
+    }`
+  );
+}
     }
   }
 
   // 🟦 DEFAULT (fallback)
   else {
     result.push(`💰 Income: ${formatCurrency(numbers.income)}`);
-    result.push(`💸 Expenses: ₹${numbers.expenses}`);
+    result.push(`💸 Expenses: formatCurrency(numbers.income)`);
     result.push(
       `📊 Burn Rate: ${numbers.burnRatio}% → ${getBurnStatus(numbers.burnRatio)}`
     );
   }
+
+  // -------------------------
+// 🧠 FINAL INSIGHT LAYER
+// -------------------------
+
+if (title.includes("buffer") || title.includes("runway")) {
+  if (numbers.runwayDays < 60) {
+    result.push("💡 Your runway is low — increase income or cut expenses urgently");
+  }
+}
+
+if (title.includes("spending")) {
+  if (numbers.burnRatio > 50) {
+    result.push("💡 High burn rate — reducing expenses will significantly improve stability");
+  } else {
+    result.push("💡 Your spending is controlled — focus on increasing income next");
+  }
+}
+
+if (title.includes("income")) {
+  if (numbers.incomeGrowth < 0) {
+    result.push("💡 Income is declining — stabilizing income should be your top priority");
+  }
+}
 
   return result;
 };

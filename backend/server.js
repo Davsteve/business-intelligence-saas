@@ -633,12 +633,14 @@ if (primaryIssue === "income_decline") {
 
   const dynamicSteps = [];
 
-  // 1️⃣ Expense-based insight
-  if (topCategoryPercent > 25) {
-    dynamicSteps.push(
-      `Reduce spending in ${topCategory} — it accounts for ${Math.round(topCategoryPercent)}% of your expenses`
-    );
-  }
+  // 1️⃣ Expense-based step (UPGRADED)
+if (topCategoryPercent > 25) {
+  const reductionTarget = Math.round(latestMonthExpense * 0.2);
+
+  dynamicSteps.push(
+    `Reduce ${topCategory} expenses by ₹${reductionTarget} — it's currently ${Math.round(topCategoryPercent)}% of your spending`
+  );
+}
 
   // 2️⃣ Trend-based insight
   if (trend && trend.includes("declining")) {
@@ -647,12 +649,14 @@ if (primaryIssue === "income_decline") {
     );
   }
 
-  // 3️⃣ Runway-based urgency
-  if (runwayDays < 60) {
-    dynamicSteps.push(
-      `Your runway is only ${Math.round(runwayDays)} days — increase cash reserves urgently`
-    );
-  }
+  // 2️⃣ Runway-based step (UPGRADED)
+if (runwayDays < 60) {
+  const daysToAdd = 30;
+
+  dynamicSteps.push(
+    `Extend your runway by at least ${daysToAdd} days by cutting costs or increasing income immediately`
+  );
+}
 
   // 4️⃣ Always include execution step
   dynamicSteps.push(

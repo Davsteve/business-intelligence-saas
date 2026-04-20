@@ -535,23 +535,42 @@ const priority = {
 {item.numbers && (
   <div style={{ marginTop: "6px", fontSize: "13px", opacity: 0.85 }}>
     
-    {item.type === "current" && (
+    {/* CURRENT STATE */}
+{item.type === "current" && (
   <>
     <div>💼 Savings: ₹{item.numbers.savings}</div>
     <div>⏳ Runway: {item.numbers.runwayDays} days</div>
+
+    {item.numbers.investableAmount > 0 && (
+      <div>📈 Investable: ₹{item.numbers.investableAmount}</div>
+    )}
+
+    {item.numbers.funMoney > 0 && (
+      <div>🎯 Safe Spending: ₹{item.numbers.funMoney}</div>
+    )}
   </>
 )}
 
+{/* RISK */}
 {item.type === "risk" && (
   <>
-    <div>📊 Burn Ratio: {item.numbers.burnRatio}%</div>
     <div>💸 Expenses: ₹{item.numbers.expenses}</div>
+    <div>📊 Burn Ratio: {item.numbers.burnRatio}%</div>
+
+    {item.numbers.suggestedCut > 0 && (
+      <div>✂️ Suggested Cut: ₹{item.numbers.suggestedCut}</div>
+    )}
   </>
 )}
 
+{/* GROWTH */}
 {item.type === "growth" && (
   <>
-    <div>💰 Income: ₹{item.numbers.income}</div>
+    <div>💰 Income: {formatCurrency(item.numbers.income)} </div>
+
+    {item.numbers.investableAmount > 0 && (
+      <div>📈 Growth Potential: ₹{item.numbers.investableAmount}</div>
+    )}
   </>
 )}
 

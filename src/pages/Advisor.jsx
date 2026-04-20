@@ -6,6 +6,84 @@ import { calculateFinancialHealth } from "../utils/financialHealthEngine";
 import { formatCurrency } from "../utils/formatcurrency";
 
 export default function Advisor() {
+  const getKeyNumbers = (item, numbers) => {
+  if (!numbers) return [];
+
+  const result = [];
+  const title = item.title?.toLowerCase() || "";
+  const type = item.type;
+
+  // -------------------------
+  // 🧱 CORE BASELINE (ALWAYS SHOW)
+  // -------------------------
+  result.push(`💰 Income: ₹${numbers.income}`);
+  result.push(`💸 Expenses: ₹${numbers.expenses}`);
+  result.push(`💼 Savings: ₹${numbers.savings}`);
+
+  // -------------------------
+  // ⏳ SURVIVAL / RUNWAY
+  // -------------------------
+  if (numbers.runwayDays) {
+    result.push(`⏳ Runway: ${numbers.runwayDays} days`);
+  }
+
+  // -------------------------
+  // 📊 EFFICIENCY
+  // -------------------------
+  if (numbers.burnRatio) {
+    result.push(`📊 Burn Rate: ${numbers.burnRatio}%`);
+  }
+
+  // -------------------------
+  // ✂️ COST CUT IMPACT
+  // -------------------------
+  if (
+    item.action?.toLowerCase().includes("cut") ||
+    type === "current"
+  ) {
+    result.push(`✂️ Possible Cut: ₹${numbers.suggestedCut}`);
+  }
+
+  // -------------------------
+  // 📈 GROWTH POTENTIAL
+  // -------------------------
+  if (type === "growth") {
+    result.push(`📈 Investable: ₹${numbers.investableAmount}`);
+  }
+
+  // -------------------------
+  // 🎯 LIFESTYLE FLEXIBILITY
+  // -------------------------
+  if (numbers.funMoney > 0) {
+    result.push(`🎯 Free Spend: ₹${numbers.funMoney}`);
+  }
+
+  // -------------------------
+  // 🧠 CONTEXT-SPECIFIC BOOST
+  // -------------------------
+
+  // Buffer / safety
+  if (title.includes("buffer") || title.includes("runway")) {
+    result.push(`⚠️ Critical Zone Below: 60 days`);
+  }
+
+  // Spending-focused insight
+  if (title.includes("spending")) {
+    result.push(
+      `💡 You spend ${numbers.burnRatio}% of your income monthly`
+    );
+  }
+
+  // Income-focused insight
+  if (title.includes("income")) {
+    result.push(
+      `📉 Risk if income drops: runway collapses fast`
+    );
+  }
+
+  return result;
+};
+
   const { businessId, loading } = useBusiness();  
   const [transactions, setTransactions] = useState([]);
   const [aiAdvice, setAiAdvice] = useState("");
@@ -530,52 +608,22 @@ const priority = {
 })()}
 </p>
 
-<b>Key Numbers:</b>
+const keyNumbers = getKeyNumbers(item, item.numbers);
 
-{item.numbers && (
-  <div style={{ marginTop: "6px", fontSize: "13px", opacity: 0.85 }}>
-    
-    {/* CURRENT STATE */}
-{item.type === "current" && (
+{keyNumbers.length > 0 && (
   <>
-    <div>💼 Savings: ₹{item.numbers.savings}</div>
-    <div>⏳ Runway: {item.numbers.runwayDays} days</div>
+    <div style={{ marginTop: "10px", fontWeight: "bold" }}>
+      Key Numbers:
+    </div>
 
-    {item.numbers.investableAmount > 0 && (
-      <div>📈 Investable: ₹{item.numbers.investableAmount}</div>
-    )}
-
-    {item.numbers.funMoney > 0 && (
-      <div>🎯 Safe Spending: ₹{item.numbers.funMoney}</div>
-    )}
+    {keyNumbers.map((num, index) => (
+      <div style={{ marginBottom: "4px", opacity: 0.9 }}>
+  {num}
+</div>
+    ))}
   </>
 )}
 
-{/* RISK */}
-{item.type === "risk" && (
-  <>
-    <div>💸 Expenses: ₹{item.numbers.expenses}</div>
-    <div>📊 Burn Ratio: {item.numbers.burnRatio}%</div>
-
-    {item.numbers.suggestedCut > 0 && (
-      <div>✂️ Suggested Cut: ₹{item.numbers.suggestedCut}</div>
-    )}
-  </>
-)}
-
-{/* GROWTH */}
-{item.type === "growth" && (
-  <>
-    <div>💰 Income: {formatCurrency(item.numbers.income)} </div>
-
-    {item.numbers.investableAmount > 0 && (
-      <div>📈 Growth Potential: ₹{item.numbers.investableAmount}</div>
-    )}
-  </>
-)}
-
-  </div>
-)}
       </div>
     ))}
 

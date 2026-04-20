@@ -286,6 +286,19 @@ if (runwayDays < 45) {
 const insights = generateSmartInsights(metrics);
 let aiInsights = insights;
 
+// =========================
+// 🧹 REMOVE DUPLICATE SIGNALS
+// =========================
+
+const hasIncomeRisk = incomeGrowth < -20;
+
+let filteredInsights = aiInsights.filter(insight => {
+  if (hasIncomeRisk && insight.title?.toLowerCase().includes("income")) {
+    return false;
+  }
+  return true;
+});
+
     // ✅ PRIORITY
     let priority = "";
 
@@ -534,7 +547,7 @@ const burnRiskProjection =
     : null;
 
   // ✅ Clean mapping (NO nesting, NO duplication)
-  aiInsights = insights.map((baseInsight) => {
+  aiInsights = filteredInsights.map((baseInsight) => {
     const matchedAI = aiMap[baseInsight.type];
 
     return {
@@ -576,6 +589,17 @@ const burnRiskProjection =
 
   return baseAction;
 })(),
+
+numbers: {
+  income: Math.round(latestMonthIncome),
+  expenses: Math.round(latestMonthExpense),
+  savings: Math.round(latestMonthNet),
+  burnRatio: (safeBurnRatio * 100).toFixed(1),
+  runwayDays: Math.round(runwayDays),
+  suggestedCut: Math.round(expenseReduction),
+  investableAmount: Math.round(investableAmount),
+  funMoney: Math.round(funMoney)
+},
 
   // ✅ SMART PRIORITY LOGIC (NEW)
   impact:

@@ -531,52 +531,19 @@ const priority = {
 </p>
         <b>Key Numbers:</b>
 
-{(() => {
-  // 🔥 CONTROL WHAT EACH INSIGHT SHOWS
-  const allowedNumbersByIndex = [
-    ["savings"], // Insight 1 → Current Position
-    ["burnRatio", "expenses", "suggestedCut"], // Insight 2 → Risk
-    ["investableAmount", "funMoney"] // Insight 3 → Growth
-  ];
+<b>Key Numbers:</b>
 
-  const allowedKeys = allowedNumbersByIndex[i] || [];
+{item.numbers && (
+  <div style={{ marginTop: "6px", fontSize: "13px", opacity: 0.85 }}>
+    
+    <div>💰 Income: ₹{item.numbers.income}</div>
+    <div>💸 Expenses: ₹{item.numbers.expenses}</div>
+    <div>💼 Savings: ₹{item.numbers.savings}</div>
+    <div>📊 Burn Ratio: {item.numbers.burnRatio}%</div>
+    <div>⏳ Runway: {item.numbers.runwayDays} days</div>
 
-  return Object.entries({
-  ...(item.numbers || {}),
-  ...(aiData?.numbers || {})
-})
-    .filter(([key]) => allowedKeys.includes(key))
-    .map(([key, value]) => {
-      if (value === undefined || value === null) return null;
-
-      const formatLabel = (k) => {
-        switch (k) {
-          case "income": return "💰 Income";
-          case "expenses": return "💸 Expenses";
-          case "runwayDays": return "⏳ Runway";
-          case "burnRatio": return "📊 Expense Ratio";
-          case "incomeGrowth": return "📉 Growth";
-          case "suggestedCut": return "✂️ Suggested Cut";
-          case "investableAmount": return "📈 Investable";
-          case "funMoney": return "🎉 Fun Money";
-          case "savings": return "💼 Savings";
-          default: return k;
-        }
-      };
-
-      const formatValue = (k, v) => {
-        if (k === "runwayDays") return `${v} days`;
-        if (k === "burnRatio" || k === "incomeGrowth") return `${v}%`;
-        return `₹ ${v}`;
-      };
-
-      return (
-        <div key={key}>
-          {formatLabel(key)}: {formatValue(key, value)}
-        </div>
-      );
-    });
-})()}
+  </div>
+)}
       </div>
     ))}
 

@@ -265,6 +265,24 @@ const funMoney = safeSurplus * 0.2;
   burnRate: safeBurnRatio
 };
 
+// =========================
+// 🧠 BEHAVIOR ANALYSIS
+// =========================
+
+const behaviorInsights = [];
+
+if (incomeGrowth < -20) {
+  behaviorInsights.push("Your income is highly inconsistent — you may be relying on unstable sources");
+}
+
+if (topCategoryPercent > 30) {
+  behaviorInsights.push(`A large portion of your spending (${topCategoryPercent.toFixed(1)}%) is on ${topCategory}`);
+}
+
+if (runwayDays < 45) {
+  behaviorInsights.push("Your financial runway is low — you have limited buffer if income drops further");
+}
+
 const insights = generateSmartInsights(metrics);
 let aiInsights = insights;
 
@@ -701,6 +719,7 @@ return res.json({
   insights: aiInsights,
   nextBestAction, // 👈 ADD THIS
   avgMonthlyBurn: avgMonthlyExpenses,
+  behaviorInsights,
   numbers: {
   surplus: Math.round(safeSurplus),
   investableAmount: Math.round(investableAmount),

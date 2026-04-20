@@ -268,11 +268,12 @@ const getAIAdvice = async () => {
       const result = await getAIAdvice();
 
       setAiData({
-  priority: result.priority || "No priority available",
-  summary: result.summary || "No summary available",
-  riskLevel: result.riskLevel || "medium",
-  insights: result.insights || [],
-  nextBestAction: result.nextBestAction || null, // 👈 ADD THIS
+  priority: result.priority,
+  summary: result.summary,
+  riskLevel: result.riskLevel,
+  insights: result.insights,
+  nextBestAction: result.nextBestAction,
+  behaviorInsights: result.behaviorInsights || [] // ✅ ADD THIS
 });
 
     } catch (err) {
@@ -458,6 +459,30 @@ const getAIAdvice = async () => {
   {risk.toUpperCase()}
 </span>
 </h3>
+
+{/* =========================
+    🧠 Behavioral Risks
+========================= */}
+{aiData?.behaviorInsights?.length > 0 && (
+  <div style={{
+    marginBottom: "16px",
+    padding: "16px",
+    borderRadius: "10px",
+    background: "#020617",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderLeft: "4px solid #f59e0b"
+  }}>
+    <h3 style={{ color: "#fbbf24" }}>⚠️ Behavioral Risks</h3>
+
+    <ul style={{ marginTop: "10px", paddingLeft: "20px" }}>
+      {aiData.behaviorInsights.map((item, i) => (
+        <li key={i} style={{ marginBottom: "8px" }}>
+          {item}
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
 
     {/* INSIGHTS */}
     <h3 style={{ marginTop: "16px" }}>Key Insights</h3>

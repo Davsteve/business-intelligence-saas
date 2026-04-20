@@ -460,7 +460,8 @@ const getAIAdvice = async () => {
   riskLevel: result.riskLevel,
   insights: result.insights,
   nextBestAction: result.nextBestAction,
-  behaviorInsights: result.behaviorInsights || [] // ✅ ADD THIS
+  behaviorInsights: result.behaviorInsights || [],
+  targets: result.targets // ✅ ADD THIS
 });
 
     } catch (err) {

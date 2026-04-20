@@ -184,12 +184,27 @@ console.log("📥 Incoming transactions:", transactions);
 
 const financialData = calculateFinancialHealth(transactions);
 
-// 🎯 TARGET CALCULATIONS (ADD HERE)
-const targetSavings = financialData.avgMonthlyExpenses * 3; // 3 months buffer
-const savingsGap = targetSavings - financialData.savings;
+// 🎯 TARGET CALCULATIONS
 
-const targetIncome = financialData.avgMonthlyExpenses * 1.3;
-const incomeGap = targetIncome - financialData.totalIncome;
+const monthlyExpenses = financialData.expenses;
+const currentSavings = financialData.savings;
+
+// Target = 90-day runway (3 months)
+const targetSavings = monthlyExpenses * 3;
+
+// Gap to safety
+const savingsGap = Math.max(0, targetSavings - currentSavings);
+
+// Income target (to fix burn)
+const targetIncome = financialData.expenses / 0.7; // aiming for 30% savings rate
+const incomeGap = Math.max(0, targetIncome - financialData.income);
+
+// Scenario: if user cuts expenses
+const reducedExpenses = financialData.expenses - (financialData.suggestedCut || 0);
+const newRunway = reducedExpenses > 0
+  ? Math.floor(currentSavings / (reducedExpenses / 30))
+  : financialData.runwayDays;
+
 
 // ✅ CURRENT MONTH EXTRACTION (CRITICAL)
 const latestMonthIncome =
@@ -771,13 +786,21 @@ return res.json({
   nextBestAction, // 👈 ADD THIS
   avgMonthlyBurn: avgMonthlyExpenses,
   behaviorInsights,
+
   numbers: {
   surplus: Math.round(safeSurplus),
   investableAmount: Math.round(investableAmount),
   funMoney: Math.round(funMoney),
   income: Math.round(latestMonthIncome),
   burn: Math.round(latestMonthExpense),
-  savings: Math.round(latestMonthNet)
+  savings: Math.round(latestMonthNet),
+
+  targetSavings: Math.round(targetSavings),
+  savingsGap: Math.round(savingsGap),
+  targetIncome: Math.round(targetIncome),
+  incomeGap: Math.round(incomeGap),
+  newRunway: Math.round(newRunway),
+  avgMonthlyBurn: Math.round(avgMonthlyExpenses)
 }
 });
 

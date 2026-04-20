@@ -184,6 +184,13 @@ console.log("📥 Incoming transactions:", transactions);
 
 const financialData = calculateFinancialHealth(transactions);
 
+// 🎯 TARGET CALCULATIONS (ADD HERE)
+const targetSavings = financialData.avgMonthlyExpenses * 3; // 3 months buffer
+const savingsGap = targetSavings - financialData.savings;
+
+const targetIncome = financialData.avgMonthlyExpenses * 1.3;
+const incomeGap = targetIncome - financialData.totalIncome;
+
 // ✅ CURRENT MONTH EXTRACTION (CRITICAL)
 const latestMonthIncome =
   financialData?.monthlyIncomeArray?.slice(-1)[0] || 0;
@@ -437,6 +444,14 @@ Financial Data:
 - Burn Ratio: ${(safeBurnRatio * 100).toFixed(1)}%
 - Runway: ${runwayDays} days (${runwayStatus})
 
+--- TARGETS ---
+
+- Ideal Savings (3 months): ₹${Math.round(targetSavings)}
+- Savings Gap: ₹${Math.max(0, Math.round(savingsGap))}
+
+- Ideal Monthly Income: ₹${Math.round(targetIncome)}
+- Income Gap: ₹${Math.max(0, Math.round(incomeGap))}
+
 - Stability: ${stability}
 - Top Expense Category: ${topCategory} (${(topCategoryPercent || 0).toFixed(1)}%)
 
@@ -451,6 +466,13 @@ Each insight MUST focus on a COMPLETELY DIFFERENT dimension:
 1. CURRENT → Overall financial position (runway, savings, stability)
 2. RISK → The biggest financial danger (ONLY ONE)
 3. GROWTH → Future improvement (NOT current problem)
+
+CRITICAL RULES:
+
+- If incomeGap > 0 → you MUST suggest increasing income by that exact amount
+- If savingsGap > 0 → you MUST suggest building savings to reach that target
+- Always mention ₹ amounts in actions
+- Avoid vague advice like "increase income" or "save more"
 
 STRICT RULES:
 
@@ -467,6 +489,11 @@ Also include:
 - summary (Brief 3 liner, human-like explanation of situation)
 - riskLevel (LOW | MODERATE | HIGH)
 - priority (1–2 lines, clear and actionable)
+
+Your advice must be:
+- Specific
+- Numeric
+- Immediate
 
 Return ONLY valid JSON:
 {

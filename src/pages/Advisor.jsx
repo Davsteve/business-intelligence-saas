@@ -51,7 +51,7 @@ export default function Advisor() {
     );
 
     result.push(
-      `💼 Savings: formatCurrency(numbers.savings) → ${getSavingsStatus(numbers.savings)}`
+      `💼 Savings: ${formatCurrency(numbers.savings)} → ${getSavingsStatus(numbers.savings)}`
     );
 
     result.push(
@@ -69,12 +69,36 @@ export default function Advisor() {
     `🎯 Free Spend: ₹${numbers.funMoney} → Lifestyle flexibility`
   );
 }
+
+// 🎯 TARGET: SAFETY BUFFER (90 DAYS)
+if (numbers.runwayDays < 90 && numbers.expenses > 0) {
+  const targetSavings = numbers.expenses * 3; // 3 months buffer
+  const gap = targetSavings - numbers.savings;
+
+  if (gap > 0) {
+    result.push(
+      `🎯 You need ${formatCurrency(gap)} more savings to reach a safe 90-day buffer`
+    );
+  }
+}
+
+// 🚀 TARGET: REQUIRED INCOME
+if (numbers.avgMonthlyBurn > 0) {
+  const requiredIncome = numbers.avgMonthlyBurn * 1.3;
+  const incomeGap = requiredIncome - numbers.income;
+
+  if (incomeGap > 0) {
+    result.push(
+      `🚀 Increase income by ${formatCurrency(incomeGap)} to stabilize finances`
+    );
+  }
+}
   }
 
   // 🟩 EFFICIENCY / SPENDING INSIGHTS
   else if (title.includes("spending")) {
     result.push(
-      `💸 Expenses: formatCurrency(numbers.income) (${numbers.burnRatio}% of income)`
+      `💸 Expenses: ${formatCurrency(numbers.expenses)} (${numbers.burnRatio}% of income)`
     );
 
     result.push(
@@ -87,7 +111,7 @@ export default function Advisor() {
 
     if (numbers.investableAmount > 0) {
       result.push(
-        `📈 Investable: formatCurrency(numbers.investableAmount) → Growth potential`
+        `📈 Investable: ${formatCurrency(numbers.investableAmount)} → Growth potential`
       );
     }
 
@@ -113,7 +137,7 @@ export default function Advisor() {
 
     if (numbers.investableAmount > 0) {
       result.push(
-        `📈 Investable: formatCurrency(numbers.investableAmount) → Can grow wealth`
+        `📈 Investable: ${formatCurrency(numbers.investableAmount)} → Can grow wealth`
       );
       if (numbers.incomeGrowth !== undefined) {
   result.push(
@@ -128,7 +152,7 @@ export default function Advisor() {
   // 🟦 DEFAULT (fallback)
   else {
     result.push(`💰 Income: ${formatCurrency(numbers.income)}`);
-    result.push(`💸 Expenses: formatCurrency(numbers.income)`);
+    result.push(`💸 Expenses: ${formatCurrency(numbers.expenses)}`);
     result.push(
       `📊 Burn Rate: ${numbers.burnRatio}% → ${getBurnStatus(numbers.burnRatio)}`
     );

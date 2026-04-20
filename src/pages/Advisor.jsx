@@ -608,21 +608,28 @@ const priority = {
 })()}
 </p>
 
-const keyNumbers = getKeyNumbers(item, item.numbers);
+{(() => {
+  const keyNumbers = getKeyNumbers(item, item.numbers);
 
-{keyNumbers.length > 0 && (
-  <>
-    <div style={{ marginTop: "10px", fontWeight: "bold" }}>
-      Key Numbers:
-    </div>
+  if (keyNumbers.length === 0) return null;
 
-    {keyNumbers.map((num, index) => (
-      <div style={{ marginBottom: "4px", opacity: 0.9 }}>
-  {num}
-</div>
-    ))}
-  </>
-)}
+  return (
+    <>
+      <div style={{ marginTop: "10px", fontWeight: "bold" }}>
+        Key Numbers:
+      </div>
+
+      {keyNumbers.map((num, index) => (
+        <div
+          key={index}
+          style={{ marginBottom: "4px", opacity: 0.9 }}
+        >
+          {num}
+        </div>
+      ))}
+    </>
+  );
+})()}
 
       </div>
     ))}

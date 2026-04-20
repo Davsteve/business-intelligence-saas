@@ -535,11 +535,25 @@ const priority = {
 {item.numbers && (
   <div style={{ marginTop: "6px", fontSize: "13px", opacity: 0.85 }}>
     
-    <div>💰 Income: ₹{item.numbers.income}</div>
-    <div>💸 Expenses: ₹{item.numbers.expenses}</div>
+    {item.type === "current" && (
+  <>
     <div>💼 Savings: ₹{item.numbers.savings}</div>
-    <div>📊 Burn Ratio: {item.numbers.burnRatio}%</div>
     <div>⏳ Runway: {item.numbers.runwayDays} days</div>
+  </>
+)}
+
+{item.type === "risk" && (
+  <>
+    <div>📊 Burn Ratio: {item.numbers.burnRatio}%</div>
+    <div>💸 Expenses: ₹{item.numbers.expenses}</div>
+  </>
+)}
+
+{item.type === "growth" && (
+  <>
+    <div>💰 Income: ₹{item.numbers.income}</div>
+  </>
+)}
 
   </div>
 )}

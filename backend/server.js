@@ -791,14 +791,21 @@ return res.json({
   surplus: Math.round(safeSurplus),
   investableAmount: Math.round(investableAmount),
   funMoney: Math.round(funMoney),
+
   income: Math.round(latestMonthIncome),
+  expenses: Math.round(latestMonthExpense), // ✅ ADD THIS
   burn: Math.round(latestMonthExpense),
+
   savings: Math.round(latestMonthNet),
+
+  runwayDays: Math.round(runwayDays), // ✅ ADD THIS
+  burnRatio: (safeBurnRatio * 100).toFixed(1), // ✅ ADD THIS
 
   targetSavings: Math.round(targetSavings),
   savingsGap: Math.round(savingsGap),
   targetIncome: Math.round(targetIncome),
   incomeGap: Math.round(incomeGap),
+
   newRunway: Math.round(newRunway),
   avgMonthlyBurn: Math.round(avgMonthlyExpenses)
 }

@@ -57,8 +57,13 @@ export default function Advisor() {
       `💼 Savings: ${formatCurrency(numbers.savings)} → ${getSavingsStatus(numbers.savings)}`
     );
     if (numbers.targetSavings) {
+  const progress =
+    numbers.targetSavings > 0
+      ? ((numbers.savings / numbers.targetSavings) * 100).toFixed(0)
+      : 0;
+
   result.push(
-    `🎯 Target Savings: ${formatCurrency(numbers.targetSavings)}`
+    `🎯 Savings Progress: ${formatCurrency(numbers.savings)} / ${formatCurrency(numbers.targetSavings)} (${progress}%)`
   );
 }
 
@@ -461,7 +466,6 @@ const getAIAdvice = async () => {
   insights: result.insights,
   nextBestAction: result.nextBestAction,
   behaviorInsights: result.behaviorInsights || [],
-  targets: result.targets // ✅ ADD THIS
 });
 
     } catch (err) {

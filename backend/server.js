@@ -256,10 +256,6 @@ const secondaryIssue =
     ? "runway_risk"
     : "none";
 
-let riskLevel = "MODERATE";
-
-
-
 if (
   !Number.isFinite(net) ||
   !Number.isFinite(avgMonthlyExpenses) ||
@@ -536,7 +532,6 @@ Return ONLY valid JSON:
 
     summary = parsed.summary || summary;
 priority = parsed.priority || priority;
-riskLevel = parsed.riskLevel || riskLevel;
 
     // ✅ Keep backend structure, only enhance text
 if (Array.isArray(parsed.insights)) {

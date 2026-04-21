@@ -48,9 +48,11 @@ export default function Dashboard() {
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
   const insight = financialStatus?.label || "No data yet";
 
+  const { financialStatus } = financials || {};
+
   const financials = calculateFinancialHealth(transactions);
 
-  const { financialStatus } = financials || {};
+  
 
 const {
   score = 0,

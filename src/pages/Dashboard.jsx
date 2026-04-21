@@ -46,35 +46,11 @@ export default function Dashboard() {
   const [dateDropdownOpen, setDateDropdownOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState("latest");
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
-  const generateInsight = () => {
-  if (!cashFlow) return "Start adding transactions to see insights";
-
-  if (cashFlow.latestMonthNet < 0) {
-    return "⚠️ You spent more than you earned this month";
-  }
-
-  if (cashFlow.averageNet < 0) {
-    return "⚠️ You're consistently overspending";
-  }
-
-  if (cashFlow.runway < 30) {
-    return "🚨 At this rate, your money may run out soon";
-  }
-
-  if (cashFlow.trend === "Upward") {
-    return "📈 You're improving your money habits";
-  }
-
-  if (cashFlow.volatilityLevel === "High") {
-    return "⚠️ Your spending is very unpredictable";
-  }
-
-  return "👍 You're managing your money well";
-};
-
-const insight = generateInsight();
+  const insight = financialStatus?.label || "No data yet";
 
   const financials = calculateFinancialHealth(transactions);
+
+  const { financialStatus } = financials || {};
 
 const {
   score = 0,

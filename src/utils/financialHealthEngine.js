@@ -236,6 +236,40 @@ else if (runwayDays < 90) riskLevel = "High";
 else if (score < 60) riskLevel = "Moderate";
 else riskLevel = "Low";
 
+// ----------------------------
+// 🔥 GLOBAL FINANCIAL STATUS (NEW)
+// ----------------------------
+const getFinancialStatus = ({ score, runwayDays, incomeGrowth, burnRatio }) => {
+  let status = "stable";
+
+  if (runwayDays < 30 || incomeGrowth < -10) {
+    status = "critical";
+  } else if (runwayDays < 60 || incomeGrowth < 0 || burnRatio > 0.7) {
+    status = "at_risk";
+  } else if (score >= 75) {
+    status = "strong";
+  }
+
+  const labels = {
+    critical: "Critical financial condition",
+    at_risk: "At risk — needs attention",
+    stable: "Stable financial position",
+    strong: "Strong financial health"
+  };
+
+  return {
+    status,
+    label: labels[status],
+  };
+};
+
+const financialStatus = getFinancialStatus({
+  score,
+  runwayDays,
+  incomeGrowth,
+  burnRatio
+});
+
   // 🔹 Status Label Helper
   const getStatus = (metricScore) => {
     if (metricScore >= 75) return "Strong";
@@ -295,6 +329,7 @@ if (runwayMonths < 1 && net < avgMonthlyBurn) {
   net,
   totalIncome,
   totalExpense,
+  financialStatus,
 
   // Monthly
   avgMonthlyIncome: Number(

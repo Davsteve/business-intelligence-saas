@@ -184,6 +184,8 @@ console.log("📥 Incoming transactions:", transactions);
 
 const financialData = calculateFinancialHealth(transactions);
 
+const { riskLevel, financialStatus } = financialData;
+
 // 🎯 TARGET CALCULATIONS
 
 const monthlyExpenses = financialData.expenses;
@@ -256,11 +258,7 @@ const secondaryIssue =
 
 let riskLevel = "MODERATE";
 
-if (runwayDays < 30) {
-  riskLevel = "HIGH";
-} else if (runwayDays > 90) {
-  riskLevel = "LOW";
-}
+
 
 if (
   !Number.isFinite(net) ||
@@ -467,7 +465,7 @@ Financial Data:
 - Ideal Monthly Income: ₹${Math.round(targetIncome)}
 - Income Gap: ₹${Math.max(0, Math.round(incomeGap))}
 
-- Stability: ${stability}
+- Financial Status: ${financialStatus.label}
 - Top Expense Category: ${topCategory} (${(topCategoryPercent || 0).toFixed(1)}%)
 
 ---

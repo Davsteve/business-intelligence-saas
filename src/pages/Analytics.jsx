@@ -3,6 +3,7 @@ import { supabase } from "../supabaseClient";
 import { useBusiness } from "../context/BusinessContext";
 import { formatCurrency } from "../utils/formatcurrency";
 import Card from "../Components/ui/Card";
+import { calculateFinancialHealth } from "../utils/financialHealthEngine";
 
 import {
   BarChart,
@@ -70,6 +71,9 @@ const getSpendingMessage = () => {
   return <p>No financial data yet.</p>
 }
 
+const financials = calculateFinancialHealth(transactions);
+const { incomeGrowth } = financials || {};
+
   // -----------------------
   // FILTER
   // -----------------------
@@ -123,41 +127,9 @@ const profitMargin =
   // MONTH-OVER-MONTH INCOME GROWTH
   // -----------------------
 
-const currentMonth = now.getMonth();
-const currentYear = now.getFullYear();
-
-const lastMonthDate = new Date(currentYear, currentMonth - 1, 1);
-
-const thisMonthIncome = transactions
-  .filter((t) => {
-    const d = new Date(t.created_at);
-    return (
-      t.categories?.type === "income" &&
-      d.getMonth() === currentMonth &&
-      d.getFullYear() === currentYear
-    );
-  })
-  .reduce((sum, t) => sum + t.amount, 0);
-
-const lastMonthIncome = transactions
-  .filter((t) => {
-    const d = new Date(t.created_at);
-    return (
-      t.categories?.type === "income" &&
-      d.getMonth() === lastMonthDate.getMonth() &&
-      d.getFullYear() === lastMonthDate.getFullYear()
-    );
-  })
-  .reduce((sum, t) => sum + t.amount, 0);
-
-let incomeGrowth = 0;
-
-if (lastMonthIncome > 0) {
-  incomeGrowth =
-    ((thisMonthIncome - lastMonthIncome) / lastMonthIncome) * 100;
-}
-
-const formattedGrowth = incomeGrowth.toFixed(1);
+  const formattedGrowth = incomeGrowth
+  ? incomeGrowth.toFixed(1)
+  : "0.0";
 
 console.log("==== MoM DEBUG ====");
 console.log("This Month Income:", thisMonthIncome);

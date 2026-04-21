@@ -234,6 +234,8 @@ if (title.includes("income")) {
 };
   const financials = calculateFinancialHealth(transactions);
 
+  const { financialStatus } = financials;
+
 const {
   score,
   riskLevel
@@ -349,72 +351,6 @@ const runwayDisplay =
 // ------------------------
 // NET TREND (CORRECT LOGIC)
 // ------------------------
-
-const monthlyNetMap = {};
-
-transactions.forEach((t) => {
-  const d = new Date(t.created_at);
-  const key = `${d.getFullYear()}-${d.getMonth()}`;
-
-  if (!monthlyNetMap[key]) {
-    monthlyNetMap[key] = 0;
-  }
-
-  if (t.categories?.type === "income") {
-    monthlyNetMap[key] += Number(t.amount || 0);
-  } else {
-    monthlyNetMap[key] -= Number(t.amount || 0);
-  }
-});
-
-const monthlyNets = Object.entries(monthlyNetMap)
-  .sort(([a], [b]) => {
-    const [yearA, monthA] = a.split("-").map(Number);
-    const [yearB, monthB] = b.split("-").map(Number);
-
-    if (yearA !== yearB) return yearA - yearB;
-    return monthA - monthB;
-  })
-  .map(([_, value]) => value);
-
-const last3Months = monthlyNets.slice(-3);
-
-let trend = "stable";
-
-if (last3Months.length === 3) {
-  const [a, b, c] = last3Months;
-
-  // 🔥 Overall direction (NOT just last month)
-  const overallChange = a !== 0 ? (c - a) / a : 0;
-
-  // 🔥 Short-term momentum
-  const recentChange = b !== 0 ? (c - b) / b : 0;
-
-  // 🔥 Volatility
-  const avg = (a + b + c) / 3;
-  const max = Math.max(a, b, c);
-  const min = Math.min(a, b, c);
-  const volatility = avg > 0 ? (max - min) / avg : 0;
-
-  // ✅ DECISION LOGIC
-  if (overallChange > 0.1) {
-    trend = volatility > 0.4 ? "growing_volatile" : "growing";
-  } else if (overallChange < -0.1) {
-    trend = volatility > 0.4 ? "declining_volatile" : "declining";
-  } else {
-    trend = volatility > 0.4 ? "volatile" : "stable";
-  }
-  // 🔥 STRICT TREND CHECK
-if (c > b && b > a) {
-  trend = "growing";
-}
-}
-
-  const growth =
-    lastMonthIncome > 0
-      ? ((thisMonthIncome - lastMonthIncome) / lastMonthIncome) * 100
-      : 0;
-
 const getAIAdvice = async () => {
 
     if (

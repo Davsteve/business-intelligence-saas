@@ -25,7 +25,43 @@ export default function Analytics() {
   const { businessId, loading } = useBusiness();
   const [transactions, setTransactions] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [filter, setFilter] = useState("thisMonth");
   const now = new Date();
+
+  const filteredTransactions = transactions.filter((t) => {
+    if (filter === "all") return true;
+
+    const date = new Date(t.created_at);
+
+    if (filter === "thisMonth") {
+      return (
+        date.getMonth() === now.getMonth() &&
+        date.getFullYear() === now.getFullYear()
+      );
+    }
+
+    if (filter === "lastMonth") {
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      return (
+        date.getMonth() === lastMonth.getMonth() &&
+        date.getFullYear() === lastMonth.getFullYear()
+      );
+    }
+
+    return true;
+  });
+
+  const income = filteredTransactions
+    .filter((t) => t.categories?.type === "income")
+    .reduce((acc, curr) => acc + curr.amount, 0);
+
+    const expense = filteredTransactions
+    .filter((t) => t.categories?.type === "expense")
+    .reduce((acc, curr) => acc + curr.amount, 0);
+
+    const netSavings = income - expense;
+
+    const savings = netSavings;
 
 const getSpendingMessage = () => {
   if (filteredTransactions.length === 0) {
@@ -42,7 +78,6 @@ const getSpendingMessage = () => {
 
   return `💰 You saved ${formatCurrency(savings)} — Well done, good job!`;
 };
-  const [filter, setFilter] = useState("thisMonth");
 
   useEffect(() => {
     if (!businessId) return;
@@ -74,51 +109,29 @@ const getSpendingMessage = () => {
 const financials = calculateFinancialHealth(transactions);
 const { incomeGrowth } = financials || {};
 
+const formattedGrowth = incomeGrowth
+  ? incomeGrowth.toFixed(1)
+  : "0.0";
+
   // -----------------------
   // FILTER
   // -----------------------
 
-  const filteredTransactions = transactions.filter((t) => {
-    if (filter === "all") return true;
-
-    const date = new Date(t.created_at);
-
-    if (filter === "thisMonth") {
-      return (
-        date.getMonth() === now.getMonth() &&
-        date.getFullYear() === now.getFullYear()
-      );
-    }
-
-    if (filter === "lastMonth") {
-      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      return (
-        date.getMonth() === lastMonth.getMonth() &&
-        date.getFullYear() === lastMonth.getFullYear()
-      );
-    }
-
-    return true;
-  });
+  
 
   // -----------------------
   // INCOME / EXPENSE
   // -----------------------
 
-  const income = filteredTransactions
-    .filter((t) => t.categories?.type === "income")
-    .reduce((acc, curr) => acc + curr.amount, 0);
+  
 
-  const expense = filteredTransactions
-    .filter((t) => t.categories?.type === "expense")
-    .reduce((acc, curr) => acc + curr.amount, 0);
+  
 
   const netProfit = income - expense;
-  const netSavings = income - expense;
+  
 
   const totalIncome = income;
 const totalExpense = expense;
-const savings = netSavings;
 
 const profitMargin =
   income > 0 ? ((netSavings / income) * 100).toFixed(1) : 0;
@@ -127,13 +140,6 @@ const profitMargin =
   // MONTH-OVER-MONTH INCOME GROWTH
   // -----------------------
 
-  const formattedGrowth = incomeGrowth
-  ? incomeGrowth.toFixed(1)
-  : "0.0";
-
-console.log("==== MoM DEBUG ====");
-console.log("This Month Income:", thisMonthIncome);
-console.log("Last Month Income:", lastMonthIncome);
 console.log("Growth:", incomeGrowth);
 
   // -----------------------
@@ -168,13 +174,6 @@ filteredTransactions.forEach((t) => {
 const incomePieData = Object.entries(incomeCategoryMap)
   .map(([name, value]) => ({ name, value }))
   .sort((a, b) => b.value - a.value);
-
-  <div style={{
-  display: "flex",
-  gap: "60px",
-  flexWrap: "wrap",
-  alignItems: "stretch"
-}}></div>
 
   // -----------------------
   // TOP EXPENSE CATEGORY

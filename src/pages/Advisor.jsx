@@ -231,7 +231,7 @@ if (title.includes("income")) {
     case "slowing":
       return "Your income growth is slowing down 📉";
     case "declining":
-      return "Your income is consistently declining ⚠️";
+  return "Your income is continuing to decline 📉";
     case "recovering":
       return "Your income is starting to recover 🔄";
     default:
@@ -239,10 +239,12 @@ if (title.includes("income")) {
   }
 };
 
-const getStabilityText = (stability) => {
+const getStabilityText = (stability, trend) => {
   switch (stability) {
     case "stable":
-      return "Your income is consistent and predictable 🟢";
+  return trend === "weak"
+    ? "Your income is steadily declining ⚠️ (consistent drop)"
+    : "Your income is consistent and predictable 🟢";
     case "volatile":
       return "Your income is fluctuating significantly ⚠️";
     default:
@@ -250,15 +252,16 @@ const getStabilityText = (stability) => {
   }
 };
 
-const getFinancialStabilityText = (stability) => {
-  switch (stability) {
-    case "stable":
-      return "Your financial position is steady 👍";
-    case "volatile":
-      return "Your finances are unstable — monitor closely ⚠️";
-    default:
-      return "Financial stability unclear";
+const getFinancialStabilityText = (stability, score, runwayDays) => {
+  if (score < 50 || runwayDays < 60) {
+    return "Your finances are under pressure — immediate action needed ⚠️";
   }
+
+  if (score < 70) {
+    return "Your finances are moderately stable but need improvement ⚠️";
+  }
+
+  return "Your financial position is strong and stable 👍";
 };
 
 const getStabilityIndicator = (stability) => {
@@ -501,7 +504,7 @@ const getAIAdvice = async () => {
 
 {trend === "strong" && "Strong upward trend 📈"}
 {trend === "mixed" && "Mixed trend (recent dip) ⚠️"}
-{trend === "weak" && "Declining trend 📉"}
+{trend === "weak" && "Downward trend 📉"}
 </p>
 
 <p>
@@ -509,13 +512,13 @@ const getAIAdvice = async () => {
 </p>
 
 <p>
-  <strong>Stability:</strong> {getStabilityText(stability)}
+  <strong>Stability:</strong> {getStabilityText(stability, trend)}
 </p>
 
 <p>
   <strong>Financial Stability:</strong>{" "}
-  {getFinancialStabilityText(stability)}{" "}
-  {getStabilityIndicator(stability)}
+{getFinancialStabilityText(stability, score, runwayDays)}{" "}
+{getStabilityIndicator(stability)}
 </p>
     </div>
 

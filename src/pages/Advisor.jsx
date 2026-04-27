@@ -224,7 +224,6 @@ if (title.includes("income")) {
   new Map((aiData?.insights || []).map(i => [i.title, i])).values()
 );
 
-  const getStabilityIndicator = (stability) => {
     const getMomentumText = (momentum) => {
   switch (momentum) {
     case "accelerating":
@@ -261,6 +260,8 @@ const getFinancialStabilityText = (stability) => {
       return "Financial stability unclear";
   }
 };
+
+const getStabilityIndicator = (stability) => {
   if (!stability) return "";
 
   if (stability.toLowerCase().includes("very stable")) return "🟢";

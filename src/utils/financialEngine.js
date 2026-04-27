@@ -133,7 +133,7 @@ function generateNarrative(state, metrics, derived) {
   }
 }
 
-function financialEngine(metrics) {
+export function financialEngine(metrics) {
   const derived = computeDerivedMetrics(metrics);
   const state = deriveFinancialState(metrics, derived);
   const riskScore = computeRiskScore(metrics, derived);

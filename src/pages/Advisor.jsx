@@ -234,7 +234,7 @@ if (title.includes("income")) {
 };
   const financials = calculateFinancialHealth(transactions);
 
-const { financialStatus, incomeTrendLabel } = financials || {};
+const { financialStatus, incomeTrendLabel, stability } = financials || {};
 
 const trend = incomeTrendLabel || "stable";
 

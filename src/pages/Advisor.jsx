@@ -4,6 +4,7 @@ import Button from "../Components/ui/Button";
 import { useBusiness } from "../context/BusinessContext";
 import { calculateFinancialHealth } from "../utils/financialHealthEngine";
 import { formatCurrency } from "../utils/formatcurrency";
+import { financialEngine } from "../utils/financialEngine";
 
 export default function Advisor() {
   const getKeyNumbers = (item, numbers, trend) => {
@@ -276,6 +277,8 @@ const getStabilityIndicator = (stability) => {
 
 const { financialStatus, incomeTrendData } = financials || {};
 
+// ✅ NEW ENGINE CALL (THIS IS STEP 5)
+
 const trend = incomeTrendData?.signal || "weak";
 const stability = incomeTrendData?.stability || "unknown";
 const momentum = incomeTrendData?.momentum || "neutral";
@@ -296,6 +299,28 @@ const {
   avgMonthlyExpenses,
   burnRatio,
 } = financials;
+
+const engineResult = financialEngine({
+  income: {
+    lastMonth: avgMonthlyIncome,
+    avg: avgMonthlyIncome,
+    history: transactions
+      .filter(t => t.categories?.type === "income")
+      .slice(-3)
+      .map(t => Number(t.amount || 0)),
+    growthRate: incomeGrowth
+  },
+  expenses: {
+    avg: avgMonthlyExpenses
+  },
+  savings: {
+    total: net,
+    rate: burnRatio ? 1 - burnRatio / 100 : 0
+  },
+  runwayDays: runwayDays,
+  burnRate: burnRatio / 100
+});
+
 const runwayDisplay =
   avgMonthlyBurn <= 0
     ? "Unlimited"
@@ -489,14 +514,16 @@ const getAIAdvice = async () => {
       </h2>
 
       <p>
+  <strong>Financial State:</strong> {engineResult.narrative.title}
+</p>
+
+      <p>
   <strong>Financial Status:</strong>{" "}
-  {riskLevel === "Low"
-  ? "You're in a strong financial position ✅"
-  : riskLevel === "Moderate"
-  ? "Stable overall, but there's room for improvement ⚠️"
-  : riskLevel === "High"
-  ? "You're under financial pressure — take action soon ⚠️"
-  : "Financial situation needs immediate attention 🚨"}
+  {engineResult.narrative.summary}
+</p>
+
+<p>
+  <strong>Priority:</strong> {engineResult.narrative.priority}
 </p>
 
 <p>

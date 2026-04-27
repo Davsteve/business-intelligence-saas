@@ -6,7 +6,7 @@ import { calculateFinancialHealth } from "../utils/financialHealthEngine";
 import { formatCurrency } from "../utils/formatcurrency";
 
 export default function Advisor() {
-  const getKeyNumbers = (item, numbers) => {
+  const getKeyNumbers = (item, numbers, trend) => {
   if (!numbers || typeof numbers !== "object") return [];
 
   const result = [];
@@ -237,6 +237,7 @@ if (title.includes("income")) {
 const { financialStatus, incomeTrendData } = financials || {};
 
 const trend = incomeTrendData?.signal || "weak";
+const stability = incomeTrendData?.stability || "unknown";
 
 const {
   score,
@@ -665,7 +666,7 @@ const priority = {
 </p>
 
 {(() => {
-  const keyNumbers = getKeyNumbers(item, item.numbers);
+  const keyNumbers = getKeyNumbers(item, item.numbers, trend);
 
   if (keyNumbers.length === 0) return null;
 

@@ -1,4 +1,4 @@
-import { analyzeIncomeTrend } from "./trendEngine";
+import { analyzeIncomeTrend } from "./trendEngine.js";
 export function calculateFinancialHealth(transactions) {
 
   transactions = transactions || [];
@@ -105,6 +105,9 @@ return "Highly unstable income";
   const monthlyIncomeArray = sortedMonths.map(
   (m) => m.income
 );
+
+// ✅ FIX: Generate trend data
+const trendData = analyzeIncomeTrend(monthlyIncomeArray);
 
   const net = totalIncome - totalExpense;
 

@@ -107,11 +107,10 @@ const getSpendingMessage = () => {
 }
 
 const financials = calculateFinancialHealth(transactions);
-const { incomeGrowth } = financials || {};
+const { incomeTrendData } = financials || {};
 
-const formattedGrowth = incomeGrowth
-  ? incomeGrowth.toFixed(1)
-  : "0.0";
+const formattedGrowth =
+  incomeTrendData?.shortTermChange?.toFixed(1) || "0.0";
 
   // -----------------------
   // FILTER
@@ -268,8 +267,8 @@ const incomePieData = Object.entries(incomeCategoryMap)
 
         <div style={kpiCard}>
           <p>Income Growth (This month vs last month)</p>
-          <h2 style={{ color: incomeGrowth >= 0 ? "#00ff9d" : "#ff4d4d" }}>
-            {formattedGrowth}%
+          <h2 style={{ color: incomeTrendData?.shortTermChange >= 0 ? "#00ff9d" : "#ff4d4d" }}>
+            {formattedGrowth}% (recent change)
           </h2>
         </div>
 

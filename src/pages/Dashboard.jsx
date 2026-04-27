@@ -28,7 +28,10 @@ export default function Dashboard() {
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
 
-  const cashFlow = calculateCashFlow(transactions);
+  const financials = calculateFinancialHealth(transactions);
+const cashFlow = calculateCashFlow(transactions);
+
+const { incomeTrendData } = financials || {};
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [newCategoryType, setNewCategoryType] = useState("");
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -46,7 +49,6 @@ export default function Dashboard() {
   const [dateDropdownOpen, setDateDropdownOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState("latest");
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
-  const financials = calculateFinancialHealth(transactions);
 
 const { financialStatus } = financials || {};
 
@@ -266,8 +268,8 @@ toast.success("Done successfully");
     netBalance,
     burn: totalExpense,
     runway: cashFlow?.runway || 0,
-    trend: cashFlow.trend,
-    volatility: cashFlow.volatilityLevel,
+    trend: incomeTrendData?.longTermTrend,
+    volatility: incomeTrendData?.stability,
     topExpense
   });
 
@@ -336,9 +338,9 @@ await supabase
   const netBalance = totalIncome - totalExpense;
 
   const trendColor =
-  cashFlow?.trend === "Upward"
+  incomeTrendData?.longTermTrend === "up"
     ? "#00ff9d"
-    : cashFlow?.trend === "Downward"
+    : incomeTrendData?.longTermTrend === "down"
     ? "#ef4444"
     : "#f59e0b";
 
@@ -461,7 +463,21 @@ const volatilityColor = (() => {
   background: trendColor,
   boxShadow: `0 0 12px ${trendColor}55`
 }}>
-  {cashFlow.trend}
+  {incomeTrendData?.longTermTrend === "up"
+  ? "Upward"
+  : incomeTrendData?.longTermTrend === "down"
+  ? "Downward"
+  : "Flat"}
+</span>
+
+<p>Momentum</p>
+<span style={styles.badge}>
+  {incomeTrendData?.momentum || "neutral"}
+</span>
+
+<p>Income Stability</p>
+<span style={styles.badge}>
+  {incomeTrendData?.stability || "unknown"}
 </span>
               </div>
 

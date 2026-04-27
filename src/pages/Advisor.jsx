@@ -190,7 +190,7 @@ if (title.includes("spending")) {
 }
 
 if (title.includes("income")) {
-  if (numbers.incomeGrowth < 0) {
+  if (trend === "weak") {
     result.push("💡 Income is declining — stabilizing income should be your top priority");
   }
 }
@@ -234,9 +234,9 @@ if (title.includes("income")) {
 };
   const financials = calculateFinancialHealth(transactions);
 
-const { financialStatus, incomeTrendLabel, stability } = financials || {};
+const { financialStatus, incomeTrendData } = financials || {};
 
-const trend = incomeTrendLabel || "stable";
+const trend = incomeTrendData?.signal || "weak";
 
 const {
   score,
@@ -460,12 +460,17 @@ const getAIAdvice = async () => {
 <p>
   <strong>Income Trend:</strong>{" "}
 
-{trend === "growing" && "Growing steadily 📈"}
-{trend === "declining" && "Declining — needs attention 📉"}
-{trend === "stable" && "Stable ➖"}
-{trend === "volatile" && "Irregular income pattern ⚠️"}
-{trend === "growing_volatile" && "Growing but inconsistent ⚠️📈"}
-{trend === "declining_volatile" && "Declining and unstable ⚠️📉"}
+{trend === "strong" && "Strong upward trend 📈"}
+{trend === "mixed" && "Mixed trend (recent dip) ⚠️"}
+{trend === "weak" && "Declining trend 📉"}
+</p>
+
+<p>
+  <strong>Momentum:</strong> {incomeTrendData?.momentum}
+</p>
+
+<p>
+  <strong>Stability:</strong> {incomeTrendData?.stability}
 </p>
 
 <p>

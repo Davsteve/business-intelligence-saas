@@ -183,6 +183,7 @@ app.post("/api/ai", verifyUser, async (req, res) => {
 console.log("📥 Incoming transactions:", transactions);
 
 const financialData = calculateFinancialHealth(transactions);
+const trendData = financialData.incomeTrendData;
 
 const { riskLevel, financialStatus } = financialData;
 
@@ -241,7 +242,7 @@ const safeBurnRatio =
     : 0;
 
     const primaryIssue =
-  incomeGrowth < 0
+  trendData.signal === "weak"
     ? "income_decline"
     : safeBurnRatio > 0.7
     ? "high_burn"
@@ -274,7 +275,7 @@ const funMoney = safeSurplus * 0.2;
 
     // ✅ INSIGHTS (ALWAYS 3)
     const metrics = {
-  incomeTrend: incomeGrowth,
+  incomeTrend: trendData.shortTermChange,
   expenseRatio: safeBurnRatio * 100,
   runway: runwayDays,
   savings: latestMonthNet,
@@ -320,7 +321,7 @@ let filteredInsights = aiInsights.filter(insight => {
 
 if (runwayDays < 15) {
   priority = `URGENT: Less than ${runwayDays} days of runway. Cut expenses immediately and secure income.`;
-} else if (incomeGrowth < 0) {
+} else if (trendData.signal === "weak") {
   priority = `HIGH: Income is declining. Focus on increasing income sources urgently.`;
 } else if (safeBurnRatio > 0.7) {
   priority = `HIGH: Spending is too high. Reduce non-essential expenses by 20–30%.`;
@@ -447,8 +448,9 @@ Financial Data:
 - Current Month Expenses: ₹${latestMonthExpense}
 - Current Month Savings: ₹${latestMonthNet}
 
-- Income Growth: ${incomeGrowth}%
-- Income Trend: ${incomeTrendLabel}
+- Income Change (recent): ${trendData.shortTermChange}%
+- Trend Signal: ${trendData.signal}
+- Momentum: ${trendData.momentum}
 
 - Burn Ratio: ${(safeBurnRatio * 100).toFixed(1)}%
 - Runway: ${runwayDays} days (${runwayStatus})

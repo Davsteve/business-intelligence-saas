@@ -1,3 +1,4 @@
+import { analyzeIncomeTrend } from "./trendEngine";
 export function calculateFinancialHealth(transactions) {
 
   transactions = transactions || [];
@@ -30,6 +31,7 @@ function calculateStability(transactions) {
     if (!stabilityMonthlyIncome[key]) stabilityMonthlyIncome[key] = 0;
 stabilityMonthlyIncome[key] += txn.amount;
   });
+
 
   const values = Object.values(stabilityMonthlyIncome);
 
@@ -344,6 +346,7 @@ if (runwayMonths < 1 && net < avgMonthlyBurn) {
 
   // Growth & Trend
   incomeGrowth: Number(incomeGrowth.toFixed(2)),
+  incomeTrendData: trendData,
   incomeTrendLabel,
 
   // Burn & Runway

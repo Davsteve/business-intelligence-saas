@@ -109,8 +109,9 @@ const getSpendingMessage = () => {
 const financials = calculateFinancialHealth(transactions);
 const { incomeTrendData } = financials || {};
 
-const formattedGrowth =
-  incomeTrendData?.shortTermChange?.toFixed(1) || "0.0";
+const incomeGrowth = incomeTrendData?.shortTermChange || 0;
+
+const formattedGrowth = incomeGrowth.toFixed(1);
 
   // -----------------------
   // FILTER

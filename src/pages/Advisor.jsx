@@ -225,6 +225,42 @@ if (title.includes("income")) {
 );
 
   const getStabilityIndicator = (stability) => {
+    const getMomentumText = (momentum) => {
+  switch (momentum) {
+    case "accelerating":
+      return "Your income growth is accelerating 🚀";
+    case "slowing":
+      return "Your income growth is slowing down 📉";
+    case "declining":
+      return "Your income is consistently declining ⚠️";
+    case "recovering":
+      return "Your income is starting to recover 🔄";
+    default:
+      return "No clear momentum detected";
+  }
+};
+
+const getStabilityText = (stability) => {
+  switch (stability) {
+    case "stable":
+      return "Your income is consistent and predictable 🟢";
+    case "volatile":
+      return "Your income is fluctuating significantly ⚠️";
+    default:
+      return "Stability cannot be determined";
+  }
+};
+
+const getFinancialStabilityText = (stability) => {
+  switch (stability) {
+    case "stable":
+      return "Your financial position is steady 👍";
+    case "volatile":
+      return "Your finances are unstable — monitor closely ⚠️";
+    default:
+      return "Financial stability unclear";
+  }
+};
   if (!stability) return "";
 
   if (stability.toLowerCase().includes("very stable")) return "🟢";
@@ -238,6 +274,7 @@ const { financialStatus, incomeTrendData } = financials || {};
 
 const trend = incomeTrendData?.signal || "weak";
 const stability = incomeTrendData?.stability || "unknown";
+const momentum = incomeTrendData?.momentum || "neutral";
 
 const {
   score,
@@ -467,16 +504,17 @@ const getAIAdvice = async () => {
 </p>
 
 <p>
-  <strong>Momentum:</strong> {incomeTrendData?.momentum}
+  <strong>Momentum:</strong> {getMomentumText(momentum)}
 </p>
 
 <p>
-  <strong>Stability:</strong> {incomeTrendData?.stability}
+  <strong>Stability:</strong> {getStabilityText(stability)}
 </p>
 
 <p>
   <strong>Financial Stability:</strong>{" "}
-  {stability} {getStabilityIndicator(stability)}
+  {getFinancialStabilityText(stability)}{" "}
+  {getStabilityIndicator(stability)}
 </p>
     </div>
 

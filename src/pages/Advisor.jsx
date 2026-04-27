@@ -124,7 +124,7 @@ if (numbers.avgMonthlyBurn > 0) {
 
     if (numbers.funMoney > 0) {
   result.push(
-    `🎯 Free Spend: ₹${numbers.funMoney} → Lifestyle flexibility`
+    `🎯 Disposable income: ₹${numbers.funMoney} → Can be allocated toward savings, investments, or discretionary spending`
   );
 }
   }

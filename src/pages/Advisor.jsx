@@ -234,13 +234,14 @@ if (title.includes("income")) {
 };
   const financials = calculateFinancialHealth(transactions);
 
-  const { financialStatus } = financials;
+const { financialStatus, incomeTrendLabel } = financials || {};
+
+const trend = incomeTrendLabel || "stable";
 
 const {
   score,
   riskLevel
 } = financials;
-  const { stability } = financials;
 
 const {
   runwayMonths,
